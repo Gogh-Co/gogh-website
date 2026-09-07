@@ -4,7 +4,7 @@ name: "🚀 - Deploy to GitHub Pages"
 
 on:
   push:
-    branches: ["main/website"]
+    branches: ["master"]
   workflow_dispatch:
 
 jobs:
@@ -14,7 +14,7 @@ jobs:
       - name: Checkout website branch
         uses: actions/checkout@v6
         with:
-          ref: main/website
+          ref: master
 
       - uses: actions/setup-node@v6
         with:
