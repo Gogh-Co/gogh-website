@@ -56,6 +56,8 @@
                     </div>
                 </div>
             </div>
+
+            <PersistenceBanner />
         </div>
 
 
@@ -190,7 +192,7 @@
                             <FavoriteButton
                                 :active="isFavorite(getThemeName(theme))"
                                 :theme-name="getThemeName(theme)"
-                                @toggle="toggleFavorite(getThemeName(theme), user?.id ?? null)"
+                                @toggle="onToggleFavorite(theme)"
                             />
                             <CompactThemeCard v-if="viewMode === 'compact'" :theme="theme" />
                             <PreviewTerminal v-else :theme="theme" />
@@ -345,6 +347,8 @@
     <div id=master-dev style="display:none">
         4d 69 67 75 65 6c 20 44 2e 20 51 75 69 6e 74 65 72 6f 20 2d 20 6d 69 67 75 65 6c 64 61 76 69 64 71 40 67 6d 61 69 6c 2e 63 6f 6d
     </div>
+
+    <FavoritesSignInBanner :visible="showFavoritesBanner" @close="dismissFavoritesBanner" />
 </template>
 
 <script setup>
@@ -371,11 +375,49 @@ useHead({
 import PreviewTerminal from '@/components/Terminal/PreviewTerminal.vue';
 import CompactThemeCard from '@/components/Terminal/CompactThemeCard.vue';
 import FavoriteButton from '@/components/Terminal/FavoriteButton.vue';
+import FavoritesSignInBanner from '@/components/Terminal/FavoritesSignInBanner.vue';
+import PersistenceBanner from '@/components/Banner/PersistenceBanner.vue';
 import Header from '@/components/Header/Header.vue';
 import ButtonFilter from '@/components/Buttons/ButtonFilter.vue';
 
 const { favorites, isFavorite, toggleFavorite } = useFavorites();
 const { user } = useAuth();
+
+// Nudges anonymous visitors, once, toward signing in so favorites persist
+// beyond this browser. Dismissing it is remembered in localStorage so it
+// never comes back for that visitor, even across sessions.
+const FAVORITES_BANNER_DISMISSED_KEY = 'gogh-favorites-banner-dismissed';
+const showFavoritesBanner = ref(false);
+
+function isFavoritesBannerDismissed() {
+    try {
+        return localStorage.getItem(FAVORITES_BANNER_DISMISSED_KEY) === '1';
+    } catch {
+        return false;
+    }
+}
+
+function dismissFavoritesBanner() {
+    showFavoritesBanner.value = false;
+    try {
+        localStorage.setItem(FAVORITES_BANNER_DISMISSED_KEY, '1');
+    } catch {
+        // Ignore storage failures (private browsing, disabled storage, quota, etc.).
+    }
+}
+
+function onToggleFavorite(theme) {
+    toggleFavorite(getThemeName(theme), user.value?.id ?? null);
+    if (!user.value && !isFavoritesBannerDismissed()) {
+        showFavoritesBanner.value = true;
+    }
+}
+
+// The banner is only ever relevant while signed out - if a sign-in completes
+// elsewhere (e.g. via the header) while it's open, close it too.
+watch(user, (value) => {
+    if (value) showFavoritesBanner.value = false;
+});
 
 const getUrl = '/api/themes';
 const GITHUB_THEMES_RAW_API = 'https://api.github.com/repos/Gogh-Co/Gogh/contents/data/themes-min.json?ref=master';

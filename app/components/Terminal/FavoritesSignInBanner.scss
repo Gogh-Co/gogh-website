@@ -1,0 +1,100 @@
+@use '@/assets/sass/base' as *;
+
+.favorites-sign-in-banner {
+    position: fixed;
+    left: 50%;
+    bottom: 16px;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    max-width: 560px;
+    width: calc(100% - 32px);
+    padding: 14px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background-color: #121f2a;
+    color: #ffffff;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    transform: translateX(-50%);
+
+    @media (max-width: 600px) {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        bottom: 8px;
+        width: calc(100% - 16px);
+    }
+}
+
+.favorites-sign-in-banner__text {
+    flex: 1 1 auto;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 1.3rem;
+    line-height: 1.4;
+
+    strong {
+        color: #ffffff;
+    }
+}
+
+.favorites-sign-in-banner__actions {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 8px;
+}
+
+.favorites-sign-in-banner__signin {
+    flex: 0 0 auto;
+    height: $tap_target_min;
+    padding: 0 14px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    background: transparent;
+    color: #ffffff;
+    font-size: 1.2rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.18s ease;
+
+    &:hover {
+        background-color: rgba(255, 255, 255, 0.12);
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: wait;
+    }
+
+    @media (max-width: 600px) {
+        flex: 1 1 auto;
+    }
+}
+
+.favorites-sign-in-banner__close {
+    flex: 0 0 auto;
+    width: $tap_target_min;
+    height: $tap_target_min;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 2rem;
+    line-height: 1;
+    cursor: pointer;
+
+    &:hover {
+        color: #ffffff;
+    }
+}
+
+.favorites-sign-in-banner-enter-active,
+.favorites-sign-in-banner-leave-active {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.favorites-sign-in-banner-enter-from,
+.favorites-sign-in-banner-leave-to {
+    opacity: 0;
+    transform: translate(-50%, 12px);
+}

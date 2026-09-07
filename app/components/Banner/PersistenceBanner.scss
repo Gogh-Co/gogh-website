@@ -1,0 +1,140 @@
+.persistence-banner {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 640px;
+    margin: 0 auto 12px;
+    padding: 8px 12px;
+    border-top: 2px solid color-mix(in srgb, var(--color-warning, #fd971f) 55%, transparent);
+    background-color: color-mix(in srgb, var(--site-background, #e7e7e7) 92%, var(--color-warning, #fd971f) 8%);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+
+    // A bare `bottom: 0; margin: 0 auto 12px` doesn't actually center a
+    // fixed element horizontally on its own - pin both edges to the
+    // viewport and let max-width + inline padding constrain the visible bar.
+    @media (min-width: 680px) {
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        border-radius: 4px;
+    }
+}
+
+.persistence-banner__text {
+    flex: 1 1 auto;
+    margin: 0;
+    font-size: 1.15rem;
+    line-height: 1.4;
+}
+
+.persistence-banner__help {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: 1px solid color-mix(in srgb, currentColor 45%, transparent);
+    border-radius: 50%;
+    background: none;
+    color: inherit;
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+
+    &:hover {
+        border-color: currentColor;
+        background-color: color-mix(in srgb, currentColor 8%, transparent);
+    }
+}
+
+.persistence-banner__dismiss {
+    flex: 0 0 auto;
+    padding: 0 2px;
+    border: 0;
+    background: none;
+    color: inherit;
+    font-size: 1.8rem;
+    line-height: 1;
+    opacity: 0.6;
+    cursor: pointer;
+
+    &:hover {
+        opacity: 1;
+    }
+}
+
+.persistence-banner__lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background-color: rgba(5, 8, 12, 0.94);
+    animation: persistence-banner-backdrop-in 0.2s ease forwards;
+}
+
+.persistence-banner__lightbox-content {
+    position: relative;
+    width: min(480px, 100%);
+    max-height: 100%;
+    overflow: auto;
+    padding: 28px;
+    background-color: var(--site-background, #e7e7e7);
+    color: var(--site-foreground, #595647);
+
+    h3 {
+        margin: 0 0 14px;
+        font-size: 1.8rem;
+    }
+
+    p {
+        margin: 0 0 14px;
+        font-size: 1.4rem;
+        line-height: 1.5;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+
+    code {
+        font-family: 'Roboto Mono', 'Courier New', monospace;
+    }
+}
+
+.persistence-banner__lightbox-close {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    border: 0;
+    background: none;
+    color: inherit;
+    font-size: 2.4rem;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.7;
+
+    &:hover {
+        opacity: 1;
+    }
+}
+
+@keyframes persistence-banner-backdrop-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
