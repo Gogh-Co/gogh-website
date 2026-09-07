@@ -1,8 +1,7 @@
 <template>
-    <div v-if="!dismissed" class="persistence-banner" role="note">
+    <div v-if="!dismissed && !user" class="persistence-banner" role="note">
         <p class="persistence-banner__text">
-            <template v-if="user">Signed in as {{ user.login }} — favorites sync to your GitHub Gist.</template>
-            <template v-else>Favorites save in this browser. Sign in with GitHub to sync across devices.</template>
+            Favorites save in this browser. Sign in with GitHub to sync across devices.
         </p>
 
         <button
