@@ -1,12 +1,6 @@
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 
-name: "🚀 - Deploy to GitHub Pages (push trigger)"
-
-# GitHub only evaluates workflow files from the ref that received the push
-# event, so this branch needs at least this stub present to react to a push
-# here at all. The actual build/deploy steps live once, on master, in
-# .github/workflows/gh-pages.yml (called below by reference) -- keep this
-# file thin and let that one carry the real logic.
+name: "🚀 - Deploy to GitHub Pages"
 
 on:
   push:
@@ -14,8 +8,38 @@ on:
   workflow_dispatch:
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout website branch
+        uses: actions/checkout@v6
+        with:
+          ref: main/website
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+      - run: npm install
+      - run: npm run generate
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: .output/public
+
   deploy:
+    needs: build
+
     permissions:
       pages: write
       id-token: write
-    uses: Gogh-Co/Gogh/.github/workflows/gh-pages.yml@master
+
+    environment:
+      name: github_pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
