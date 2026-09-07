@@ -14,9 +14,24 @@
                         Gogh is a collection of color schemes for various terminal emulators, including Gnome Terminal, Pantheon Terminal, Tilix, and XFCE4 Terminal. These schemes are designed to make your terminal more visually appealing and improve your productivity by providing a better contrast and color differentiation.
                     </p>
 
-                    <p class="install-intro">
-                        <strong>Install: </strong>Just copy and paste One line command.
-                    </p>
+                    <div class="hero-github">
+                        <a class="github-button"
+                            href="https://github.com/Gogh-Co/Gogh"
+                            data-color-scheme="no-preference: dark; light: light; dark: dark;"
+                            data-size="large"
+                            aria-label="Open Gogh-Co/Gogh on GitHub">
+                            View
+                        </a>
+                        <a class="github-button"
+                            href="https://github.com/Gogh-Co/Gogh"
+                            data-color-scheme="no-preference: dark; light: light; dark: dark;"
+                            data-icon="octicon-star"
+                            data-size="large"
+                            data-show-count="true"
+                            aria-label="Star Gogh-Co/Gogh on GitHub">
+                            Star
+                        </a>
+                    </div>
                 </div>
 
                 <div class="col-md-6">

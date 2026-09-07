@@ -13,6 +13,18 @@
     }
 }
 
+.hero-github {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    // Reserves space for the two GitHub-buttons.js widgets (View + Star
+    // count), which render as empty <span> shadow-DOM hosts until the
+    // injected script loads and measures/resizes them. Without a fixed
+    // size here, the hero visibly reflows once they pop in.
+    min-width: 200px;
+    min-height: 28px;
+}
+
 .gogh-content {
     p {
         margin: 0 0 30px;

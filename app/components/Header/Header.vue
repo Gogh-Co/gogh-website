@@ -56,25 +56,6 @@
                     <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M9.822 2.238a.75.75 0 0 1 .174.808a7.5 7.5 0 0 0 9.958 9.958a.75.75 0 0 1 .982.982A9.001 9.001 0 0 1 12 21a9 9 0 0 1-2.834-17.539a.75.75 0 0 1 .656.777"/></svg>
                     <span class="gogh-header__theme-toggle-label">{{ pageTheme === 'dark' ? 'Light background' : 'Dark background' }}</span>
                 </button>
-
-                <div class="gogh-header__github">
-                    <a class="github-button"
-                        href="https://github.com/Gogh-Co/Gogh"
-                        data-color-scheme="no-preference: dark; light: light; dark: dark;"
-                        data-size="large"
-                        aria-label="Open Gogh-Co/Gogh on GitHub">
-                        View
-                    </a>
-                    <a class="github-button"
-                        href="https://github.com/Gogh-Co/Gogh"
-                        data-color-scheme="no-preference: dark; light: light; dark: dark;"
-                        data-icon="octicon-star"
-                        data-size="large"
-                        data-show-count="true"
-                        aria-label="Star Gogh-Co/Gogh on GitHub">
-                        Star
-                    </a>
-                </div>
             </nav>
         </div>
     </header>
@@ -97,11 +78,11 @@ function mountGithubButtons() {
     }
 
     // The buttons.js library only scans the DOM for `.github-button`
-    // anchors once, when its script executes. Header re-mounts fresh
-    // anchors on every client-side navigation (it lives in each page,
-    // not app.vue), so the old script must be removed and re-injected
-    // each time to force a re-scan — otherwise the new anchors are
-    // left untransformed.
+    // anchors once, when its script executes. Header re-mounts on every
+    // client-side navigation (it lives in each page, not app.vue) and
+    // pages render their own `.github-button` anchors (e.g. the homepage
+    // hero), so the old script must be removed and re-injected each time
+    // to force a re-scan — otherwise those anchors are left untransformed.
     const scriptId = 'github-buttons-inline';
     const existingScript = document.getElementById(scriptId);
 
