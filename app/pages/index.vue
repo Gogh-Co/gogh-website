@@ -90,6 +90,11 @@
                                         Popular
                                     </ButtonFilter>
 
+                                    <ButtonFilter extra-class="js-btn--filter" :active="filter === 'favorites' && !colorFilterField"
+                                        @click="setFilter('favorites'); clearColorFilter()">
+                                        Favorites{{ favorites.length ? ` (${favorites.length})` : '' }}
+                                    </ButtonFilter>
+
                                     <ButtonFilter
                                         :active="!!colorFilterField"
                                         aria-haspopup="dialog"
@@ -182,6 +187,11 @@
                             @keydown.enter.prevent="openThemeLightbox(theme)"
                             @keydown.space.prevent="openThemeLightbox(theme)"
                         >
+                            <FavoriteButton
+                                :active="isFavorite(getThemeName(theme))"
+                                :theme-name="getThemeName(theme)"
+                                @toggle="toggleFavorite(getThemeName(theme), user?.id ?? null)"
+                            />
                             <CompactThemeCard v-if="viewMode === 'compact'" :theme="theme" />
                             <PreviewTerminal v-else :theme="theme" />
                         </div>
@@ -360,8 +370,12 @@ useHead({
 
 import PreviewTerminal from '@/components/Terminal/PreviewTerminal.vue';
 import CompactThemeCard from '@/components/Terminal/CompactThemeCard.vue';
+import FavoriteButton from '@/components/Terminal/FavoriteButton.vue';
 import Header from '@/components/Header/Header.vue';
 import ButtonFilter from '@/components/Buttons/ButtonFilter.vue';
+
+const { favorites, isFavorite, toggleFavorite } = useFavorites();
+const { user } = useAuth();
 
 const getUrl = '/api/themes';
 const GITHUB_THEMES_RAW_API = 'https://api.github.com/repos/Gogh-Co/Gogh/contents/data/themes-min.json?ref=master';
@@ -859,6 +873,10 @@ function themeMatchesFilter(theme) {
     if (colorFilterField.value && colorFilterValue.value) {
         const themeValue = (theme[colorFilterField.value] || '').toLowerCase();
         return themeValue === colorFilterValue.value && matchesThemeSearch(theme);
+    }
+
+    if (filter.value === 'favorites') {
+        return isFavorite(getThemeName(theme)) && matchesThemeSearch(theme);
     }
 
     return (filter.value === theme.category || filter.value === 'all' || (filter.value === 'popular' && theme.popular)) && matchesThemeSearch(theme);

@@ -56,6 +56,8 @@
                     <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M9.822 2.238a.75.75 0 0 1 .174.808a7.5 7.5 0 0 0 9.958 9.958a.75.75 0 0 1 .982.982A9.001 9.001 0 0 1 12 21a9 9 0 0 1-2.834-17.539a.75.75 0 0 1 .656.777"/></svg>
                     <span class="gogh-header__theme-toggle-label">{{ pageTheme === 'dark' ? 'Light background' : 'Dark background' }}</span>
                 </button>
+
+                <AuthControl />
             </nav>
         </div>
     </header>
@@ -63,9 +65,12 @@
 
 <script setup>
 import githubButtonsScript from '@/assets/static/buttons.js?raw';
+import AuthControl from '@/components/Auth/AuthControl.vue';
 
 const mobileNavOpen = ref(false);
 const { pageTheme, togglePageTheme, initPageTheme } = usePageTheme();
+const { checkAuth } = useAuth();
+const { initFavorites } = useFavorites();
 
 const logoBarColors = [
     '#243342', '#C54133', '#27AE60', '#EDB20A', '#2479D0', '#7D3EA0', '#1D8579', '#C9CCCD',
@@ -100,6 +105,8 @@ function mountGithubButtons() {
 onMounted(() => {
     mountGithubButtons();
     initPageTheme();
+    initFavorites();
+    checkAuth();
 });
 </script>
 

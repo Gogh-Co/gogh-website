@@ -1,0 +1,159 @@
+@use '@/assets/sass/base' as *;
+
+.admin-page {
+    // Multiplies every rem size below via calc() - set on the page root by
+    // the A+/A- buttons (see index.vue), so the whole dashboard's text
+    // scales together rather than each element needing its own state.
+    --admin-font-scale: 1;
+
+    .admin-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+
+        h2 {
+            margin: 0;
+        }
+    }
+
+    .admin-font-controls {
+        display: flex;
+        gap: 6px;
+        flex: 0 0 auto;
+    }
+
+    .admin-font-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: $tap_target_min;
+        height: $tap_target_min;
+        padding: 0;
+        border: 1px solid currentColor;
+        background: transparent;
+        color: inherit;
+        font-size: 1.4rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: opacity 0.15s ease, background-color 0.15s ease;
+
+        &:hover:not(:disabled) {
+            background-color: color-mix(in srgb, currentColor 8%, transparent);
+        }
+
+        &:disabled {
+            opacity: 0.4;
+            cursor: default;
+        }
+    }
+
+    .admin-status {
+        padding: 20px;
+        border: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+        font-size: calc(1.4rem * var(--admin-font-scale));
+
+        &--error {
+            border-color: var(--color-danger, #f92672);
+        }
+    }
+
+    .admin-panels {
+        display: grid;
+        gap: 20px;
+        margin-bottom: 40px;
+    }
+
+    .admin-panel {
+        padding: 16px 20px;
+        border: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+
+        h3 {
+            margin: 0 0 12px;
+            font-size: calc(1.6rem * var(--admin-font-scale));
+        }
+    }
+
+    .admin-identity {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: calc(1.3rem * var(--admin-font-scale));
+    }
+
+    .admin-identity__avatar {
+        border-radius: 50%;
+    }
+
+    .admin-identity__id {
+        opacity: 0.6;
+    }
+
+    .admin-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+
+        li {
+            margin-bottom: 6px;
+            font-size: calc(1.3rem * var(--admin-font-scale));
+        }
+    }
+
+    .admin-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 12px;
+    }
+
+    .admin-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: $tap_target_min;
+        padding: 0 16px;
+        border: 1px solid currentColor;
+        background: transparent;
+        color: inherit;
+        font-size: calc(1.3rem * var(--admin-font-scale));
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: opacity 0.15s ease, background-color 0.15s ease;
+
+        &:hover:not(:disabled) {
+            background-color: color-mix(in srgb, currentColor 8%, transparent);
+        }
+
+        &:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        // The "View on GitHub" link reuses this class but isn't a <button>,
+        // so it needs its own hover affordance parity - already covered by
+        // the shared :hover rule above since it applies to any .admin-action.
+        &--link {
+            border-style: dashed;
+        }
+    }
+
+    .admin-action-message {
+        margin: 10px 0 0;
+        font-size: calc(1.3rem * var(--admin-font-scale));
+    }
+
+    .admin-yaml {
+        max-height: 400px;
+        overflow: auto;
+        padding: 12px;
+        background: color-mix(in srgb, currentColor 6%, transparent);
+        font-family: 'Roboto Mono', 'Courier New', monospace;
+        font-size: calc(1.2rem * var(--admin-font-scale));
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+}
