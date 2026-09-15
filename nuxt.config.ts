@@ -60,7 +60,7 @@ export default defineNuxtConfig({
 
       script: [
         {
-          src: 'https://plausible.arcano.site/js/pa-Fw7nMNFtqNmPh7jU-bDaj.js',
+          src: 'https://analytics.arcano.site/js/pa-Fw7nMNFtqNmPh7jU-bDaj.js',
           async: true,
         },
 
