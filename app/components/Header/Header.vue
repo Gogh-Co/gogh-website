@@ -69,8 +69,8 @@ import AuthControl from '@/components/Auth/AuthControl.vue';
 
 const mobileNavOpen = ref(false);
 const { pageTheme, togglePageTheme, initPageTheme } = usePageTheme();
-const { checkAuth } = useAuth();
-const { initFavorites } = useFavorites();
+const { user, checkAuth } = useAuth();
+const { initFavorites, mergeAfterLogin, mergedThisSession } = useFavorites();
 
 const logoBarColors = [
     '#243342', '#C54133', '#27AE60', '#EDB20A', '#2479D0', '#7D3EA0', '#1D8579', '#C9CCCD',
@@ -102,11 +102,21 @@ function mountGithubButtons() {
     document.body.appendChild(script);
 }
 
-onMounted(() => {
+onMounted(async () => {
     mountGithubButtons();
     initPageTheme();
     initFavorites();
-    checkAuth();
+
+    await checkAuth();
+
+    // Covers sessions that never went through AuthControl's own
+    // login()-then-mergeAfterLogin() call: the popup-blocked fallback is a
+    // full top-level redirect (see useAuth.ts's login()), which reloads the
+    // page and lands here already authenticated, as does simply reloading
+    // an existing session. Runs once per session (see mergedThisSession).
+    if (user.value && !mergedThisSession.value) {
+        mergeAfterLogin(user.value.id);
+    }
 });
 </script>
 

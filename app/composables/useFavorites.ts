@@ -80,6 +80,11 @@ export function useFavorites() {
     // optimistic-concurrency check on the next write (see
     // docs/API.md "Ongoing synchronization algorithm").
     const lastKnownRevision = useState<string | undefined>('gogh-sync-revision', () => undefined);
+    // Tracks whether mergeAfterLogin has already run for the current session
+    // (reset on logout), so Header.vue's onMounted -- which fires again on
+    // every client-side navigation -- doesn't re-fetch/re-merge remote
+    // favorites on every route change once it's already been done once.
+    const mergedThisSession = useState<boolean>('gogh-merge-done', () => false);
 
     function isFavorite(themeName: string): boolean {
         return favorites.value.includes(themeName);
@@ -184,6 +189,7 @@ export function useFavorites() {
             const union = Array.from(new Set([...remote, ...favorites.value])).sort();
             favorites.value = union;
             persistLocal();
+            mergedThisSession.value = true;
 
             const remoteAlreadyHadEverything =
                 union.length === remote.length && union.every((name, i) => name === remote[i]);
@@ -203,11 +209,13 @@ export function useFavorites() {
     function resetSyncStateOnLogout() {
         syncState.value = 'idle';
         lastKnownRevision.value = undefined;
+        mergedThisSession.value = false;
     }
 
     return {
         favorites,
         syncState,
+        mergedThisSession,
         isFavorite,
         initFavorites,
         toggleFavorite,
