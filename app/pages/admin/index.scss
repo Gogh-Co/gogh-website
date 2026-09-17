@@ -58,6 +58,10 @@
         &--error {
             border-color: var(--color-danger, #f92672);
         }
+
+        .admin-action {
+            margin-top: 4px;
+        }
     }
 
     .admin-panels {

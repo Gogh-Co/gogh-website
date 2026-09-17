@@ -22,6 +22,9 @@
 
             <div v-else-if="phase === 'signed-out'" class="admin-status">
                 <p>Sign in with GitHub to continue.</p>
+                <button type="button" class="admin-action" :disabled="signingIn" @click="onSignIn">
+                    {{ signingIn ? 'Signing in…' : 'Sign in with GitHub' }}
+                </button>
             </div>
 
             <div v-else-if="phase === 'forbidden'" class="admin-status admin-status--error">
@@ -111,7 +114,7 @@ import Footer from '@/components/Footer/Footer.vue';
 
 useSeoMeta({ title: 'Gogh - Admin', robots: 'noindex, nofollow' });
 
-const { user, checkAuth } = useAuth();
+const { user, checkAuth, login } = useAuth();
 const { fetchStatus, forceSync, recoverGist, fetchGist } = useAdmin();
 
 const phase = ref('loading');
@@ -120,6 +123,7 @@ const gistYaml = ref('');
 const errorMessage = ref('');
 const syncing = ref(false);
 const recovering = ref(false);
+const signingIn = ref(false);
 const actionMessage = ref('');
 const syncLog = ref([]);
 
@@ -185,6 +189,16 @@ async function load() {
     const gistResult = await fetchGist();
     if (gistResult.ok) {
         gistYaml.value = gistResult.data.rawYaml;
+    }
+}
+
+async function onSignIn() {
+    signingIn.value = true;
+    try {
+        const result = await login(useRoute().fullPath);
+        if (result.ok) await load();
+    } finally {
+        signingIn.value = false;
     }
 }
 
