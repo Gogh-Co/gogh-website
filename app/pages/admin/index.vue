@@ -195,8 +195,9 @@ async function load() {
 async function onSignIn() {
     signingIn.value = true;
     try {
-        const result = await login(useRoute().fullPath);
-        if (result.ok) await load();
+        // No need to call load() here on success - the watch(user, ...)
+        // below reacts to the checkAuth() that login() runs internally.
+        await login(useRoute().fullPath);
     } finally {
         signingIn.value = false;
     }
@@ -221,6 +222,20 @@ async function onRecoverGist() {
         : `Recovery failed: ${result.message}`;
     if (result.ok) await load();
 }
+
+// `user` is shared app-wide state (see useAuth.ts's useState), so signing
+// in/out via the header's AuthControl (not just this page's own button)
+// updates it too - re-run load() whenever that happens so the panel doesn't
+// require a manual reload to reflect a session change made elsewhere.
+watch(user, (current, previous) => {
+    if (!previous === !current) return;
+    if (current) {
+        load();
+    } else {
+        phase.value = 'signed-out';
+        status.value = null;
+    }
+});
 
 onMounted(() => {
     try {
