@@ -250,29 +250,88 @@ onBeforeUnmount(() => {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 8px;
-    margin: -30px 0 24px;
+    gap: 10px;
+    margin: -30px 0 32px;
 }
 
 .preview-slider__tab {
-    padding: 6px 14px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 999px;
+    // Same language as the page's filter buttons (ButtonFilter): square,
+    // uppercase, 1px border, filled when active with an animated colour bar
+    // underneath. Inverted for the lightbox's dark backdrop. px: rem is 10px.
+    position: relative;
+    padding: 10px 20px 9px;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 0;
     background: transparent;
-    color: rgba(255, 255, 255, 0.75);
-    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
     cursor: pointer;
-    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 
-    &:hover {
+    &::after {
+        position: absolute;
+        right: 0;
+        bottom: -8px;
+        left: 0;
+        width: 0;
+        height: 3px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        content: '';
+        opacity: 0;
+        transition: width 0.3s ease, opacity 0.3s ease;
+    }
+
+    &:hover,
+    &:focus-visible {
+        border-color: #ffffff;
         color: #ffffff;
-        border-color: rgba(255, 255, 255, 0.6);
+    }
+
+    &:focus-visible {
+        outline: 2px solid #ffffff;
+        outline-offset: 2px;
+    }
+
+    &:hover::after,
+    &.is-active::after {
+        width: 100%;
+        opacity: 1;
     }
 
     &.is-active {
         border-color: #ffffff;
         background: #ffffff;
         color: #0d1926;
+
+        &::after {
+            animation: preview-slider-tab-bar 18s infinite;
+        }
     }
+
+    @media (max-width: 575.98px) {
+        padding: 8px 12px 7px;
+        font-size: 11px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        &.is-active::after {
+            animation: none;
+        }
+    }
+}
+
+// Mirrors ButtonFilter's anim-gogh-bg (scoped keyframes can't be shared).
+@keyframes preview-slider-tab-bar {
+    25%   { background-color: #FF0883; }
+    37.5% { background-color: #FF8308; }
+    50%   { background-color: #0883FF; }
+    62.5% { background-color: #8308FF; }
+    75%   { background-color: #3dba98; }
+    87.5% { background-color: #ffffff; }
+    100%  { background-color: #47af32; }
 }
 </style>
