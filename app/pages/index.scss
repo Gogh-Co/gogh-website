@@ -577,6 +577,24 @@
     cursor: zoom-in;
 }
 
+// In detailed view the card is a full terminal: keep the favorite button
+// inside its bottom-right corner instead of over the title bar.
+// The terminal's bottom margin moves to the wrapper so the wrapper's bottom
+// edge is the terminal's bottom edge and the button can anchor to it.
+.terminal-preview--detailed {
+    margin-bottom: 50px;
+
+    :deep(.terminal) {
+        margin-bottom: 0;
+    }
+
+    .favorite-button {
+        top: auto;
+        bottom: 16px;
+        right: 16px;
+    }
+}
+
 .terminal-lightbox {
     position: fixed;
     inset: 0;

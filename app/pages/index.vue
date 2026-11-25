@@ -183,6 +183,7 @@
                     <div :class="viewMode === 'compact' ? 'col-6 col-md-4 col-lg-3 col-xl-2' : 'col-12 col-md-6  col-xl-4'">
                         <div
                             class="terminal-preview"
+                            :class="{ 'terminal-preview--detailed': viewMode === 'detailed' }"
                             role="button"
                             tabindex="0"
                             @click="openThemeLightbox(theme)"
