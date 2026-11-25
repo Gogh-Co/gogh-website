@@ -625,25 +625,53 @@
         box-shadow: 2px 4px 20px rgba(27, 27, 27, 0.95);
     }
 
+    // Install command under the preview: one flat block (no outer frame
+    // with a gap around the code) with the copy button as a full-height
+    // segment on its right. Sizes in px: this site's rem is 10px.
     .lightbox-code-holder {
+        max-width: 100%;
+        overflow: hidden;
         text-align: center;
-        border: 1px solid rgb(95 95 95);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+
+        pre[class*="language-"] {
+            margin: 0;
+            padding: 0;
+            border-radius: 0;
+        }
 
         .language-bash {
-            padding: 1.3rem 4rem 0.8rem 2rem;
+            display: block;
+            padding: 16px 76px 16px 24px;
             text-align: center;
-            background: rgba(0 0 0 / 0.2);
-            text-shadow: 0 1px black;
         }
 
         .btn-copy {
-            top: 16px;
-            right: 10px;
-            height: 30px;
-            background-color: black;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            align-items: center;
+            justify-content: center;
+            width: 56px;
+            max-width: none;
+            height: auto;
+            padding: 0;
+            border-radius: 0;
+            background-color: #121f2a;
 
             svg {
-                fill: #F7F6F5;
+                width: 22px;
+                height: 22px;
+                fill: #ECF0F1;
+            }
+
+            &:hover {
+                background-color: #000000;
+            }
+
+            &:focus-visible {
+                outline: 2px solid #FF0883;
+                outline-offset: -2px;
             }
         }
     }
