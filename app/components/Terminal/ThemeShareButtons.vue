@@ -35,7 +35,7 @@
 
         <nav class="share-previews" aria-label="Preview the share card">
             <span class="share-previews__label">Preview card</span>
-            <template v-for="(tool, index) in PREVIEW_TOOLS" :key="tool.id">
+            <template v-for="(tool, index) in previewTools" :key="tool.id">
                 <span v-if="index" class="share-previews__sep" aria-hidden="true">·</span>
                 <a
                     class="share-previews__link"
@@ -64,6 +64,11 @@ const props = defineProps({
     theme: {
         type: Object,
         default: null,
+    },
+    // Page to share; the site root when empty (the gallery lightbox).
+    url: {
+        type: String,
+        default: '',
     },
 });
 
@@ -124,25 +129,25 @@ const ICONS = {
     check: ['M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0'],
 };
 
-const shareUrl = `${SITE_URL}/`;
+const shareUrl = computed(() => props.url || `${SITE_URL}/`);
 
 // Official card debuggers (they also refresh a network's cached preview)
 // plus two multi-network previewers. X and Bluesky have no public tool.
-const PREVIEW_TOOLS = (() => {
-    const url = encodeURIComponent(shareUrl);
+const previewTools = computed(() => {
+    const url = encodeURIComponent(shareUrl.value);
     return [
         { id: 'facebook', label: 'Facebook', title: 'Facebook Sharing Debugger (also WhatsApp)', href: `https://developers.facebook.com/tools/debug/?q=${url}` },
         { id: 'linkedin', label: 'LinkedIn', title: 'LinkedIn Post Inspector', href: `https://www.linkedin.com/post-inspector/inspect/${url}` },
         { id: 'opengraph', label: 'OpenGraph.xyz', title: 'Preview on several networks at once', href: `https://www.opengraph.xyz/url/${url}` },
         { id: 'metatags', label: 'Metatags.io', title: 'Preview on several networks at once', href: `https://metatags.io/?url=${url}` },
     ];
-})();
+});
 
 const networks = computed(() => {
-    const url = encodeURIComponent(shareUrl);
+    const url = encodeURIComponent(shareUrl.value);
     const name = props.themeName.trim();
     const text = encodeURIComponent(name ? `${name} · Gogh` : 'Gogh');
-    const textWithUrl = encodeURIComponent(`${name ? `${name} · Gogh` : 'Gogh'} ${shareUrl}`);
+    const textWithUrl = encodeURIComponent(`${name ? `${name} · Gogh` : 'Gogh'} ${shareUrl.value}`);
 
     return [
         { id: 'x', label: 'X', paths: ICONS.x, href: `https://x.com/intent/post?url=${url}&text=${text}` },
@@ -160,7 +165,7 @@ let copiedTimer = null;
 
 async function copyLink() {
     try {
-        await navigator.clipboard.writeText(shareUrl);
+        await navigator.clipboard.writeText(shareUrl.value);
     } catch {
         return;
     }

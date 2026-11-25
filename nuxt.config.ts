@@ -1,4 +1,5 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import { themeSlug } from './app/utils/themeSlug'
 
 const devPort = Number(
   import.meta.env.NUXT_PORT ||
@@ -7,6 +8,34 @@ const devPort = Number(
 )
 
 const enableDevtools = import.meta.env.NUXT_DEVTOOLS === 'true'
+
+const THEMES_RAW_URL = 'https://raw.githubusercontent.com/Gogh-Co/Gogh/master/data/themes-min.json'
+
+// One prerendered page per theme (gogh.website/<slug>/). The gallery only
+// server-renders its first 60 cards, so the crawler alone would miss most
+// of them. If GitHub is unreachable the build still succeeds, and the
+// crawler picks up whatever theme pages the gallery and prev/next links reach.
+async function themePageRoutes(): Promise<string[]> {
+  try {
+    const response = await fetch(THEMES_RAW_URL, { signal: AbortSignal.timeout(20000) })
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`)
+    }
+
+    const body = await response.json()
+    const themes: Array<Record<string, unknown>> = Array.isArray(body) ? body : (body?.data ?? [])
+
+    return [...new Set(
+      themes
+        .map((theme) => String(theme?.name || theme?.theme || ''))
+        .filter(Boolean)
+        .map((name) => `/${themeSlug(name)}/`),
+    )]
+  } catch (error) {
+    console.warn(`[gogh] Could not list themes for prerendering: ${(error as Error).message}`)
+    return []
+  }
+}
 
 export default defineNuxtConfig({
   srcDir: 'app/',
@@ -100,6 +129,21 @@ export default defineNuxtConfig({
           silenceDeprecations: ['legacy-js-api'],
         },
       },
+    },
+  },
+
+  hooks: {
+    async 'nitro:config'(nitroConfig) {
+      if (nitroConfig.dev) {
+        return
+      }
+
+      nitroConfig.prerender ??= {}
+      nitroConfig.prerender.routes = [
+        ...(nitroConfig.prerender.routes ?? []),
+        '/sitemap.xml',
+        ...(await themePageRoutes()),
+      ]
     },
   },
 

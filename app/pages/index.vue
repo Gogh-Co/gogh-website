@@ -195,6 +195,7 @@
                                 :theme-name="getThemeName(theme)"
                                 @toggle="onToggleFavorite(theme)"
                             />
+                            <ThemePageLink :theme-name="getThemeName(theme)" />
                             <CompactThemeCard v-if="viewMode === 'compact'" :theme="theme" />
                             <PreviewTerminal v-else :theme="theme" />
                         </div>
@@ -378,6 +379,7 @@ useHead({
 import PreviewTerminal from '@/components/Terminal/PreviewTerminal.vue';
 import CompactThemeCard from '@/components/Terminal/CompactThemeCard.vue';
 import FavoriteButton from '@/components/Terminal/FavoriteButton.vue';
+import ThemePageLink from '@/components/Terminal/ThemePageLink.vue';
 import ThemePreviewSlider from '@/components/Terminal/ThemePreviewSlider.vue';
 import ThemeShareButtons from '@/components/Terminal/ThemeShareButtons.vue';
 import FavoritesSignInBanner from '@/components/Terminal/FavoritesSignInBanner.vue';
@@ -424,8 +426,6 @@ watch(user, (value) => {
     if (value) showFavoritesBanner.value = false;
 });
 
-const getUrl = '/api/themes';
-const GITHUB_THEMES_RAW_API = 'https://api.github.com/repos/Gogh-Co/Gogh/contents/data/themes-min.json?ref=master';
 const THEMES_PAGE_SIZE = 60;
 
 // The 48 most popular terminal color schemes, used by the "Popular" filter.
@@ -658,44 +658,14 @@ function lightOrDark(color) {
     }
 }
 
-function normalizeThemes(remoteThemes) {
-    if (Array.isArray(remoteThemes)) {
-        return remoteThemes;
-    }
-
-    if (Array.isArray(remoteThemes?.data)) {
-        return remoteThemes.data;
-    }
-
-    return [];
-}
-
 async function fetchData() {
     try {
-        const remoteThemes = await $fetch(getUrl, {
-            timeout: 12000,
-        });
-
+        const remoteThemes = await fetchThemeList();
         themesError.value = '';
-        return normalizeThemes(remoteThemes);
+        return remoteThemes;
     } catch {
-        // Static deploy fallback (e.g. GitHub Pages): /api/themes only exists
-        // at build time, so fetch directly from GitHub API at runtime.
-        try {
-            const remoteThemes = await $fetch(GITHUB_THEMES_RAW_API, {
-                timeout: 12000,
-                headers: {
-                    Accept: 'application/vnd.github.raw+json',
-                    'X-GitHub-Api-Version': '2022-11-28',
-                },
-            });
-
-            themesError.value = '';
-            return normalizeThemes(remoteThemes);
-        } catch {
-            themesError.value = 'Could not fetch theme data from GitHub.';
-            return [];
-        }
+        themesError.value = 'Could not fetch theme data from GitHub.';
+        return [];
     }
 }
 

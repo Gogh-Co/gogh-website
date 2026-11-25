@@ -78,4 +78,19 @@ describe('ThemeShareButtons', () => {
             expect(link.attributes('target')).toBe('_blank');
         }
     });
+
+    it('shares a theme page URL when one is given', async () => {
+        const url = 'https://gogh.website/dracula/';
+        const writeText = vi.fn().mockResolvedValue(undefined);
+        vi.stubGlobal('navigator', { ...navigator, clipboard: { writeText } });
+        const wrapper = await mountSuspended(ThemeShareButtons, { props: { themeName: 'Dracula', url } });
+
+        const facebook = wrapper.find('a[aria-label="Share on Facebook"]').attributes('href')!;
+        expect(new URL(facebook).searchParams.get('u')).toBe(url);
+        expect(decodeURIComponent(wrapper.find('.share-previews__link').attributes('href')!)).toContain(url);
+
+        await wrapper.find('button.share-buttons__btn').trigger('click');
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        expect(writeText).toHaveBeenCalledWith(url);
+    });
 });
