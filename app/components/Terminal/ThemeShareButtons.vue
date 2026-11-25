@@ -1,35 +1,51 @@
 <template>
-    <div class="share-buttons" role="group" :aria-label="`Share ${themeName}`">
-        <a
-            v-for="network in networks"
-            :key="network.id"
-            class="share-buttons__btn"
-            :style="{ '--brand': network.color, '--brand-ink': network.ink }"
-            :href="network.href"
-            target="_blank"
-            rel="noopener noreferrer"
-            :aria-label="`Share on ${network.label}`"
-            :title="network.label"
-        >
-            <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true">
-                <path v-for="(d, index) in network.paths" :key="index" fill="currentColor" :d="d" />
-            </svg>
-        </a>
+    <div class="share">
+        <div class="share-buttons" role="group" :aria-label="`Share ${themeName}`">
+            <a
+                v-for="network in networks"
+                :key="network.id"
+                class="share-buttons__btn"
+                :style="{ '--brand': network.color, '--brand-ink': network.ink }"
+                :href="network.href"
+                target="_blank"
+                rel="noopener noreferrer"
+                :aria-label="`Share on ${network.label}`"
+                :title="network.label"
+            >
+                <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true">
+                    <path v-for="(d, index) in network.paths" :key="index" fill="currentColor" :d="d" />
+                </svg>
+            </a>
 
-        <button
-            type="button"
-            class="share-buttons__btn share-buttons__btn--copy"
-            :class="{ 'is-copied': copied }"
-            :style="copied ? null : { '--brand': copyColor.color, '--brand-ink': copyColor.ink }"
-            :aria-label="copied ? 'Link copied' : 'Copy link'"
-            :title="copied ? 'Copied' : 'Copy link'"
-            @click="copyLink"
-        >
-            <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true">
-                <path v-for="(d, index) in (copied ? ICONS.check : ICONS.link)" :key="index" fill="currentColor" :d="d" />
-            </svg>
-        </button>
-        <span class="share-buttons__status" role="status" aria-live="polite">{{ copied ? 'Link copied' : '' }}</span>
+            <button
+                type="button"
+                class="share-buttons__btn share-buttons__btn--copy"
+                :class="{ 'is-copied': copied }"
+                :style="copied ? null : { '--brand': copyColor.color, '--brand-ink': copyColor.ink }"
+                :aria-label="copied ? 'Link copied' : 'Copy link'"
+                :title="copied ? 'Copied' : 'Copy link'"
+                @click="copyLink"
+            >
+                <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true">
+                    <path v-for="(d, index) in (copied ? ICONS.check : ICONS.link)" :key="index" fill="currentColor" :d="d" />
+                </svg>
+            </button>
+            <span class="share-buttons__status" role="status" aria-live="polite">{{ copied ? 'Link copied' : '' }}</span>
+        </div>
+
+        <nav class="share-previews" aria-label="Preview the share card">
+            <span class="share-previews__label">Preview card</span>
+            <template v-for="(tool, index) in PREVIEW_TOOLS" :key="tool.id">
+                <span v-if="index" class="share-previews__sep" aria-hidden="true">·</span>
+                <a
+                    class="share-previews__link"
+                    :href="tool.href"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    :title="tool.title"
+                >{{ tool.label }}</a>
+            </template>
+        </nav>
     </div>
 </template>
 
@@ -110,6 +126,18 @@ const ICONS = {
 
 const shareUrl = `${SITE_URL}/`;
 
+// Official card debuggers (they also refresh a network's cached preview)
+// plus two multi-network previewers. X and Bluesky have no public tool.
+const PREVIEW_TOOLS = (() => {
+    const url = encodeURIComponent(shareUrl);
+    return [
+        { id: 'facebook', label: 'Facebook', title: 'Facebook Sharing Debugger (also WhatsApp)', href: `https://developers.facebook.com/tools/debug/?q=${url}` },
+        { id: 'linkedin', label: 'LinkedIn', title: 'LinkedIn Post Inspector', href: `https://www.linkedin.com/post-inspector/inspect/${url}` },
+        { id: 'opengraph', label: 'OpenGraph.xyz', title: 'Preview on several networks at once', href: `https://www.opengraph.xyz/url/${url}` },
+        { id: 'metatags', label: 'Metatags.io', title: 'Preview on several networks at once', href: `https://metatags.io/?url=${url}` },
+    ];
+})();
+
 const networks = computed(() => {
     const url = encodeURIComponent(shareUrl);
     const name = props.themeName.trim();
@@ -149,12 +177,50 @@ onBeforeUnmount(() => clearTimeout(copiedTimer));
 <style lang="scss" scoped>
 // Square, bordered, icon-only: same language as the lightbox tabs and the
 // page's filter buttons. px: this site's rem is 10px.
+.share {
+    margin: 0 0 24px;
+}
+
 .share-buttons {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 8px;
-    margin: 0 0 24px;
+}
+
+// Discreet text line under the icons: where to check the share card.
+.share-previews {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: baseline;
+    gap: 6px;
+    margin-top: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 12px;
+    letter-spacing: 0.5px;
+}
+
+.share-previews__label {
+    text-transform: uppercase;
+}
+
+.share-previews__link {
+    color: rgba(255, 255, 255, 0.78);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+    transition: color 0.2s ease, border-color 0.2s ease;
+
+    &:hover,
+    &:focus-visible {
+        color: #ffffff;
+        border-bottom-color: #ffffff;
+    }
+
+    &:focus-visible {
+        outline: 2px solid #ffffff;
+        outline-offset: 2px;
+    }
 }
 
 .share-buttons__btn {

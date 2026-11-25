@@ -67,4 +67,15 @@ describe('ThemeShareButtons', () => {
         expect(color).not.toBe('#1a0000');
         expect(chroma.contrast(color, '#05080c')).toBeGreaterThanOrEqual(3);
     });
+
+    it('links to share-card preview tools for the site URL', async () => {
+        const wrapper = await mountSuspended(ThemeShareButtons, { props: { themeName: 'Dracula' } });
+        const links = wrapper.findAll('.share-previews__link');
+
+        expect(links.map((link) => link.text())).toEqual(['Facebook', 'LinkedIn', 'OpenGraph.xyz', 'Metatags.io']);
+        for (const link of links) {
+            expect(decodeURIComponent(link.attributes('href')!)).toContain('https://gogh.website/');
+            expect(link.attributes('target')).toBe('_blank');
+        }
+    });
 });
