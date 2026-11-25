@@ -359,7 +359,7 @@ import chroma from 'chroma-js';
 import ClipboardJS from 'clipboard';
 import Prism from 'prismjs';
 
-const title = 'Gogh - 1,200+ Terminal Color Schemes';
+const title = 'Gogh - Terminal Color Schemes';
 const description = SITE_DESCRIPTION;
 
 useSeoMeta({

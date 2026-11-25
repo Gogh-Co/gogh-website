@@ -31,7 +31,7 @@ export default defineNuxtConfig({
       meta: [
         {
           name: 'description',
-          content: '1,200+ free color schemes for terminal emulators like GNOME Terminal, iTerm2, Tilix, Konsole and Alacritty. Preview any theme and install it with one command.',
+          content: 'Terminal color schemes for Linux, macOS and Windows: GNOME Terminal, Konsole, Alacritty, Kitty, Ghostty, WezTerm, iTerm2, Tilix, Mintty and more.',
         },
         {
           name: 'author',
