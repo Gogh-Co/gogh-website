@@ -6,9 +6,9 @@
 
             <div class="row hero-row">
                 <div class="col-md-6">
-                    <h2>
-                        Color scheme for your terminal
-                    </h2>
+                    <h1 class="page-title">
+                        Color schemes for your terminal
+                    </h1>
 
                     <p>
                         Gogh is a collection of color schemes for various terminal emulators, including Gnome Terminal, Pantheon Terminal, Tilix, and XFCE4 Terminal. These schemes are designed to make your terminal more visually appealing and improve your productivity by providing a better contrast and color differentiation.
@@ -357,7 +357,7 @@ import chroma from 'chroma-js';
 import ClipboardJS from 'clipboard';
 import Prism from 'prismjs';
 
-const title = 'Gogh - Terminal Color Schemes';
+const title = 'Gogh - 1,200+ Terminal Color Schemes';
 const description = SITE_DESCRIPTION;
 
 useSeoMeta({

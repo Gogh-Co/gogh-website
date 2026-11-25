@@ -5,7 +5,7 @@
         <div class="container-fluid wallpapers-container">
             <div class="row">
                 <div class="col-12">
-                    <h2>Wallpapers</h2>
+                    <h1 class="page-title">Wallpapers</h1>
                 </div>
             </div>
 
@@ -108,8 +108,8 @@
 <script setup>
 import Header from '@/components/Header/Header.vue';
 
-const title = 'Wallpapers - Gogh';
-const description = "Download desktop wallpapers featuring Gogh's terminal color palette.";
+const title = 'Terminal Color Wallpapers - Gogh';
+const description = "Free desktop wallpapers in Gogh's terminal color palette. Preview each one full screen and download the full-size image.";
 
 useSeoMeta({
     title,

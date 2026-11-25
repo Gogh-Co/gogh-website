@@ -5,7 +5,7 @@
         <div class="container-fluid terminals-container">
             <div class="row">
                 <div class="col-12">
-                    <h2>Terminal Support</h2>
+                    <h1 class="page-title">Terminal Support</h1>
                 </div>
             </div>
 
@@ -48,8 +48,8 @@
 <script setup>
 import Header from '@/components/Header/Header.vue';
 
-const title = 'Terminal Support - Gogh';
-const description = 'Terminal emulators supported by Gogh, with links to each project.';
+const title = 'Supported Terminal Emulators - Gogh';
+const description = 'Every terminal emulator Gogh can theme, from GNOME Terminal, Tilix and Konsole to Alacritty, Kitty, WezTerm and iTerm2, with links to each project.';
 
 useSeoMeta({
     title,

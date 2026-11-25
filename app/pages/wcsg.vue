@@ -6,9 +6,9 @@
         <div class="container-fluid wcsg-container">
             <div class="row">
                 <div class="col-12">
-                    <h2>
+                    <h1 class="page-title">
                         WCAG Color Data
-                    </h2>
+                    </h1>
                 </div>
             </div>
 
@@ -140,7 +140,7 @@ import Header from '@/components/Header/Header.vue'
 import WcsgThemeCard from '@/components/Wcsg/WcsgThemeCard.vue'
 import ButtonFilter from '@/components/Buttons/ButtonFilter.vue'
 
-const title = 'WCAG Color Data - Gogh';
+const title = 'WCAG Contrast Data for Terminal Themes - Gogh';
 const description = 'Explore WCAG contrast ratios and accessibility data for every Gogh terminal color scheme, filterable by light and dark themes.';
 
 useSeoMeta({

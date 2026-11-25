@@ -35,21 +35,52 @@ useHead({
         { rel: 'icon', type: 'image/png', sizes: '96x96', href: withBase('favicons/favicon-96x96.png') },
         { rel: 'icon', type: 'image/png', sizes: '16x16', href: withBase('favicons/favicon-16x16.png') },
         { rel: 'manifest', href: withBase('favicons/manifest.json') },
+        { rel: 'author', href: SITE_AUTHOR.url },
     ],
     meta: [
-        { name: 'msapplication-TileColor', content: '#ffffff' },
+        { name: 'msapplication-TileColor', content: '#121f2a' },
         { name: 'msapplication-TileImage', content: withBase('favicons/ms-icon-144x144.png') },
-        { name: 'theme-color', content: '#ffffff' },
+        // Matches the header so mobile browser chrome blends into it.
+        { name: 'theme-color', content: '#121f2a' },
     ],
     script: [
         {
             type: 'application/ld+json',
             innerHTML: JSON.stringify({
                 '@context': 'https://schema.org',
-                '@type': 'WebSite',
-                name: SITE_NAME,
-                url: SITE_URL,
-                description: SITE_DESCRIPTION,
+                '@graph': [
+                    {
+                        '@type': 'WebSite',
+                        '@id': `${SITE_URL}/#website`,
+                        name: SITE_NAME,
+                        url: `${SITE_URL}/`,
+                        description: SITE_DESCRIPTION,
+                        inLanguage: 'en',
+                        publisher: { '@id': `${SITE_URL}/#author` },
+                    },
+                    {
+                        '@type': 'SoftwareApplication',
+                        '@id': `${SITE_URL}/#software`,
+                        name: SITE_NAME,
+                        url: `${SITE_URL}/`,
+                        description: SITE_DESCRIPTION,
+                        image: SITE_IMAGE,
+                        applicationCategory: 'DeveloperApplication',
+                        operatingSystem: 'Linux, macOS, Windows',
+                        isAccessibleForFree: true,
+                        offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+                        license: 'https://opensource.org/licenses/MIT',
+                        sameAs: [SITE_REPOSITORY],
+                        author: { '@id': `${SITE_URL}/#author` },
+                    },
+                    {
+                        '@type': 'Person',
+                        '@id': `${SITE_URL}/#author`,
+                        name: SITE_AUTHOR.name,
+                        url: SITE_AUTHOR.url,
+                        sameAs: [SITE_AUTHOR.url, `https://x.com/${SITE_AUTHOR.twitter.slice(1)}`],
+                    },
+                ],
             }),
         },
     ],
@@ -58,9 +89,16 @@ useHead({
 useSeoMeta({
     ogSiteName: SITE_NAME,
     ogType: 'website',
+    ogLocale: 'en_US',
     ogImage: SITE_IMAGE,
+    ogImageType: 'image/png',
+    ogImageWidth: SITE_IMAGE_WIDTH,
+    ogImageHeight: SITE_IMAGE_HEIGHT,
+    ogImageAlt: SITE_IMAGE_ALT,
     twitterCard: 'summary_large_image',
     twitterImage: SITE_IMAGE,
+    twitterImageAlt: SITE_IMAGE_ALT,
+    twitterCreator: SITE_AUTHOR.twitter,
 });
 </script>
 

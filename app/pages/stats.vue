@@ -5,7 +5,7 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-8">
-                    <h2>Theme statistics</h2>
+                    <h1 class="page-title">Theme statistics</h1>
                     <p class="stats-intro">
                         Aggregated analytics for Gogh themes from the GitHub source.
                     </p>
@@ -509,7 +509,7 @@
 import Header from '@/components/Header/Header.vue';
 import Button from '@/components/Buttons/Button.vue';
 
-const title = 'Theme Statistics - Gogh';
+const title = 'Terminal Theme Statistics - Gogh';
 const description = 'Browse statistics across every Gogh terminal theme, including author coverage, and name and color-hash duplicates.';
 
 useSeoMeta({

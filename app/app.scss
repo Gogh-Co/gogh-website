@@ -30,6 +30,9 @@
     color: var(--site-foreground, #595647);
     transition: background-color 0.18s ease, color 0.18s ease;
 
+    // Each page's main heading is an h1.page-title (one per page, for SEO and
+    // screen readers) styled exactly like the h2 page titles it replaced.
+    h1.page-title,
     h2 {
         margin: 0 0 25px;
         color: var(--site-foreground, #595647);

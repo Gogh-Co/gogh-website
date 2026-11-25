@@ -8,7 +8,7 @@
         <div class="container generator-page">
             <div class="row">
                 <div class="col-md-12">
-                    <h2>Theme Generator</h2>
+                    <h1 class="page-title">Theme Generator</h1>
                 </div>
             </div>
 
@@ -326,7 +326,7 @@ import GeneratorTerminal from '@/components/Terminal/GeneratorTerminal.vue';
 import themeTemplate from '../../theme-template.yml?raw';
 import Button from '@/components/Buttons/Button.vue';
 
-const title = 'Theme Generator - Gogh';
+const title = 'Terminal Theme Generator - Gogh';
 const description = "Design your own terminal color scheme with a live preview, then export it as a ready-to-use Gogh theme file.";
 
 useSeoMeta({

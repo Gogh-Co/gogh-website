@@ -24,16 +24,14 @@ export default defineNuxtConfig({
 
       viewport: 'width=device-width, initial-scale=1',
 
-      title: 'Gogh - Color Schemes',
+      // Fallback for pages that don't set their own (e.g. the generated
+      // 404.html); real pages override these via useSeoMeta.
+      title: 'Gogh - Terminal Color Schemes',
 
       meta: [
         {
-          'http-equiv': 'X-UA-Compatible',
-          content: 'IE=edge',
-        },
-        {
           name: 'description',
-          content: 'Color Schemes for Terminals',
+          content: '1,200+ free color schemes for terminal emulators like GNOME Terminal, iTerm2, Tilix, Konsole and Alacritty. Preview any theme and install it with one command.',
         },
         {
           name: 'author',
@@ -43,18 +41,9 @@ export default defineNuxtConfig({
 
       link: [
         {
-          rel: 'author',
-          href: 'humans.txt',
-        },
-        {
           rel: 'icon',
-          type: 'image/png',
-          sizes: '16x16',
-          href: 'favicons/favicon.png',
-        },
-        {
-          rel: 'icon',
-          href: 'favicons/favicon.ico',
+          href: '/favicons/favicon.ico',
+          sizes: 'any',
         },
       ],
 
