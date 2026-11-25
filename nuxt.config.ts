@@ -87,7 +87,7 @@ export default defineNuxtConfig({
     },
 
     server: {
-      hmr: {
+      ws: {
         host: 'localhost',
         clientPort: devPort,
         protocol: 'ws',
