@@ -18,7 +18,7 @@
                     :aria-hidden="index !== activeIndex"
                     :inert="index !== activeIndex"
                 >
-                    <component :is="slide.component" :theme="theme" />
+                    <component :is="slide.component" :theme="theme" v-bind="slide.props" />
                 </div>
             </div>
         </div>
@@ -62,13 +62,14 @@ import PreviewTerminal from './PreviewTerminal.vue';
 import HomePreviewTerminal from './HomePreviewTerminal.vue';
 import CodePreviewTerminal from './CodePreviewTerminal.vue';
 
-// Lightbox carousel: the palette terminal plus two "in use" previews of the
-// same scheme. The active slide is a v-model so the page can keep the
+// Lightbox carousel: the palette terminal plus "in use" previews of the same
+// scheme (a Linux home session and code in two languages). The active slide is a v-model so the page can keep the
 // visitor's last choice between lightbox openings.
 const SLIDES = [
     { id: 'palette', label: 'Palette', component: markRaw(PreviewTerminal) },
     { id: 'home', label: 'Linux home', component: markRaw(HomePreviewTerminal) },
-    { id: 'code', label: 'JavaScript', component: markRaw(CodePreviewTerminal) },
+    { id: 'javascript', label: 'JavaScript', component: markRaw(CodePreviewTerminal), props: { language: 'javascript' } },
+    { id: 'python', label: 'Python', component: markRaw(CodePreviewTerminal), props: { language: 'python' } },
 ];
 
 const props = defineProps({
@@ -241,6 +242,11 @@ onBeforeUnmount(() => {
 }
 
 .preview-slider__tabs {
+    // The negative margin tucks the tabs into the terminal's bottom margin,
+    // which overlaps the viewport. The track is transformed, so it paints
+    // above in-flow siblings: lift the tabs or the track swallows clicks.
+    position: relative;
+    z-index: 3;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
