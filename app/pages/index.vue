@@ -232,6 +232,8 @@
                         </button>
                     </div>
                 </div>
+
+                <ThemeShareButtons :theme-name="getThemeName(lightboxTheme)" :theme="lightboxTheme" />
             </div>
         </div>
 
@@ -377,6 +379,7 @@ import PreviewTerminal from '@/components/Terminal/PreviewTerminal.vue';
 import CompactThemeCard from '@/components/Terminal/CompactThemeCard.vue';
 import FavoriteButton from '@/components/Terminal/FavoriteButton.vue';
 import ThemePreviewSlider from '@/components/Terminal/ThemePreviewSlider.vue';
+import ThemeShareButtons from '@/components/Terminal/ThemeShareButtons.vue';
 import FavoritesSignInBanner from '@/components/Terminal/FavoritesSignInBanner.vue';
 import PersistenceBanner from '@/components/Banner/PersistenceBanner.vue';
 import Header from '@/components/Header/Header.vue';
