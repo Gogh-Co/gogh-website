@@ -1,5 +1,5 @@
 <template>
-    <TerminalFrame :theme="theme" :title="`loadTheme.js — ${themeName}`">
+    <TerminalFrame :theme="theme" :title="`${languageConfig.fileName} — ${themeName}`">
         <div class="code-preview">
             <div v-for="(line, lineIndex) in highlightedLines" :key="lineIndex" class="code-preview__line">
                 <span class="code-preview__gutter" :style="{ color: theme.color_09 }">{{ lineIndex + 1 }}</span>
@@ -18,11 +18,16 @@
 import TerminalFrame from './TerminalFrame.vue';
 
 // Shows the palette as a terminal editor (vim, nano, micro...) would paint
-// JavaScript with the 16 ANSI colours: each token type maps to one slot.
+// source code with the 16 ANSI colours: each token type maps to one slot.
 const props = defineProps({
     theme: {
         type: Object,
         required: true,
+    },
+    // Key of LANGUAGES below; anything else falls back to JavaScript.
+    language: {
+        type: String,
+        default: 'javascript',
     },
 });
 
@@ -34,11 +39,22 @@ const TOKEN_COLOR_KEYS = {
     function: 'color_05',
     property: 'color_07',
     type: 'color_04',
+    decorator: 'color_04',
     constant: 'color_02',
     plain: null,
 };
 
-const SOURCE = `// Load a saved theme, retrying before giving up.
+const LANGUAGES = {
+    javascript: {
+        fileName: 'loadTheme.js',
+        commentPattern: '\\/\\/.*',
+        keywords: [
+            'import', 'from', 'export', 'const', 'let', 'async', 'await', 'function',
+            'for', 'try', 'catch', 'return', 'throw', 'new',
+        ],
+        constants: ['true', 'false', 'null', 'undefined'],
+        builtinTypes: [],
+        source: `// Load a saved theme, retrying before giving up.
 import { readFile } from 'node:fs/promises';
 
 const DEFAULT_THEME = 'Dracula';
@@ -59,36 +75,80 @@ export async function loadTheme(name = DEFAULT_THEME) {
     }
 
     throw new Error(\`Theme "\${name}" not found\`);
-}`;
+}`,
+    },
+    python: {
+        fileName: 'load_theme.py',
+        commentPattern: '#.*',
+        keywords: [
+            'import', 'from', 'def', 'class', 'return', 'for', 'in', 'try', 'except',
+            'as', 'raise', 'if', 'else', 'with', 'not', 'and', 'or',
+        ],
+        constants: ['True', 'False', 'None', 'self'],
+        builtinTypes: ['str', 'int', 'list', 'dict', 'bool'],
+        source: `# Load a saved theme, retrying before giving up.
+import json
+from dataclasses import dataclass
+from pathlib import Path
 
-const KEYWORDS = new Set([
-    'import', 'from', 'export', 'const', 'let', 'async', 'await', 'function',
-    'for', 'try', 'catch', 'return', 'throw', 'new',
-]);
-const CONSTANTS = new Set(['true', 'false', 'null', 'undefined']);
+MAX_RETRIES = 3
 
-const TOKEN_PATTERN = /(\/\/.*)|('(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)|(\b\d+(?:\.\d+)?\b)|([A-Za-z_$][\w$]*)|(\s+)|(.)/g;
 
-function classifyWord(word, before, after) {
-    if (KEYWORDS.has(word)) return 'keyword';
-    if (CONSTANTS.has(word)) return 'constant';
+@dataclass
+class Theme:
+    name: str
+    colors: list[str]
+    loaded: bool = False
+
+
+def load_theme(name: str = "Dracula") -> Theme:
+    path = Path("themes") / f"{name}.json"
+
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            data = json.loads(path.read_text("utf8"))
+            return Theme(data["name"], data["colors"], loaded=True)
+        except OSError as error:
+            print(f"Attempt {attempt} failed: {error}")
+
+    raise LookupError(f'Theme "{name}" not found')`,
+    },
+};
+
+function buildTokenPattern(commentPattern) {
+    return new RegExp(
+        `(${commentPattern})`
+        + '|((?:\\b[rbfu])?(?:\'(?:[^\'\\\\]|\\\\.)*\'|"(?:[^"\\\\]|\\\\.)*"|`(?:[^`\\\\]|\\\\.)*`))'
+        + '|(\\b\\d+(?:\\.\\d+)?\\b)'
+        + '|(@[A-Za-z_][\\w.]*)'
+        + '|([A-Za-z_$][\\w$]*)'
+        + '|(\\s+)|(.)',
+        'g',
+    );
+}
+
+function classifyWord(word, before, after, config) {
+    if (config.keywords.has(word)) return 'keyword';
+    if (config.constants.has(word)) return 'constant';
+    if (config.builtinTypes.has(word)) return 'type';
     if (/^[A-Z][A-Z0-9_]+$/.test(word)) return 'constant';
     if (/^[A-Z]/.test(word)) return 'type';
     if (/^\s*\(/.test(after)) return 'function';
-    if (/\.\s*$/.test(before) || /^\s*:/.test(after)) return 'property';
+    if (/\.\s*$/.test(before) || /^\s*:(?!:)/.test(after)) return 'property';
     return 'plain';
 }
 
-function tokenizeLine(line) {
+function tokenizeLine(line, config) {
     const tokens = [];
-    for (const match of line.matchAll(TOKEN_PATTERN)) {
-        const [text, comment, string, number, word] = match;
+    for (const match of line.matchAll(config.pattern)) {
+        const [text, comment, string, number, decorator, word] = match;
         let type = 'plain';
         if (comment) type = 'comment';
         else if (string) type = 'string';
         else if (number) type = 'number';
+        else if (decorator) type = 'decorator';
         else if (word) {
-            type = classifyWord(word, line.slice(0, match.index), line.slice(match.index + text.length));
+            type = classifyWord(word, line.slice(0, match.index), line.slice(match.index + text.length), config);
         }
 
         const previous = tokens[tokens.length - 1];
@@ -101,7 +161,25 @@ function tokenizeLine(line) {
     return tokens.length ? tokens : [{ type: 'plain', text: ' ' }];
 }
 
-const highlightedLines = SOURCE.split('\n').map(tokenizeLine);
+// Tokenize each language once, on first use, and share it across instances.
+const highlightCache = new Map();
+
+function highlight(language) {
+    if (!highlightCache.has(language)) {
+        const definition = LANGUAGES[language];
+        const config = {
+            pattern: buildTokenPattern(definition.commentPattern),
+            keywords: new Set(definition.keywords),
+            constants: new Set(definition.constants),
+            builtinTypes: new Set(definition.builtinTypes),
+        };
+        highlightCache.set(language, definition.source.split('\n').map((line) => tokenizeLine(line, config)));
+    }
+    return highlightCache.get(language);
+}
+
+const languageConfig = computed(() => LANGUAGES[props.language] || LANGUAGES.javascript);
+const highlightedLines = computed(() => highlight(props.language in LANGUAGES ? props.language : 'javascript'));
 
 const themeName = computed(() => (props.theme?.name || props.theme?.theme || 'Theme').toString());
 
