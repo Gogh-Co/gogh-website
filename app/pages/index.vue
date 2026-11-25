@@ -222,7 +222,7 @@
 
 
             <div class="terminal-lightbox__content">
-                <PreviewTerminal :theme="lightboxTheme" />
+                <ThemePreviewSlider v-model="lightboxSlide" :theme="lightboxTheme" />
 
                 <div v-if="lightboxTheme" class="code-wrap terminal-lightbox__install">
                     <div class="code-holder lightbox-code-holder">
@@ -376,6 +376,7 @@ useHead({
 import PreviewTerminal from '@/components/Terminal/PreviewTerminal.vue';
 import CompactThemeCard from '@/components/Terminal/CompactThemeCard.vue';
 import FavoriteButton from '@/components/Terminal/FavoriteButton.vue';
+import ThemePreviewSlider from '@/components/Terminal/ThemePreviewSlider.vue';
 import FavoritesSignInBanner from '@/components/Terminal/FavoritesSignInBanner.vue';
 import PersistenceBanner from '@/components/Banner/PersistenceBanner.vue';
 import Header from '@/components/Header/Header.vue';
@@ -622,6 +623,9 @@ const visibleCount = ref(THEMES_PAGE_SIZE);
 const loadMoreSentinel = ref(null);
 let loadMoreObserver = null;
 const lightboxTheme = ref(null);
+// Which lightbox preview (palette / Linux home / JS code) is showing. Kept
+// across openings so a visitor comparing themes stays on the same view.
+const lightboxSlide = ref(0);
 const searchQuery = ref('');
 
 function lightOrDark(color) {
