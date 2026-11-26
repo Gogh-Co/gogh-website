@@ -27,7 +27,7 @@
                     :to="link.to"
                     class="gogh-header__nav-link"
                     :style="{ '--i': index }"
-                    @click="mobileNavOpen = false"
+                    @click="onNavClick($event, link)"
                 >
                     <span class="gogh-header__nav-index" aria-hidden="true">{{ String(index + 1).padStart(2, '0') }}</span>
                     {{ link.label }}
@@ -99,7 +99,8 @@ defineProps({
 });
 
 const NAV_LINKS = [
-    { to: '/', label: 'Themes' },
+    // The collection section on the home page.
+    { to: '/#themes', label: 'Themes' },
     { to: '/generator', label: 'Generator' },
     { to: '/wcsg', label: 'WCAG' },
     { to: '/stats', label: 'Stats' },
@@ -129,6 +130,21 @@ async function onBrandClick(event) {
     event.preventDefault();
     await nextTick();
     scrollToTarget(0, 0);
+}
+
+// A link to a section of the page already open (Themes on the home page)
+// glides there like the hero's "Browse the collection" instead of jumping,
+// and puts the anchor in the address bar. Other links navigate as usual.
+async function onNavClick(event, link) {
+    mobileNavOpen.value = false;
+    const [path, hash] = link.to.split('#');
+    if (!hash || route.path !== (path || '/')) {
+        return;
+    }
+    event.preventDefault();
+    await nextTick();
+    history.replaceState(history.state, '', `#${hash}`);
+    scrollToTarget(`#${hash}`, 0);
 }
 
 // Warm the theme list on hover/focus so the click itself feels instant.

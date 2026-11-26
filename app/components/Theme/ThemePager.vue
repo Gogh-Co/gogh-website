@@ -28,7 +28,7 @@
             </nav>
 
             <div class="pager__foot">
-                <NuxtLink to="/" class="pager__all">
+                <NuxtLink to="/#themes" class="pager__all">
                     <span>All {{ total.toLocaleString('en-US') }} themes</span>
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 11v2h12l-5.5 5.5l1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5L16 11z"/></svg>
                 </NuxtLink>

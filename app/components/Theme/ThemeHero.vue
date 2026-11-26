@@ -8,7 +8,7 @@
 
         <div ref="content" class="theme-hero__content">
             <nav class="theme-hero__crumbs" aria-label="Breadcrumb">
-                <NuxtLink to="/" class="theme-hero__crumb-link">All themes</NuxtLink>
+                <NuxtLink to="/#themes" class="theme-hero__crumb-link">All themes</NuxtLink>
                 <span aria-hidden="true">/</span>
                 <span aria-current="page">{{ themeName }}</span>
             </nav>

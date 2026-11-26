@@ -1044,6 +1044,15 @@ onMounted(() => {
     document.fonts?.ready.then(() => ScrollTrigger.refresh());
     window.addEventListener('load', () => ScrollTrigger.refresh(), { once: true });
 
+    // Opening /#themes directly (a shared link): the browser jumps to the
+    // anchor before the animated sections above reach their final height, so
+    // go there again once the page has loaded and ScrollTrigger refreshed.
+    if (useRoute().hash === '#themes' && document.readyState !== 'complete') {
+        window.addEventListener('load', () => {
+            requestAnimationFrame(() => scrollToTarget('#themes', 0));
+        }, { once: true });
+    }
+
     if (!prefersReducedMotion() && galleryHeader.value) {
         galleryMotion = gsap.context(() => {
             gsap.from('.gallery__header > *, .gallery__heading > *', {
