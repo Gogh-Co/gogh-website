@@ -43,7 +43,7 @@
 
             <div class="gogh-footer__bottom">
                 <span class="gogh-footer__credit">
-                    Made by <a href="https://lanet.co" target="_blank" rel="noopener">Miguel D. Quintero</a>
+                    Made by <a href="https://mgldvd.online" target="_blank" rel="noopener">Miguel D. Quintero</a>
                 </span>
 
                 <div class="gogh-footer__socials">
