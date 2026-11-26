@@ -49,6 +49,16 @@
             <div id="theme-install" ref="install" class="theme-hero__install">
                 <InstallCommand tone="glass" :theme-name="themeName" />
             </div>
+
+            <div class="theme-hero__share">
+                <ThemeShareButtons
+                    :theme-name="themeName"
+                    :theme="theme"
+                    :url="url"
+                    :backdrop="background"
+                    :previews="false"
+                />
+            </div>
         </div>
 
         <div class="theme-hero__footer">
@@ -73,6 +83,7 @@
 <script setup>
 import StarryCanvas from '@/components/Home/StarryCanvas.vue';
 import InstallCommand from '@/components/Home/InstallCommand.vue';
+import ThemeShareButtons from '@/components/Terminal/ThemeShareButtons.vue';
 
 const props = defineProps({
     theme: {
@@ -92,6 +103,11 @@ const props = defineProps({
         default: '',
     },
     authorUrl: {
+        type: String,
+        default: '',
+    },
+    // This page's canonical URL, for the share buttons.
+    url: {
         type: String,
         default: '',
     },
@@ -388,6 +404,21 @@ onBeforeUnmount(() => gsapContext?.revert());
 
     :deep(.install-cmd__prompt) {
         color: var(--hero-a);
+    }
+}
+
+// Share row under the install command, in the theme's own colors.
+.theme-hero__share {
+    margin-top: 22px;
+    opacity: 0;
+    animation: fade-up 1.1s $ease_out_expo 1.25s forwards;
+
+    :deep(.share) {
+        margin: 0;
+    }
+
+    :deep(.share-buttons__btn) {
+        backdrop-filter: blur(8px);
     }
 }
 

@@ -10,6 +10,7 @@
             :variant="summary.variant"
             :author-name="authorName"
             :author-url="authorUrl"
+            :url="pageUrl"
         />
 
         <ThemePalette :theme="theme" :theme-name="themeName" :summary="summary" />

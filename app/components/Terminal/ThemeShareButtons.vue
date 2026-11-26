@@ -80,6 +80,12 @@ const props = defineProps({
         type: String,
         default: 'center',
     },
+    // What the buttons sit on; icons are pushed away from it until they
+    // reach 3:1 (lighter on dark backdrops, darker on light ones).
+    backdrop: {
+        type: String,
+        default: '#05080c',
+    },
 });
 
 // Each network takes the ANSI slot closest to its brand colour.
@@ -94,9 +100,8 @@ const NETWORK_SLOTS = {
     copy: 'color_06',
 };
 
-// The lightbox backdrop is near-black; any theme colour darker than 3:1
-// against it gets brightened so every icon stays visible.
-const BACKDROP = '#05080c';
+// Any theme colour under 3:1 against the backdrop gets brightened (or
+// darkened, on a light backdrop) so every icon stays visible.
 const MIN_CONTRAST = 3;
 const FALLBACK = '#ffffff';
 
@@ -106,8 +111,10 @@ function swatch(key) {
         return { color: FALLBACK, ink: '#0d1926' };
     }
     let color = chroma(raw);
-    for (let step = 0; step < 8 && chroma.contrast(color, BACKDROP) < MIN_CONTRAST; step++) {
-        color = color.brighten(0.5);
+    const backdrop = chroma.valid(props.backdrop) ? props.backdrop : '#05080c';
+    const lightBackdrop = chroma(backdrop).luminance() > 0.4;
+    for (let step = 0; step < 8 && chroma.contrast(color, backdrop) < MIN_CONTRAST; step++) {
+        color = lightBackdrop ? color.darken(0.5) : color.brighten(0.5);
     }
     // Icon colour on hover (filled button): the theme background when it
     // reads on the fill, else whichever of black/white contrasts more.
