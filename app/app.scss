@@ -133,6 +133,12 @@ html.lenis body {
 * ·······  Editorial section primitives (home sections)
 * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 */
+// The project name is always written "Gogh", even inside labels that the
+// design sets in capitals.
+.brand-name {
+    text-transform: none;
+}
+
 .section-eyebrow.section-eyebrow {
     display: flex;
     align-items: center;

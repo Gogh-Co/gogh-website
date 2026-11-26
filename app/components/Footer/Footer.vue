@@ -10,7 +10,7 @@
                     </a>
 
                     <div class="gogh-footer__share">
-                        <span class="gogh-footer__col-title">Share Gogh</span>
+                        <span class="gogh-footer__col-title">Share <span class="brand-name">Gogh</span></span>
                         <ThemeShareButtons :url="shareUrl" :theme="GOGH_SHARE_THEME" :previews="false" align="start" />
                     </div>
                 </div>

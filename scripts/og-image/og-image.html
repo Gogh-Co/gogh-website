@@ -3,7 +3,7 @@
   Source of public/og-image.png (1200x630 social share card).
   Re-render from the repo root, then bump SITE_IMAGE's ?v= in app/utils/site.ts:
     google-chrome --headless=new --hide-scrollbars --allow-file-access-from-files \
-      --force-device-scale-factor=1 --window-size=1200,630 --virtual-time-budget=3000 \
+      --force-device-scale-factor=1 --window-size=1200,630 \
       --screenshot=public/og-image.png "file://$PWD/scripts/og-image/og-image.html"
     optipng -o2 public/og-image.png
 -->
@@ -11,81 +11,39 @@
 <head>
 <meta charset="utf-8">
 <style>
-@font-face { font-family: 'Roboto'; font-weight: 100; src: url('../../node_modules/@fontsource/roboto/files/roboto-latin-100-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Roboto'; font-weight: 300; src: url('../../node_modules/@fontsource/roboto/files/roboto-latin-300-normal.woff2') format('woff2'); }
 @font-face { font-family: 'Roboto'; font-weight: 400; src: url('../../node_modules/@fontsource/roboto/files/roboto-latin-400-normal.woff2') format('woff2'); }
-@font-face { font-family: 'Roboto'; font-weight: 700; src: url('../../node_modules/@fontsource/roboto/files/roboto-latin-700-normal.woff2') format('woff2'); }
 @font-face { font-family: 'Roboto Mono'; font-weight: 400; src: url('../../node_modules/@fontsource/roboto-mono/files/roboto-mono-latin-400-normal.woff2') format('woff2'); }
 
 html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: #0D1926; }
-.card { position: relative; width: 1200px; height: 630px; overflow: hidden; background: #0D1926; color: #F4EFE6; font-family: 'Roboto', sans-serif; isolation: isolate; }
-canvas { position: absolute; inset: 0; }
-.veil { position: absolute; inset: 0; background:
-    radial-gradient(58% 70% at 50% 46%, rgba(13,25,38,0.92) 0%, rgba(13,25,38,0.6) 48%, transparent 80%),
-    linear-gradient(180deg, transparent 70%, rgba(13,25,38,0.9) 100%); }
-.glow { position: absolute; left: 50%; top: 254px; width: 820px; height: 220px; transform: translate(-50%, -50%);
-    display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(2, 1fr);
-    filter: blur(15px) saturate(1.2); opacity: 0.62; }
-.content { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-bottom: 40px; }
-.word { font-weight: 400; font-size: 250px; line-height: 0.84; letter-spacing: -0.04em; text-shadow: 0 2px 20px rgba(10,15,20,0.45); }
-.sub { margin-top: 26px; font-weight: 100; font-size: 92px; line-height: 1; letter-spacing: -0.04em;
-    background: linear-gradient(100deg, #F1C40F, #E74C3C 30%, #9B59B6 55%, #3498DB 80%, #2ECC71);
-    -webkit-background-clip: text; background-clip: text; color: transparent; }
-.foot { position: absolute; left: 56px; right: 56px; bottom: 40px; display: flex; justify-content: space-between; align-items: center;
-    font-family: 'Roboto Mono', monospace; font-size: 22px; color: rgba(244,239,230,0.72); }
-.foot b { color: #F4EFE6; font-weight: 400; }
-.bar { position: absolute; left: 0; right: 0; bottom: 0; height: 8px; display: grid; grid-template-columns: repeat(8, 1fr); }
+.card { position: relative; box-sizing: border-box; width: 1200px; height: 630px; padding: 72px 80px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    background: #0D1926; color: #F4EFE6; font-family: 'Roboto', sans-serif; }
+.head { display: flex; justify-content: space-between; align-items: center;
+    font-family: 'Roboto Mono', monospace; font-size: 22px; color: rgba(244, 239, 230, 0.5); }
+.head b { font-weight: 400; color: #F4EFE6; }
+.word { margin: 0; font-weight: 400; font-size: 188px; line-height: 0.8; letter-spacing: -0.045em; }
+.sub { margin: 62px 0 0; font-weight: 300; font-size: 46px; line-height: 1.1; letter-spacing: -0.02em; color: rgba(244, 239, 230, 0.62); }
+.palette { display: grid; grid-template-columns: repeat(16, 1fr); gap: 0; height: 18px; }
 </style>
 </head>
 <body>
 <div class="card">
-    <canvas id="c" width="1200" height="630"></canvas>
-    <div class="veil"></div>
-    <div class="glow" id="glow"></div>
-    <div class="content">
-        <div class="word">GOGH</div>
-        <div class="sub">terminal schemes</div>
+    <div class="head"><b>gogh.website</b><span>$ bash -c "$(wget -qO- gogh.website/gogh)"</span></div>
+    <div>
+        <h1 class="word">Gogh</h1>
+        <p class="sub">Color schemes for your terminal.</p>
     </div>
-    <div class="foot"><span>$ bash -c "$(wget -qO- <b>https://gogh.website/gogh</b>)"</span><span><b>gogh.website</b></span></div>
-    <div class="bar" id="bar"></div>
+    <div class="palette" id="palette"></div>
 </div>
 <script>
+// The Gogh logo palette: normal colors, then bright.
 const LOGO = ['#243342','#C54133','#27AE60','#EDB20A','#2479D0','#7D3EA0','#1D8579','#C9CCCD',
               '#34495E','#E74C3C','#2ECC71','#F1C40F','#3498DB','#9B59B6','#2AA198','#ECF0F1'];
-for (const c of LOGO) { const s = document.createElement('span'); s.style.background = c; document.getElementById('glow').appendChild(s); }
-for (const c of LOGO.slice(8)) { const s = document.createElement('span'); s.style.background = c; document.getElementById('bar').appendChild(s); }
-
-// Painted night sky: short strokes following a swirling flow field, like the hero canvas.
-let seed = 7;
-const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-const PALETTE = ['#C54133','#27AE60','#EDB20A','#2479D0','#7D3EA0','#1D8579','#E74C3C','#2ECC71','#F1C40F','#3498DB','#9B59B6','#2AA198'];
-const ctx = document.getElementById('c').getContext('2d');
-const W = 1200, H = 630;
-const swirls = [[180, 150, 1], [1040, 120, -1], [980, 500, 1], [140, 520, -1], [600, 40, -1]];
-function angle(x, y) {
-    let a = Math.sin(x * 0.004) * 1.2 + Math.cos(y * 0.005) * 1.1;
-    for (const [sx, sy, dir] of swirls) {
-        const dx = x - sx, dy = y - sy, d = Math.hypot(dx, dy);
-        const w = Math.exp(-d / 170);
-        a = a * (1 - w) + (Math.atan2(dy, dx) + dir * Math.PI / 2) * w;
-    }
-    return a;
-}
-ctx.lineCap = 'round';
-for (let i = 0; i < 2600; i++) {
-    let x = rand() * W, y = rand() * H;
-    const color = PALETTE[Math.floor(rand() * PALETTE.length)];
-    const steps = 10 + Math.floor(rand() * 22);
-    ctx.strokeStyle = color;
-    ctx.globalAlpha = 0.35 + rand() * 0.5;
-    ctx.lineWidth = 0.8 + rand() * 2.2;
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    for (let s = 0; s < steps; s++) {
-        const a = angle(x, y);
-        x += Math.cos(a) * 2.4; y += Math.sin(a) * 2.4;
-        ctx.lineTo(x, y);
-    }
-    ctx.stroke();
+for (const c of LOGO) {
+    const s = document.createElement('span');
+    s.style.background = c;
+    document.getElementById('palette').appendChild(s);
 }
 </script>
 </body>
