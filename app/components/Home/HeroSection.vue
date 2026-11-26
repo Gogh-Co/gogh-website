@@ -586,20 +586,25 @@ onBeforeUnmount(() => {
         transform: translate(-50%, 0);
     }
 
-    // Palette border drawn on top: a conic gradient that keeps turning.
-    &::after {
+    // Palette border: a turning conic gradient behind everything; the canvas
+    // and veil sit 1.5px inside it, so only a thin frame of it shows. (No CSS
+    // masks: Firefox resolves the -webkit-mask fallback to a solid fill.)
+    &::before {
         content: '';
         position: absolute;
         inset: 0;
-        z-index: 3;
-        padding: 1.5px;
+        z-index: 0;
         background: conic-gradient(from var(--cta-angle), var(--hero-a), var(--hero-c), var(--hero-d), var(--hero-b), var(--hero-a));
-        mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-        mask-composite: exclude;
-        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-        -webkit-mask-composite: xor;
         animation: cta-spin 4s linear infinite;
         pointer-events: none;
+    }
+
+    .starry-canvas {
+        top: 1.5px;
+        left: 1.5px;
+        z-index: 1;
+        width: calc(100% - 3px);
+        height: calc(100% - 3px);
     }
 
     &:hover,
@@ -629,8 +634,8 @@ onBeforeUnmount(() => {
 // Keeps the label readable over the strokes; lifts on hover so the paint shows.
 .hero-sticky-cta__veil {
     position: absolute;
-    inset: 0;
-    z-index: 1;
+    inset: 1.5px;
+    z-index: 2;
     background: radial-gradient(80% 120% at 50% 50%, color-mix(in srgb, var(--hero-bg) 80%, transparent), color-mix(in srgb, var(--hero-bg) 35%, transparent));
     opacity: 0.7;
     transition: opacity 0.5s ease;
@@ -639,7 +644,7 @@ onBeforeUnmount(() => {
 
 .hero-sticky-cta__label {
     position: relative;
-    z-index: 2;
+    z-index: 3;
     display: inline-flex;
     align-items: center;
     gap: 10px;
