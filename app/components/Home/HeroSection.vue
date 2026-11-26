@@ -1,7 +1,7 @@
 <template>
     <section ref="root" class="hero" :style="heroStyle">
         <ClientOnly>
-            <StarryCanvas :palette="palette" :background="activeTheme.background" />
+            <StarryCanvas :palette="palette" :background="activeTheme.background" scene />
         </ClientOnly>
         <div class="hero__veil" aria-hidden="true"></div>
         <div class="hero__grain" aria-hidden="true"></div>
@@ -250,8 +250,8 @@ onBeforeUnmount(() => {
     inset: 0;
     z-index: 1;
     background:
-        radial-gradient(60% 65% at 50% 50%, color-mix(in srgb, var(--hero-bg) 90%, transparent) 0%, color-mix(in srgb, var(--hero-bg) 55%, transparent) 50%, transparent 80%),
-        linear-gradient(180deg, transparent 60%, var(--hero-bg) 100%);
+        radial-gradient(46% 48% at 50% 50%, color-mix(in srgb, var(--hero-bg) 82%, transparent) 0%, color-mix(in srgb, var(--hero-bg) 45%, transparent) 55%, transparent 85%),
+        linear-gradient(180deg, transparent 92%, var(--hero-bg) 100%);
     pointer-events: none;
     transition: background 1.2s ease;
 }
