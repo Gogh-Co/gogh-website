@@ -27,7 +27,7 @@
             </div>
 
             <div class="hero__actions">
-                <a href="#themes" class="hero__cta" @click.prevent="emit('browse')">
+                <a ref="cta" href="#themes" class="hero__cta" @click.prevent="emit('browse')">
                     Browse the collection
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M11 4h2v12l5.5-5.5l1.42 1.42L12 19.84l-7.92-7.92L5.5 10.5L11 16z"/></svg>
                 </a>
@@ -61,6 +61,25 @@
             </div>
         </div>
     </section>
+
+    <!-- The same CTA, pinned to the bottom of the screen from the moment the
+         hero's own button scrolls away until the theme gallery comes in. -->
+    <ClientOnly>
+        <Teleport to="body">
+            <a
+                href="#themes"
+                class="hero-sticky-cta"
+                :class="{ 'is-visible': stickyVisible }"
+                :style="{ '--hero-a': heroStyle['--hero-a'], bottom: `${stickyBottom}px` }"
+                :tabindex="stickyVisible ? 0 : -1"
+                :aria-hidden="!stickyVisible"
+                @click.prevent="emit('browse')"
+            >
+                Browse the collection
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M11 4h2v12l5.5-5.5l1.42 1.42L12 19.84l-7.92-7.92L5.5 10.5L11 16z"/></svg>
+            </a>
+        </Teleport>
+    </ClientOnly>
 </template>
 
 <script setup>
@@ -97,6 +116,32 @@ const activeIndex = ref(0);
 let rotateTimer = null;
 let userPicked = false;
 let gsapContext = null;
+const cta = ref(null);
+const stickyVisible = ref(false);
+const stickyBottom = ref(24);
+let stickyTicking = false;
+
+// Visible once the hero button has scrolled up under the header, hidden
+// again as soon as the gallery (#themes) starts entering the screen.
+function updateSticky() {
+    stickyTicking = false;
+    const button = cta.value?.getBoundingClientRect();
+    const gallery = document.getElementById('themes')?.getBoundingClientRect();
+    const pastHero = !!button && button.bottom < 80;
+    const reachedGallery = !!gallery && gallery.top < window.innerHeight * 0.85;
+    stickyVisible.value = pastHero && !reachedGallery;
+
+    // Sit above the "favorites save in this browser" bar while it's shown.
+    const banner = document.querySelector('.persistence-banner');
+    stickyBottom.value = banner ? window.innerHeight - banner.getBoundingClientRect().top + 16 : 24;
+}
+
+function onStickyScroll() {
+    if (!stickyTicking) {
+        stickyTicking = true;
+        requestAnimationFrame(updateSticky);
+    }
+}
 
 const rotation = computed(() => {
     const byName = new Map(props.themes.map((theme) => [String(theme.name || theme.theme || ''), theme]));
@@ -125,6 +170,10 @@ function nextTheme(fromUser = false) {
 }
 
 onMounted(() => {
+    window.addEventListener('scroll', onStickyScroll, { passive: true });
+    window.addEventListener('resize', onStickyScroll, { passive: true });
+    updateSticky();
+
     if (!prefersReducedMotion()) {
         rotateTimer = setInterval(() => {
             if (!userPicked && !document.hidden) {
@@ -151,6 +200,8 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+    window.removeEventListener('scroll', onStickyScroll);
+    window.removeEventListener('resize', onStickyScroll);
     clearInterval(rotateTimer);
     gsapContext?.revert();
 });
@@ -509,6 +560,55 @@ onBeforeUnmount(() => {
 .name-swap-leave-to {
     opacity: 0;
     transform: translateY(-6px);
+}
+
+.hero-sticky-cta {
+    position: fixed;
+    left: 50%;
+    z-index: 880;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 52px;
+    padding: 0 24px;
+    background: var(--hero-a, #f1c40f);
+    color: var(--ink);
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    box-shadow: 0 18px 40px -12px rgba(0, 0, 0, 0.55);
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 140%);
+    transition:
+        transform 0.7s $ease_out_expo,
+        opacity 0.4s ease,
+        bottom 0.4s ease,
+        background-color 1.2s ease;
+
+    &.is-visible {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translate(-50%, 0);
+    }
+
+    svg {
+        transition: transform 0.5s $ease_out_expo;
+    }
+
+    &:hover {
+        color: var(--ink);
+
+        svg {
+            transform: translateY(3px);
+        }
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--cream);
+        outline-offset: 3px;
+    }
 }
 
 @keyframes word-rise {
