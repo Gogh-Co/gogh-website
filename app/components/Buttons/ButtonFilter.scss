@@ -1,58 +1,37 @@
 @use '@/assets/sass/base' as *;
 
+// Pill chips: the active one is filled. A small dot cycles through the Gogh
+// palette on the active chip (the old animated underline, condensed).
 .filter-btn {
   position: relative;
 
-  &::before {
-    @include m768 {
-      height: 3px;
+  &.active {
+    background-color: var(--generator-action-background, #0d1926);
+    color: var(--generator-action-foreground, #e7e7e7);
+    padding-left: 2.8rem;
+
+    &::before {
+      content: '';
       position: absolute;
-      right: 0;
-      bottom: -10px;
-      left: 0;
-      margin: 0 auto;
-      width: 0;
-      background-color: #0d1926;
-      content: " ";
-      opacity: 0;
-      transition: all 0.3s ease;
+      top: 50%;
+      left: 1.2rem;
+      width: 7px;
+      height: 7px;
+      margin-top: -3.5px;
+      border-radius: 50%;
+      background-color: #FF0883;
+      animation: anim-gogh-bg 18s infinite;
     }
   }
-
-  // The hover decoration also applies (and keeps animating) while the
-  // filter/view is the active selection, not just transiently on hover.
-  &:hover::before,
-  &.active::before {
-    height: 3px;
-    position: absolute;
-    right: 0;
-    bottom: -10px;
-    left: 0;
-    margin: 0 auto;
-    width: 100%;
-    background-color: #0d1926;
-    content: " ";
-    opacity: 1;
-    animation-name: anim-gogh-bg;
-    animation-duration: 18s;
-    animation-iteration-count: infinite;
-  }
-
-  &.active {
-    background-color: #0d1926;
-    color: #e7e7e7;
-  }
 }
-
 
 @keyframes anim-gogh-bg {
-  25%   { background-color: #FF0883; }
-  37.5% { background-color: #FF8308; }
-  50%   { background-color: #0883FF; }
-  62.5% { background-color: #8308FF; }
-  75%   { background-color: #3dba98; }
-  87.5% { background-color: #363636; }
-  100%  { background-color: #47af32; }
+  0%    { background-color: #FF0883; }
+  25%   { background-color: #FF8308; }
+  37.5% { background-color: #0883FF; }
+  50%   { background-color: #8308FF; }
+  62.5% { background-color: #3dba98; }
+  75%   { background-color: #F1C40F; }
+  87.5% { background-color: #47af32; }
+  100%  { background-color: #FF0883; }
 }
-
-

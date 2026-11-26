@@ -1,34 +1,177 @@
 @use '@/assets/sass/base' as *;
 
-// Same fixed dark bar as the Header, so the site reads as framed top and
-// bottom regardless of the page's light/dark toggle (Header never follows
-// that toggle either -- see Header.scss).
+// Always ink, like the header, so every page is framed the same way.
 .gogh-footer {
-    background-color: #121f2a;
+    position: relative;
+    overflow: hidden;
+    border-top: 1px solid var(--ink-line);
+    background-color: var(--ink);
+    color: var(--cream);
 }
 
 .gogh-footer__inner {
+    max-width: 1504px;
+    margin: 0 auto;
+    padding: 72px 20px 28px;
+
+    @include m768 {
+        padding: 96px 48px 32px;
+    }
+}
+
+.gogh-footer__top {
+    display: grid;
+    gap: 40px;
+
+    @include m768 {
+        grid-template-columns: 2fr 1fr 1fr;
+    }
+}
+
+.gogh-footer__tagline {
+    max-width: 380px;
+    margin: 0 0 24px;
+    color: var(--cream);
+    font-family: $font_display;
+    font-size: 2.6rem;
+    font-weight: 360;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+}
+
+.gogh-footer__star {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 46px;
+    padding: 0 20px;
+    border-radius: 999px;
+    background: var(--cream);
+    color: var(--ink);
+    font-size: 1.4rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform 0.5s $ease_out_expo, background-color 0.3s ease;
+
+    svg {
+        color: #d4a50a;
+        transition: transform 0.7s $ease_out_expo;
+    }
+
+    &:hover {
+        background: var(--gogh-yellow);
+        color: var(--ink);
+        transform: translateY(-2px);
+
+        svg {
+            color: var(--ink);
+            transform: rotate(144deg) scale(1.15);
+        }
+    }
+}
+
+.gogh-footer__col {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+
+    a {
+        position: relative;
+        display: inline-flex;
+        min-height: 32px;
+        align-items: center;
+        color: var(--muted);
+        font-size: 1.5rem;
+        text-decoration: none;
+        transition: color 0.25s ease, transform 0.5s $ease_out_expo;
+
+        &:hover {
+            color: var(--cream);
+            transform: translateX(4px);
+        }
+    }
+}
+
+.gogh-footer__col-title {
+    margin: 0 0 8px;
+    color: var(--cream);
+    font-family: $font_mono;
+    font-size: 1.1rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.gogh-footer__wordmark {
+    display: flex;
+    justify-content: space-between;
+    margin: 72px 0 0;
+    // Room for the "g" descender and the "h" overhang inside the clip.
+    padding: 0 0.04em 0.16em;
+    overflow: hidden;
+    font-family: $font_display;
+    font-size: clamp(12rem, 31vw, 52rem);
+    font-weight: 400;
+    font-variation-settings: 'opsz' 144, 'SOFT' 100, 'WONK' 1;
+    line-height: 0.78;
+    letter-spacing: -0.06em;
+    user-select: none;
+}
+
+.gogh-footer__letter {
+    display: inline-block;
+    padding-bottom: 0.06em;
+    color: var(--cream);
+    transform: translateY(100%);
+    transition: transform 1.4s $ease_out_expo, color 0.4s ease;
+    transition-delay: calc(var(--i) * 0.08s);
+
+    .is-visible & {
+        transform: translateY(0);
+    }
+
+    &:nth-child(1):hover { color: var(--gogh-red); }
+    &:nth-child(2):hover { color: var(--gogh-yellow); }
+    &:nth-child(3):hover { color: var(--gogh-green); }
+    &:nth-child(4):hover { color: var(--gogh-blue); }
+}
+
+.gogh-footer__palette {
+    display: grid;
+    grid-template-columns: repeat(16, 1fr);
+    gap: 3px;
+    height: 10px;
+    margin: 0 0 28px;
+
+    span {
+        border-radius: 2px;
+        transform-origin: bottom;
+        transition: transform 0.5s $ease_out_expo;
+
+        &:hover {
+            transform: scaleY(2.4);
+        }
+    }
+}
+
+.gogh-footer__bottom {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 10px 24px;
-    max-width: 2100px;
-    margin: 0 auto;
-    padding: 20px 12px;
+    gap: 12px 24px;
 }
 
 .gogh-footer__credit {
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 1.3rem;
+    color: var(--muted);
+    font-size: 1.35rem;
 
     a {
-        color: rgba(255, 255, 255, 0.9);
+        color: var(--cream);
         text-decoration: none;
 
         &:hover {
-            color: #ffffff;
-            text-decoration: underline;
+            color: var(--gogh-yellow);
         }
     }
 }
@@ -36,20 +179,27 @@
 .gogh-footer__socials {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 8px;
 }
 
 .gogh-footer__social-link {
     display: inline-flex;
-    color: rgba(255, 255, 255, 0.7);
-    transition: color 0.18s ease, transform 0.18s ease;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--ink-line);
+    border-radius: 50%;
+    color: var(--muted);
+    transition: color 0.25s ease, border-color 0.25s ease, transform 0.5s $ease_out_expo;
 
     svg {
         display: block;
     }
 
     &:hover {
-        color: #ffffff;
-        transform: translateY(-2px);
+        border-color: rgba(255, 255, 255, 0.3);
+        color: var(--cream);
+        transform: translateY(-3px);
     }
 }

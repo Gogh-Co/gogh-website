@@ -1,123 +1,251 @@
 @use '@/assets/sass/base' as *;
 
+$header_height: 72px;
+
+// Fixed bar shared by every page. Transparent over the home hero, glass
+// (blurred ink) once the page scrolls or on pages without a hero. It never
+// follows the page's light/dark toggle, so the site always reads as framed.
 .gogh-header {
-    background-color: #121f2a;
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 900;
+    border-bottom: 1px solid transparent;
+    color: var(--cream);
+    transition:
+        transform 0.6s $ease_out_expo,
+        background-color 0.4s ease,
+        border-color 0.4s ease,
+        backdrop-filter 0.4s ease;
+
+    &.is-scrolled {
+        border-bottom-color: rgba(255, 255, 255, 0.08);
+        background-color: rgba(10, 15, 20, 0.72);
+        backdrop-filter: blur(18px) saturate(160%);
+        -webkit-backdrop-filter: blur(18px) saturate(160%);
+    }
+
+    &.is-hidden {
+        transform: translateY(-100%);
+    }
+
+    &.is-menu-open {
+        background-color: var(--ink);
+        backdrop-filter: none;
+    }
+}
+
+.gogh-header-spacer {
+    height: $header_height;
+    background: var(--ink);
 }
 
 .gogh-header__inner {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 10px 24px;
-    max-width: 2100px;
+    gap: 24px;
+    max-width: 1504px;
+    height: $header_height;
     margin: 0 auto;
-    padding: 14px 12px;
+    padding: 0 20px;
 
     @include m768 {
-        padding: 16px 12px;
+        padding: 0 48px;
     }
 }
 
 .gogh-header__brand {
+    position: relative;
+    z-index: 2;
     display: flex;
     align-items: center;
-    gap: 10px;
-    color: #ffffff;
+    gap: 12px;
+    color: var(--cream);
     text-decoration: none;
+
+    &:hover {
+        color: #fff;
+
+        .gogh-header__logo-swatch {
+            animation: swatch-wave 0.9s $ease_out_expo;
+            animation-delay: calc(var(--i) * 25ms);
+        }
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--gogh-yellow);
+        outline-offset: 4px;
+        border-radius: 4px;
+    }
 }
 
 .gogh-header__brand-text {
-    font-size: 1.8rem;
-    font-weight: 700;
-    letter-spacing: 0.5px;
+    font-family: $font_display;
+    font-size: 2.6rem;
+    font-weight: 500;
+    font-variation-settings: 'opsz' 72, 'SOFT' 100;
+    letter-spacing: -0.02em;
+    line-height: 1;
 }
 
 .gogh-header__logo-bar {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
-    overflow: hidden;
-    width: 64px;
-    height: 18px;
-    border-radius: 2px;
+    gap: 2px;
+    width: 58px;
+    height: 16px;
 }
 
 .gogh-header__logo-swatch {
     display: block;
-}
-
-.gogh-header__toggle {
-    display: none;
-    align-items: center;
-    justify-content: center;
-    width: $tap_target_min;
-    height: $tap_target_min;
-    padding: 0;
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    background: transparent;
-    color: #ffffff;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    flex: 0 0 auto;
-
-    &:hover {
-        background-color: rgba(255, 255, 255, 0.12);
-    }
-
-    @media (max-width: 991px) {
-        display: inline-flex;
-    }
+    border-radius: 2px;
+    // Swatches drop in one by one when the page loads.
+    transform-origin: bottom;
+    animation: swatch-in 0.8s $ease_out_expo backwards;
+    animation-delay: calc(0.2s + var(--i) * 30ms);
 }
 
 .gogh-header__nav {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    gap: 16px 20px;
+    gap: 4px;
 
-    // Collapses into a full-width dropdown panel toggled by the hamburger
-    // button below 992px -- six links, the theme toggle and the GitHub
-    // badges need close to 950px to sit on one line (measured), so this
-    // wraps into an ugly two-line header well before a phone/tablet's
-    // media query would suggest.
-    @media (max-width: 991px) {
-        display: none;
+    // Below 992px the nav becomes a full-screen panel with large links.
+    @media (max-width: 991.98px) {
+        position: fixed;
+        inset: 0;
+        z-index: 1;
         flex-direction: column;
         align-items: stretch;
+        justify-content: flex-start;
         gap: 0;
-        width: 100%;
-        margin-top: 14px;
-        padding-top: 6px;
-        border-top: 1px solid rgba(255, 255, 255, 0.14);
+        padding: ($header_height + 24px) 20px 40px;
+        overflow-y: auto;
+        background: var(--ink);
+        visibility: hidden;
+        opacity: 0;
+        clip-path: inset(0 0 100% 0);
+        transition: clip-path 0.7s $ease_out_expo, opacity 0.3s ease, visibility 0s linear 0.7s;
 
         &.is-open {
-            display: flex;
+            visibility: visible;
+            opacity: 1;
+            clip-path: inset(0 0 0 0);
+            transition: clip-path 0.7s $ease_out_expo, opacity 0.2s ease, visibility 0s;
         }
     }
 }
 
 .gogh-header__nav-link {
-    color: rgba(255, 255, 255, 0.7);
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 14px;
+    border-radius: 999px;
+    color: rgba(244, 239, 230, 0.72);
+    font-size: 1.4rem;
+    font-weight: 500;
     text-decoration: none;
-    text-transform: uppercase;
-    font-size: 1.2rem;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    transition: color 0.18s ease;
+    transition: color 0.25s ease, background-color 0.25s ease;
 
-    &:hover,
-    &.router-link-active {
-        color: #ffffff;
+    &:hover {
+        background-color: rgba(255, 255, 255, 0.08);
+        color: #fff;
     }
 
-    // Full-width rows with a real tap height, instead of a tight inline run.
-    @media (max-width: 991px) {
-        display: flex;
-        align-items: center;
-        min-height: $tap_target_min;
-        padding: 11px 4px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        font-size: 1.4rem;
+    &.router-link-exact-active {
+        color: #fff;
+
+        &::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            width: 4px;
+            height: 4px;
+            margin-left: -2px;
+            border-radius: 50%;
+            background: var(--gogh-yellow);
+        }
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--gogh-yellow);
+        outline-offset: 2px;
+    }
+
+    @media (max-width: 991.98px) {
+        gap: 16px;
+        min-height: 64px;
+        padding: 0 4px;
+        border-bottom: 1px solid var(--ink-line);
+        border-radius: 0;
+        color: var(--cream);
+        font-family: $font_display;
+        font-size: clamp(3.2rem, 9vw, 4.8rem);
+        font-weight: 360;
+        letter-spacing: -0.02em;
+        opacity: 0;
+        transform: translateY(24px);
+        transition: opacity 0.5s ease, transform 0.8s $ease_out_expo, color 0.25s ease;
+
+        &:hover {
+            background: transparent;
+            color: var(--gogh-yellow);
+        }
+
+        &.router-link-exact-active::after {
+            position: static;
+            width: 10px;
+            height: 10px;
+            margin: 0 0 0 auto;
+        }
+
+        .is-open & {
+            opacity: 1;
+            transform: translateY(0);
+            transition-delay: calc(0.1s + var(--i) * 0.05s);
+        }
+    }
+}
+
+.gogh-header__nav-index {
+    display: none;
+    color: var(--muted);
+    font-family: $font_mono;
+    font-size: 1.2rem;
+    letter-spacing: 0.08em;
+
+    @media (max-width: 991.98px) {
+        display: inline;
+    }
+}
+
+.gogh-header__tools {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 12px;
+    padding-left: 16px;
+    border-left: 1px solid var(--ink-line);
+
+    @media (max-width: 991.98px) {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        margin: 24px 0 0;
+        padding: 0;
+        border: 0;
+        opacity: 0;
+        transition: opacity 0.5s ease 0s;
+
+        .is-open & {
+            opacity: 1;
+            transition-delay: 0.45s;
+        }
     }
 }
 
@@ -125,44 +253,123 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    width: $tap_target_min;
-    height: $tap_target_min;
+    gap: 10px;
+    width: 40px;
+    height: 40px;
     padding: 0;
-    border: 1px solid rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 50%;
     background: transparent;
-    color: #ffffff;
+    color: var(--cream);
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: background-color 0.25s ease, border-color 0.25s ease, transform 0.5s $ease_out_expo;
     flex: 0 0 auto;
 
     &:hover {
-        background-color: rgba(255, 255, 255, 0.12);
+        border-color: rgba(255, 255, 255, 0.4);
+        background-color: rgba(255, 255, 255, 0.08);
+        transform: rotate(-20deg);
     }
 
-    // Inside the mobile dropdown a bare icon reads as unlabeled among a
-    // column of text links, so it grows into a labeled row there; on the
-    // desktop inline bar it stays an icon-only button, matching the
-    // GitHub badges beside it.
-    @media (max-width: 991px) {
+    &:focus-visible {
+        outline: 2px solid var(--gogh-yellow);
+        outline-offset: 2px;
+    }
+
+    @media (max-width: 991.98px) {
+        justify-content: flex-start;
         width: 100%;
         height: auto;
-        justify-content: flex-start;
-        padding: 11px 4px;
         min-height: $tap_target_min;
+        padding: 11px 4px;
         border: 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        border-bottom: 1px solid var(--ink-line);
+        border-radius: 0;
+
+        &:hover {
+            transform: none;
+        }
     }
 }
 
 .gogh-header__theme-toggle-label {
     display: none;
-    text-transform: uppercase;
-    font-size: 1.4rem;
-    font-weight: 600;
-    letter-spacing: 0.5px;
+    font-size: 1.5rem;
+    font-weight: 500;
 
-    @media (max-width: 991px) {
+    @media (max-width: 991.98px) {
         display: inline;
+    }
+}
+
+// Two-line burger that morphs into an X.
+.gogh-header__toggle {
+    position: relative;
+    z-index: 2;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: $tap_target_min;
+    height: $tap_target_min;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+    flex: 0 0 auto;
+
+    span {
+        display: block;
+        width: 18px;
+        height: 1.5px;
+        background: var(--cream);
+        transition: transform 0.5s $ease_out_expo;
+    }
+
+    &.is-open {
+        span:first-child {
+            transform: translateY(3.75px) rotate(45deg);
+        }
+
+        span:last-child {
+            transform: translateY(-3.75px) rotate(-45deg);
+        }
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--gogh-yellow);
+        outline-offset: 2px;
+    }
+
+    @media (max-width: 991.98px) {
+        display: inline-flex;
+    }
+}
+
+// AuthControl renders inside the tools group; give it the rounded look.
+:deep(.auth-control__signin) {
+    height: 40px;
+    border-color: rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    padding: 0 16px;
+
+    @media (max-width: 991.98px) {
+        height: auto;
+        border-radius: 0;
+    }
+}
+
+@keyframes swatch-in {
+    from {
+        transform: scaleY(0);
+        opacity: 0;
+    }
+}
+
+@keyframes swatch-wave {
+    40% {
+        transform: scaleY(1.6);
     }
 }

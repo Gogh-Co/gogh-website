@@ -1,66 +1,35 @@
 <template>
-    <Header />
+    <Header overlay />
 
-    <div class="gogh-content" :style="pageContentStyle">
-        <div class="container">
+    <main class="home">
+        <HeroSection :themes="themes" @browse="scrollToGallery" />
+        <ThemeMarquee :themes="themes" @open="openThemeLightbox" />
+        <ManifestoText />
+        <ThemeShowcase :themes="themes" />
+        <FeatureBento />
+        <TerminalsStrip />
+        <InstallSteps />
+    </main>
 
-            <div class="row hero-row">
-                <div class="col-md-6">
-                    <h1 class="page-title">
-                        Color schemes for your terminal
-                    </h1>
-
-                    <p>
-                        Gogh is a collection of color schemes for various terminal emulators, including Gnome Terminal, Pantheon Terminal, Tilix, and XFCE4 Terminal. These schemes are designed to make your terminal more visually appealing and improve your productivity by providing a better contrast and color differentiation.
+    <div id="themes" class="gogh-content gallery" :style="pageContentStyle">
+        <div class="container-fluid">
+            <header ref="galleryHeader" class="gallery__header">
+                <p class="section-eyebrow gallery__eyebrow"><span>06</span> The collection</p>
+                <div class="gallery__heading">
+                    <h2 class="page-title gallery__title">
+                        Every theme,<br><em>one click away.</em>
+                    </h2>
+                    <!-- Hidden for the 100ms setFilter() blanks the filter, so it never flashes "0". -->
+                    <p class="gallery__count" aria-live="polite" :style="{ visibility: filter === '' ? 'hidden' : 'visible' }">
+                        <strong>{{ filteredThemes.length }}</strong>
+                        {{ filteredThemes.length === 1 ? 'theme' : 'themes' }}
+                        <span v-if="filteredThemes.length !== themes.length">of {{ themes.length }}</span>
                     </p>
-
-                    <div class="hero-github">
-                        <a class="github-button"
-                            href="https://github.com/Gogh-Co/Gogh"
-                            data-color-scheme="no-preference: dark; light: light; dark: dark;"
-                            data-size="large"
-                            aria-label="Open Gogh-Co/Gogh on GitHub">
-                            View
-                        </a>
-                        <a class="github-button"
-                            href="https://github.com/Gogh-Co/Gogh"
-                            data-color-scheme="no-preference: dark; light: light; dark: dark;"
-                            data-icon="octicon-star"
-                            data-size="large"
-                            data-show-count="true"
-                            aria-label="Star Gogh-Co/Gogh on GitHub">
-                            Star
-                        </a>
-                    </div>
                 </div>
-
-                <div class="col-md-6">
-                    <div class="code-wrap">
-                        <h4>Linux <span>(wget)</span></h4>
-                        <div class="code-holder">
-                            <pre><code class="language-bash" id="code-linux">bash -c  "$(wget -qO- https://gogh.website/gogh)" </code></pre>
-                            <button type="button" class="btn-copy" data-clipboard-target="#code-linux" aria-label="Copy Linux install command">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="#000" width="48" height="48"> <path d="M27.4,14.7l-6.1-6.1C21,8.2,20.5,8,20,8h-8c-1.1,0-2,0.9-2,2v18c0,1.1,0.9,2,2,2h14c1.1,0,2-0.9,2-2V16.1C28,15.6,27.8,15.1,27.4,14.7z M20,10l5.9,6H20V10z M12,28V10h6v6c0,1.1,0.9,2,2,2h6l0,10H12z"/> <path d="M6,18H4V4c0-1.1,0.9-2,2-2h14v2H6V18z"/> <rect width="32" height="32" fill="none"/> </svg>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="code-wrap">
-                        <h4>Mac <span>(curl)</span></h4>
-                        <div class="code-holder">
-                            <pre><code class="language-bash" id="code-mac">bash -c  "$(curl -fsSL https://gogh.website/gogh)" </code></pre>
-                            <button type="button" class="btn-copy" data-clipboard-target="#code-mac" aria-label="Copy macOS install command">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="#000" width="48" height="48"> <path d="M27.4,14.7l-6.1-6.1C21,8.2,20.5,8,20,8h-8c-1.1,0-2,0.9-2,2v18c0,1.1,0.9,2,2,2h14c1.1,0,2-0.9,2-2V16.1C28,15.6,27.8,15.1,27.4,14.7z M20,10l5.9,6H20V10z M12,28V10h6v6c0,1.1,0.9,2,2,2h6l0,10H12z"/> <path d="M6,18H4V4c0-1.1,0.9-2,2-2h14v2H6V18z"/> <rect width="32" height="32" fill="none"/> </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            </header>
 
             <PersistenceBanner />
         </div>
-
-
 
         <div class="container-fluid">
             <div class="row">
@@ -209,6 +178,7 @@
         <div
             v-if="lightboxVisible && lightboxTheme"
             class="terminal-lightbox"
+            data-lenis-prevent
             @click.self="closeThemeLightbox"
         >
             <button
@@ -241,6 +211,7 @@
         <div
             v-if="colorFilterFieldMenuOpen"
             class="color-filter-lightbox"
+            data-lenis-prevent
             @click.self="closeColorFilterFieldMenu"
         >
             <button
@@ -303,6 +274,7 @@
         <div
             v-if="colorFilterValueMenuOpen"
             class="background-lightbox"
+            data-lenis-prevent
             @click.self="closeColorFilterValueMenu"
         >
             <button
@@ -386,6 +358,21 @@ import FavoritesSignInBanner from '@/components/Terminal/FavoritesSignInBanner.v
 import PersistenceBanner from '@/components/Banner/PersistenceBanner.vue';
 import Header from '@/components/Header/Header.vue';
 import ButtonFilter from '@/components/Buttons/ButtonFilter.vue';
+import HeroSection from '@/components/Home/HeroSection.vue';
+import ThemeMarquee from '@/components/Home/ThemeMarquee.vue';
+import ManifestoText from '@/components/Home/ManifestoText.vue';
+import ThemeShowcase from '@/components/Home/ThemeShowcase.vue';
+import FeatureBento from '@/components/Home/FeatureBento.vue';
+import TerminalsStrip from '@/components/Home/TerminalsStrip.vue';
+import InstallSteps from '@/components/Home/InstallSteps.vue';
+
+const smoothScroll = useSmoothScroll();
+const galleryHeader = ref(null);
+let galleryMotion = null;
+
+function scrollToGallery() {
+    scrollToTarget('#themes', 0);
+}
 
 const { favorites, isFavorite, toggleFavorite } = useFavorites();
 const { user } = useAuth();
@@ -686,7 +673,19 @@ function setViewMode(mode) {
     }
 }
 
-const pageContentStyle = computed(() => (pageTheme.value === 'dark' ? PAGE_THEME_DARK_STYLE : undefined));
+// Light mode on the redesigned home: warm "paper" instead of flat grey.
+const PAGE_THEME_LIGHT_STYLE = {
+    '--site-background': '#EFEBE3',
+    '--site-foreground': '#0d1926',
+};
+
+const pageContentStyle = computed(() => (pageTheme.value === 'dark' ? PAGE_THEME_DARK_STYLE : PAGE_THEME_LIGHT_STYLE));
+
+// Overlays pause the smooth scroll so the page doesn't move behind them.
+watch(
+    () => lightboxVisible.value || colorFilterFieldMenuOpen.value || colorFilterValueMenuOpen.value,
+    (open) => setPageScrollLocked(open),
+);
 
 // Unique, rainbow-ordered values for whichever field the 2-step "by Color"
 // filter has picked (an ANSI slot or "background"). Neutrals are grouped
@@ -1024,6 +1023,26 @@ themes.value = rawThemes.map((theme) => ({
 onMounted(() => {
     new ClipboardJS('.btn-copy');
 
+    smoothScroll.start();
+
+    const { gsap, ScrollTrigger } = useGsap();
+    // Fonts and lazy images change section heights after first layout.
+    document.fonts?.ready.then(() => ScrollTrigger.refresh());
+    window.addEventListener('load', () => ScrollTrigger.refresh(), { once: true });
+
+    if (!prefersReducedMotion() && galleryHeader.value) {
+        galleryMotion = gsap.context(() => {
+            gsap.from('.gallery__header > *, .gallery__heading > *', {
+                y: 40,
+                opacity: 0,
+                duration: 1.2,
+                stagger: 0.08,
+                ease: 'expo.out',
+                scrollTrigger: { trigger: galleryHeader.value, start: 'top 85%' },
+            });
+        }, galleryHeader.value);
+    }
+
     try {
         const savedViewMode = localStorage.getItem(VIEW_MODE_STORAGE_KEY);
         if (savedViewMode === 'compact' || savedViewMode === 'detailed') {
@@ -1078,6 +1097,9 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+    galleryMotion?.revert();
+    setPageScrollLocked(false);
+    smoothScroll.stop();
     window.removeEventListener('keydown', onWindowKeydown);
     loadMoreObserver?.disconnect();
 });

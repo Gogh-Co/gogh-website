@@ -26,6 +26,20 @@
     --color-info: var(--color-yellow);
     --color-warning: var(--color-orange);
     --color-danger: var(--color-red);
+    /* Redesign surface tokens: ink (always-dark landing) and paper (light gallery). */
+    --ink: #0a0f14;
+    --ink-2: #111a22;
+    --ink-3: #18232d;
+    --ink-line: rgba(255, 255, 255, 0.1);
+    --paper: #efebe3;
+    --cream: #f4efe6;
+    --muted: rgba(244, 239, 230, 0.62);
+    --gogh-yellow: #f1c40f;
+    --gogh-blue: #3498db;
+    --gogh-red: #e74c3c;
+    --gogh-green: #2ecc71;
+    --gogh-magenta: #9b59b6;
+    --gogh-cyan: #2aa198;
 }
 
 $color_blue : var(--color-blue);
@@ -57,7 +71,14 @@ $color_danger : $color_red;
 */
 $font_roboto_default: 'Roboto', sans-serif;
 /* */
-$font_default : $font_roboto_default;
+$font_default : 'Inter Variable', 'Roboto', system-ui, sans-serif;
+// Editorial display serif (headlines) and the mono used for labels and code.
+$font_display : 'Fraunces Variable', 'Iowan Old Style', Georgia, serif;
+$font_mono : 'JetBrains Mono', 'Roboto Mono', ui-monospace, monospace;
+/* */
+// Motion: one shared "expo out" curve so every reveal decelerates the same way.
+$ease_out_expo: cubic-bezier(0.16, 1, 0.3, 1);
+$ease_in_out: cubic-bezier(0.65, 0, 0.35, 1);
 $font_normal : $font_default;
 /* */
 $font_size_base: 1.6rem;
