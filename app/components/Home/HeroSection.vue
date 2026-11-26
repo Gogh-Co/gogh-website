@@ -57,21 +57,32 @@
         </div>
     </section>
 
-    <!-- The same CTA, pinned to the bottom of the screen from the moment the
-         hero's own button scrolls away until the theme gallery comes in. -->
+    <!-- The same CTA, pinned to the top of the screen from the moment the
+         hero's own button scrolls away until the theme gallery comes in.
+         It carries a miniature of the hero's brushstroke canvas. -->
     <ClientOnly>
         <Teleport to="body">
             <a
                 href="#themes"
                 class="hero-sticky-cta"
                 :class="{ 'is-visible': stickyVisible }"
-                :style="{ '--hero-a': heroStyle['--hero-a'], bottom: `${stickyBottom}px` }"
+                :style="{ ...heroStyle, top: `${stickyTop}px` }"
                 :tabindex="stickyVisible ? 0 : -1"
                 :aria-hidden="!stickyVisible"
                 @click.prevent="emit('browse')"
             >
-                Browse the collection
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M11 4h2v12l5.5-5.5l1.42 1.42L12 19.84l-7.92-7.92L5.5 10.5L11 16z"/></svg>
+                <StarryCanvas
+                    :palette="palette"
+                    :background="activeTheme.background"
+                    :min-particles="70"
+                    :max-particles="140"
+                    :paused="!stickyVisible"
+                />
+                <span class="hero-sticky-cta__veil" aria-hidden="true"></span>
+                <span class="hero-sticky-cta__label">
+                    Browse the collection
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M11 4h2v12l5.5-5.5l1.42 1.42L12 19.84l-7.92-7.92L5.5 10.5L11 16z"/></svg>
+                </span>
             </a>
         </Teleport>
     </ClientOnly>
@@ -113,8 +124,9 @@ let userPicked = false;
 let gsapContext = null;
 const cta = ref(null);
 const stickyVisible = ref(false);
-const stickyBottom = ref(24);
+const stickyTop = ref(88);
 let stickyTicking = false;
+let headerObserver = null;
 
 // Visible once the hero button has scrolled up under the header, hidden
 // again as soon as the gallery (#themes) starts entering the screen.
@@ -126,9 +138,10 @@ function updateSticky() {
     const reachedGallery = !!gallery && gallery.top < window.innerHeight * 0.85;
     stickyVisible.value = pastHero && !reachedGallery;
 
-    // Sit above the "favorites save in this browser" bar while it's shown.
-    const banner = document.querySelector('.persistence-banner');
-    stickyBottom.value = banner ? window.innerHeight - banner.getBoundingClientRect().top + 16 : 24;
+    // Just under the header, or at the very top while the header is tucked away.
+    const header = document.querySelector('.gogh-header');
+    const headerHidden = !header || header.classList.contains('is-hidden');
+    stickyTop.value = headerHidden ? 16 : (header.getBoundingClientRect().height || 72) + 16;
 }
 
 function onStickyScroll() {
@@ -167,6 +180,12 @@ function nextTheme(fromUser = false) {
 onMounted(() => {
     window.addEventListener('scroll', onStickyScroll, { passive: true });
     window.addEventListener('resize', onStickyScroll, { passive: true });
+    // The header hides/shows itself on its own frame; follow it when it does.
+    const header = document.querySelector('.gogh-header');
+    if (header) {
+        headerObserver = new MutationObserver(onStickyScroll);
+        headerObserver.observe(header, { attributes: true, attributeFilter: ['class'] });
+    }
     updateSticky();
 
     if (!prefersReducedMotion()) {
@@ -197,6 +216,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
     window.removeEventListener('scroll', onStickyScroll);
     window.removeEventListener('resize', onStickyScroll);
+    headerObserver?.disconnect();
     clearInterval(rotateTimer);
     gsapContext?.revert();
 });
@@ -537,37 +557,58 @@ onBeforeUnmount(() => {
     z-index: 880;
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    min-height: 52px;
-    padding: 0 24px;
-    background: var(--hero-a, #f1c40f);
-    color: var(--ink);
-    font-size: 1.5rem;
-    font-weight: 600;
+    justify-content: center;
+    min-width: 260px;
+    height: 56px;
+    padding: 0 28px;
+    overflow: hidden;
+    isolation: isolate;
+    background: var(--hero-bg, var(--ink));
+    color: var(--cream);
     text-decoration: none;
     white-space: nowrap;
-    box-shadow: 0 18px 40px -12px rgba(0, 0, 0, 0.55);
+    box-shadow: 0 20px 50px -18px rgba(0, 0, 0, 0.75);
+    // Hidden: collapsed to a sliver in the middle and lifted above the screen.
     opacity: 0;
     pointer-events: none;
-    transform: translate(-50%, 140%);
+    clip-path: inset(0 50% 0 50%);
+    transform: translate(-50%, -24px);
     transition:
-        transform 0.7s $ease_out_expo,
-        opacity 0.4s ease,
-        bottom 0.4s ease,
-        background-color 1.2s ease;
+        clip-path 0.9s $ease_out_expo,
+        transform 0.9s $ease_out_expo,
+        opacity 0.3s ease,
+        top 0.6s $ease_out_expo;
 
     &.is-visible {
         opacity: 1;
         pointer-events: auto;
+        clip-path: inset(0 0 0 0);
         transform: translate(-50%, 0);
     }
 
-    svg {
-        transition: transform 0.5s $ease_out_expo;
+    // Palette border drawn on top: a conic gradient that keeps turning.
+    &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: 3;
+        padding: 1.5px;
+        background: conic-gradient(from var(--cta-angle), var(--hero-a), var(--hero-c), var(--hero-d), var(--hero-b), var(--hero-a));
+        mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        mask-composite: exclude;
+        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+        animation: cta-spin 4s linear infinite;
+        pointer-events: none;
     }
 
-    &:hover {
-        color: var(--ink);
+    &:hover,
+    &:focus-visible {
+        color: #fff;
+
+        .hero-sticky-cta__veil {
+            opacity: 0.25;
+        }
 
         svg {
             transform: translateY(3px);
@@ -577,6 +618,51 @@ onBeforeUnmount(() => {
     &:focus-visible {
         outline: 2px solid var(--cream);
         outline-offset: 3px;
+    }
+
+    @media (max-width: 420px) {
+        min-width: 0;
+        padding: 0 22px;
+    }
+}
+
+// Keeps the label readable over the strokes; lifts on hover so the paint shows.
+.hero-sticky-cta__veil {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: radial-gradient(80% 120% at 50% 50%, color-mix(in srgb, var(--hero-bg) 80%, transparent), color-mix(in srgb, var(--hero-bg) 35%, transparent));
+    opacity: 0.7;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+}
+
+.hero-sticky-cta__label {
+    position: relative;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.5rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.6);
+
+    svg {
+        color: var(--hero-a);
+        transition: transform 0.5s $ease_out_expo;
+    }
+}
+
+@property --cta-angle {
+    syntax: '<angle>';
+    inherits: false;
+    initial-value: 0deg;
+}
+
+@keyframes cta-spin {
+    to {
+        --cta-angle: 360deg;
     }
 }
 

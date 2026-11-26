@@ -17,6 +17,20 @@ const props = defineProps({
         type: String,
         default: '#0a0f14',
     },
+    // Particle budget bounds (the count scales with the canvas area).
+    minParticles: {
+        type: Number,
+        default: 350,
+    },
+    maxParticles: {
+        type: Number,
+        default: 1400,
+    },
+    // Stops the animation loop while the host is hidden.
+    paused: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 const canvas = ref(null);
@@ -52,7 +66,9 @@ function updateFadeColor() {
 function placeVortices() {
     // Fixed composition (relative to the viewport) so the swirls read as
     // deliberate: one big swirl upper-right ("the moon"), a few smaller ones.
-    const base = Math.min(width, height);
+    // Short, wide canvases (the sticky button) use the width instead, so the
+    // swirls stay broad sweeps rather than tiny knots.
+    const base = height < 160 ? width * 0.35 : Math.min(width, height);
     vortices = [
         { x: width * 0.74, y: height * 0.3, r: base * 0.22, s: 1 },
         { x: width * 0.42, y: height * 0.2, r: base * 0.16, s: -1 },
@@ -77,7 +93,7 @@ function spawn(particle = {}) {
 
 function createParticles() {
     const area = width * height;
-    const count = Math.round(Math.min(1400, Math.max(350, area / 1100)));
+    const count = Math.round(Math.min(props.maxParticles, Math.max(props.minParticles, area / 1100)));
     particles = Array.from({ length: count }, () => spawn());
     // Stagger ages so the field doesn't all respawn on the same frame.
     particles.forEach((particle) => {
@@ -156,7 +172,8 @@ function step() {
         ctx.strokeStyle = palette[index];
         // Two widths per color keeps the batching cheap but the strokes varied.
         for (const thick of [false, true]) {
-            ctx.lineWidth = thick ? 2.4 : 1.1;
+            const scale = height < 160 ? 0.6 : 1;
+            ctx.lineWidth = (thick ? 2.4 : 1.1) * scale;
             ctx.globalAlpha = thick ? 0.55 : 0.85;
             ctx.beginPath();
             for (const particle of bucket) {
@@ -181,7 +198,7 @@ function loop() {
 }
 
 function play() {
-    if (running || reduced || !ctx) {
+    if (running || reduced || !ctx || props.paused) {
         return;
     }
     running = true;
@@ -244,6 +261,14 @@ function onVisibilityChange() {
         play();
     }
 }
+
+watch(() => props.paused, (paused) => {
+    if (paused) {
+        pause();
+    } else if (onScreen && !document.hidden) {
+        play();
+    }
+});
 
 watch(() => props.palette, () => {
     particles.forEach((particle) => {
