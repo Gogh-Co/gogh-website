@@ -74,13 +74,7 @@
 <script setup>
 import ThemeShareButtons from '@/components/Terminal/ThemeShareButtons.vue';
 
-// Share buttons for whatever page is open, tinted with the Gogh palette
-// (the buttons pick each network's colour from a theme's ANSI slots).
-const GOGH_SHARE_THEME = {
-    background: '#0A0F14',
-    foreground: '#ECF0F1',
-    ...Object.fromEntries(GOGH_LOGO_COLORS.map((color, index) => [`color_${String(index + 1).padStart(2, '0')}`, color])),
-};
+// Share buttons for whatever page is open, tinted with the Gogh palette.
 
 const route = useRoute();
 const shareUrl = computed(() => canonicalUrl(route.path));

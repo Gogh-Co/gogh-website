@@ -335,6 +335,10 @@
     </div>
 
     <FavoritesSignInBanner :visible="showFavoritesBanner" @close="dismissFavoritesBanner" />
+
+    <ClientOnly>
+        <ShareSite />
+    </ClientOnly>
 </template>
 
 <script setup>
@@ -368,6 +372,7 @@ import FavoritesSignInBanner from '@/components/Terminal/FavoritesSignInBanner.v
 import PersistenceBanner from '@/components/Banner/PersistenceBanner.vue';
 import Header from '@/components/Header/Header.vue';
 import ButtonFilter from '@/components/Buttons/ButtonFilter.vue';
+import ShareSite from '@/components/Buttons/ShareSite.vue';
 import HeroSection from '@/components/Home/HeroSection.vue';
 import ThemeMarquee from '@/components/Home/ThemeMarquee.vue';
 import ManifestoText from '@/components/Home/ManifestoText.vue';
