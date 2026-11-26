@@ -7,11 +7,6 @@
         <div class="hero__grain" aria-hidden="true"></div>
 
         <div ref="content" class="hero__content">
-            <p class="hero__eyebrow">
-                <span class="hero__dot" aria-hidden="true"></span>
-                Gogh · Terminal color schemes
-            </p>
-
             <h1 class="hero__title">
                 <span class="hero__line hero__line--brand">
                     <span class="hero__word" style="--i: 0">GOGH</span>
@@ -261,33 +256,7 @@ onBeforeUnmount(() => {
     will-change: transform, opacity;
 }
 
-.hero__eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    margin: 0 0 28px;
-    padding: 8px 14px;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 0;
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(8px);
-    color: var(--cream);
-    font-family: $font_default;
-    font-size: 1.15rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    opacity: 0;
-    animation: fade-up 1s $ease_out_expo 0.1s forwards;
-}
 
-.hero__dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 0;
-    background: var(--hero-a);
-    box-shadow: 0 0 0 0 var(--hero-a);
-    animation: pulse 2.4s ease-out infinite;
-}
 
 .hero__title {
     margin: 0 0 40px;
@@ -635,15 +604,6 @@ onBeforeUnmount(() => {
     }
 }
 
-@keyframes pulse {
-    0% {
-        box-shadow: 0 0 0 0 color-mix(in srgb, var(--hero-a) 70%, transparent);
-    }
-
-    100% {
-        box-shadow: 0 0 0 10px transparent;
-    }
-}
 
 @keyframes scroll-line {
     0% {
