@@ -31,6 +31,7 @@
 
     <ClientOnly>
         <ThemeInstallDock :theme="theme" :theme-name="themeName" />
+        <ThemeSwipe :previous="previous" :next="next" />
     </ClientOnly>
 </template>
 
@@ -42,6 +43,7 @@ import ThemeReading from '@/components/Theme/ThemeReading.vue';
 import ThemePreviews from '@/components/Theme/ThemePreviews.vue';
 import ThemePager from '@/components/Theme/ThemePager.vue';
 import ThemeInstallDock from '@/components/Theme/ThemeInstallDock.vue';
+import ThemeSwipe from '@/components/Theme/ThemeSwipe.vue';
 
 // The previews section follows the page's light/dark toggle (the gallery's
 // paper and ink); the hero and the reading section wear the theme itself.
