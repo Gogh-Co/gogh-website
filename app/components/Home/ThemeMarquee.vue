@@ -153,7 +153,7 @@ onBeforeUnmount(() => gsapContext?.revert());
     padding: 0 0 16px;
     overflow: hidden;
     border: 1px solid color-mix(in srgb, var(--fg) 14%, transparent);
-    border-radius: 16px;
+    border-radius: 0;
     background: var(--bg);
     color: var(--fg);
     text-align: left;
@@ -192,14 +192,14 @@ onBeforeUnmount(() => gsapContext?.revert());
     i {
         width: 9px;
         height: 9px;
-        border-radius: 50%;
+        border-radius: 0;
         background: color-mix(in srgb, var(--fg) 28%, transparent);
     }
 }
 
 .mini-term__name {
     overflow: hidden;
-    font-family: $font_mono;
+    font-family: $font_default;
     font-size: 1.2rem;
     font-weight: 500;
     text-overflow: ellipsis;
@@ -230,7 +230,7 @@ onBeforeUnmount(() => gsapContext?.revert());
 
     i {
         height: 16px;
-        border-radius: 4px;
+        border-radius: 0;
     }
 }
 

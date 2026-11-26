@@ -153,7 +153,7 @@ onBeforeUnmount(() => gsapContext?.revert());
     &:focus-visible {
         outline: 2px solid var(--gogh-yellow);
         outline-offset: 4px;
-        border-radius: 18px;
+        border-radius: 0;
     }
 
     @include m768 {
@@ -165,7 +165,7 @@ onBeforeUnmount(() => gsapContext?.revert());
     display: block;
     overflow: hidden;
     border: 1px solid var(--ink-line);
-    border-radius: 18px;
+    border-radius: 0;
     aspect-ratio: 16 / 10;
     background: var(--ink-2);
 
@@ -184,7 +184,7 @@ onBeforeUnmount(() => gsapContext?.revert());
     align-self: flex-start;
     font-family: $font_display;
     font-size: 2.2rem;
-    font-weight: 400;
+    font-weight: 500;
     letter-spacing: -0.01em;
 
     &::after {

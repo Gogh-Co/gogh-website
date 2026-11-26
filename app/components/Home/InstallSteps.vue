@@ -86,7 +86,7 @@ onBeforeUnmount(() => gsapContext?.revert());
     z-index: -1;
     width: min(1100px, 140vw);
     aspect-ratio: 1;
-    border-radius: 50%;
+    border-radius: 0;
     background: conic-gradient(from 0deg, #e74c3c, #f1c40f, #2ecc71, #2aa198, #3498db, #9b59b6, #e74c3c);
     filter: blur(140px);
     opacity: 0.18;
@@ -109,14 +109,14 @@ onBeforeUnmount(() => gsapContext?.revert());
     color: var(--cream);
     font-family: $font_display;
     font-size: clamp(5.2rem, 10vw, 14rem);
-    font-weight: 380;
-    font-variation-settings: 'opsz' 144, 'SOFT' 100;
+    font-weight: 900;
     line-height: 0.9;
-    letter-spacing: -0.045em;
+    letter-spacing: -0.055em;
 
     em {
-        font-style: italic;
-        font-weight: 300;
+        font-style: normal;
+        font-weight: 100;
+        letter-spacing: -0.04em;
         background: linear-gradient(100deg, var(--gogh-yellow), var(--gogh-red) 35%, var(--gogh-magenta) 65%, var(--gogh-blue));
         -webkit-background-clip: text;
         background-clip: text;
@@ -161,14 +161,14 @@ onBeforeUnmount(() => gsapContext?.revert());
     margin: 0;
     padding: 26px;
     border: 1px solid var(--ink-line);
-    border-radius: 20px;
+    border-radius: 0;
     background: rgba(17, 26, 34, 0.7);
     backdrop-filter: blur(10px);
 }
 
 .install__step-index {
     color: var(--gogh-yellow);
-    font-family: $font_mono;
+    font-family: $font_default;
     font-size: 1.2rem;
     letter-spacing: 0.1em;
 }
@@ -176,7 +176,7 @@ onBeforeUnmount(() => gsapContext?.revert());
 .install__step-title {
     font-family: $font_display;
     font-size: 2.4rem;
-    font-weight: 400;
+    font-weight: 700;
     letter-spacing: -0.01em;
 }
 

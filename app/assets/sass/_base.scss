@@ -71,10 +71,11 @@ $color_danger : $color_red;
 */
 $font_roboto_default: 'Roboto', sans-serif;
 /* */
-$font_default : 'Inter Variable', 'Roboto', system-ui, sans-serif;
-// Editorial display serif (headlines) and the mono used for labels and code.
-$font_display : 'Fraunces Variable', 'Iowan Old Style', Georgia, serif;
-$font_mono : 'JetBrains Mono', 'Roboto Mono', ui-monospace, monospace;
+$font_default : $font_roboto_default;
+// The whole site is set in Roboto; hierarchy comes from weight (100-900)
+// and size. Roboto Mono is only used inside code and terminal mock-ups.
+$font_display : $font_roboto_default;
+$font_mono : 'Roboto Mono', ui-monospace, monospace;
 /* */
 // Motion: one shared "expo out" curve so every reveal decelerates the same way.
 $ease_out_expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -185,7 +186,7 @@ blockquote>p {
     border-color: rgba(0, 0, 0, 0.2);
     border-top: 2px solid;
     border-bottom: 2px solid;
-    border-radius: 0.25em;
+    border-radius: 0;
     color: #888;
     letter-spacing: 0.05em;
     font-style: italic;

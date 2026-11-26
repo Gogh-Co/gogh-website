@@ -221,15 +221,14 @@ onBeforeUnmount(() => {
     color: var(--fg);
     font-family: $font_display;
     font-size: clamp(4rem, 6vw, 8.4rem);
-    font-weight: 380;
-    font-variation-settings: 'opsz' 144, 'SOFT' 80;
+    font-weight: 900;
     line-height: 0.95;
-    letter-spacing: -0.035em;
+    letter-spacing: -0.05em;
     transition: color 0.8s ease;
 
     em {
-        font-style: italic;
-        font-weight: 300;
+        font-style: normal;
+        font-weight: 100;
         color: var(--c13, var(--fg));
         transition: color 0.8s ease;
     }
@@ -266,7 +265,7 @@ onBeforeUnmount(() => {
     gap: 12px;
     padding: 6px 12px;
     border: 1px solid color-mix(in srgb, var(--fg) 20%, transparent);
-    border-radius: 999px;
+    border-radius: 0;
     background: transparent;
     color: var(--fg);
     opacity: 0.45;
@@ -295,17 +294,18 @@ onBeforeUnmount(() => {
         border-radius: 0;
         font-family: $font_display;
         font-size: 3.2rem;
-        font-weight: 360;
+        font-weight: 200;
         letter-spacing: -0.02em;
 
         &.is-active {
+            font-weight: 700;
             transform: translateX(14px);
         }
     }
 }
 
 .showcase__item-index {
-    font-family: $font_mono;
+    font-family: $font_default;
     font-size: 1.1rem;
     letter-spacing: 0.04em;
     opacity: 0.7;
@@ -338,7 +338,7 @@ onBeforeUnmount(() => {
 .showcase__window {
     overflow: hidden;
     border: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
-    border-radius: 18px;
+    border-radius: 0;
     background: color-mix(in srgb, var(--bg) 88%, var(--fg));
     box-shadow: 0 50px 120px -40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(0, 0, 0, 0.08);
     transition: background-color 0.8s ease, border-color 0.8s ease;
@@ -363,7 +363,7 @@ onBeforeUnmount(() => {
     i {
         width: 11px;
         height: 11px;
-        border-radius: 50%;
+        border-radius: 0;
         background: var(--c2);
         transition: background-color 0.8s ease;
 
@@ -373,7 +373,7 @@ onBeforeUnmount(() => {
 }
 
 .showcase__bar-title {
-    font-family: $font_mono;
+    font-family: $font_default;
     font-size: 1.2rem;
     opacity: 0.7;
 }
@@ -468,7 +468,7 @@ onBeforeUnmount(() => {
 
     i {
         height: 22px;
-        border-radius: 5px;
+        border-radius: 0;
         transition: background-color 0.7s ease;
 
         @include m768 {

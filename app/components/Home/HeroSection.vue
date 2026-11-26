@@ -228,11 +228,11 @@ onBeforeUnmount(() => {
     margin: 0 0 28px;
     padding: 8px 14px;
     border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 999px;
+    border-radius: 0;
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(8px);
     color: var(--cream);
-    font-family: $font_mono;
+    font-family: $font_default;
     font-size: 1.15rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -243,7 +243,7 @@ onBeforeUnmount(() => {
 .hero__dot {
     width: 8px;
     height: 8px;
-    border-radius: 50%;
+    border-radius: 0;
     background: var(--hero-a);
     box-shadow: 0 0 0 0 var(--hero-a);
     animation: pulse 2.4s ease-out infinite;
@@ -254,10 +254,9 @@ onBeforeUnmount(() => {
     color: var(--cream);
     font-family: $font_display;
     font-size: clamp(6.4rem, min(12.5vw, 18vh), 19rem);
-    font-weight: 380;
-    font-variation-settings: 'opsz' 144, 'SOFT' 100, 'WONK' 0;
-    line-height: 0.86;
-    letter-spacing: -0.045em;
+    font-weight: 900;
+    line-height: 0.88;
+    letter-spacing: -0.055em;
 }
 
 .hero__line {
@@ -278,9 +277,9 @@ onBeforeUnmount(() => {
 }
 
 .hero__word--accent {
-    font-style: italic;
-    font-weight: 300;
-    font-variation-settings: 'opsz' 144, 'SOFT' 100, 'WONK' 1;
+    font-style: normal;
+    font-weight: 100;
+    letter-spacing: -0.04em;
     background: linear-gradient(100deg, var(--hero-a), var(--hero-c) 30%, var(--hero-d) 55%, var(--hero-b) 80%, var(--hero-a));
     background-size: 220% 100%;
     -webkit-background-clip: text;
@@ -330,7 +329,7 @@ onBeforeUnmount(() => {
     gap: 10px;
     min-height: 50px;
     padding: 0 22px;
-    border-radius: 999px;
+    border-radius: 0;
     font-size: 1.5rem;
     font-weight: 600;
     text-decoration: none;
@@ -403,7 +402,7 @@ onBeforeUnmount(() => {
     min-height: 44px;
     padding: 6px 14px 6px 16px;
     border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 999px;
+    border-radius: 0;
     background: rgba(10, 15, 20, 0.45);
     backdrop-filter: blur(10px);
     color: var(--cream);
@@ -427,7 +426,7 @@ onBeforeUnmount(() => {
 
 .hero__painting-label {
     color: var(--muted);
-    font-family: $font_mono;
+    font-family: $font_default;
     font-size: 1.1rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -445,7 +444,7 @@ onBeforeUnmount(() => {
         height: 14px;
         margin-left: -4px;
         border: 2px solid rgba(10, 15, 20, 0.8);
-        border-radius: 50%;
+        border-radius: 0;
         transition: background-color 0.8s ease;
 
         &:first-child {
@@ -473,7 +472,7 @@ onBeforeUnmount(() => {
     align-items: center;
     gap: 10px;
     color: var(--muted);
-    font-family: $font_mono;
+    font-family: $font_default;
     font-size: 1.05rem;
     letter-spacing: 0.2em;
     text-transform: uppercase;

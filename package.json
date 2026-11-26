@@ -12,10 +12,8 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@fontsource-variable/fraunces": "^5.3.0",
-    "@fontsource-variable/inter": "^5.3.0",
-    "@fontsource/jetbrains-mono": "^5.3.0",
     "@fontsource/roboto": "^5.3.0",
+    "@fontsource/roboto-mono": "^5.3.0",
     "@morev/vue-transitions": "^4.0.0",
     "axios": "^1.21.1",
     "bootstrap": "^5.3.9",

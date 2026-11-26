@@ -77,15 +77,14 @@ $header_height: 72px;
     &:focus-visible {
         outline: 2px solid var(--gogh-yellow);
         outline-offset: 4px;
-        border-radius: 4px;
+        border-radius: 0;
     }
 }
 
 .gogh-header__brand-text {
     font-family: $font_display;
     font-size: 2.6rem;
-    font-weight: 500;
-    font-variation-settings: 'opsz' 72, 'SOFT' 100;
+    font-weight: 900;
     letter-spacing: -0.02em;
     line-height: 1;
 }
@@ -100,7 +99,7 @@ $header_height: 72px;
 
 .gogh-header__logo-swatch {
     display: block;
-    border-radius: 2px;
+    border-radius: 0;
     // Swatches drop in one by one when the page loads.
     transform-origin: bottom;
     animation: swatch-in 0.8s $ease_out_expo backwards;
@@ -144,7 +143,7 @@ $header_height: 72px;
     align-items: center;
     min-height: 40px;
     padding: 0 14px;
-    border-radius: 999px;
+    border-radius: 0;
     color: rgba(244, 239, 230, 0.72);
     font-size: 1.4rem;
     font-weight: 500;
@@ -167,7 +166,7 @@ $header_height: 72px;
             width: 4px;
             height: 4px;
             margin-left: -2px;
-            border-radius: 50%;
+            border-radius: 0;
             background: var(--gogh-yellow);
         }
     }
@@ -186,7 +185,7 @@ $header_height: 72px;
         color: var(--cream);
         font-family: $font_display;
         font-size: clamp(3.2rem, 9vw, 4.8rem);
-        font-weight: 360;
+        font-weight: 300;
         letter-spacing: -0.02em;
         opacity: 0;
         transform: translateY(24px);
@@ -215,7 +214,7 @@ $header_height: 72px;
 .gogh-header__nav-index {
     display: none;
     color: var(--muted);
-    font-family: $font_mono;
+    font-family: $font_default;
     font-size: 1.2rem;
     letter-spacing: 0.08em;
 
@@ -258,7 +257,7 @@ $header_height: 72px;
     height: 40px;
     padding: 0;
     border: 1px solid rgba(255, 255, 255, 0.18);
-    border-radius: 50%;
+    border-radius: 0;
     background: transparent;
     color: var(--cream);
     cursor: pointer;
@@ -315,7 +314,7 @@ $header_height: 72px;
     height: $tap_target_min;
     padding: 0;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
+    border-radius: 0;
     background: transparent;
     cursor: pointer;
     flex: 0 0 auto;
@@ -352,7 +351,7 @@ $header_height: 72px;
 :deep(.auth-control__signin) {
     height: 40px;
     border-color: rgba(255, 255, 255, 0.18);
-    border-radius: 999px;
+    border-radius: 0;
     padding: 0 16px;
 
     @media (max-width: 991.98px) {

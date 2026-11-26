@@ -88,8 +88,7 @@ onBeforeUnmount(() => gsapContext?.revert());
     color: var(--cream);
     font-family: $font_display;
     font-size: clamp(3.2rem, 5.6vw, 8rem);
-    font-weight: 350;
-    font-variation-settings: 'opsz' 144, 'SOFT' 60;
+    font-weight: 300;
     line-height: 1.08;
     letter-spacing: -0.03em;
 }
@@ -98,10 +97,9 @@ onBeforeUnmount(() => gsapContext?.revert());
     display: inline;
     transition: color 0.3s ease;
 
-    // Accents: italic plus a palette color; they still fade in with the rest.
+    // Accents: heavy weight plus a palette color; they still fade in with the rest.
     &[class*='--'] {
-        font-style: italic;
-        font-weight: 300;
+        font-weight: 800;
     }
 
     &--yellow { color: var(--gogh-yellow); }

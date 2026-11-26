@@ -222,7 +222,7 @@ onBeforeUnmount(() => gsapContext?.revert());
     padding: 28px;
     overflow: hidden;
     border: 1px solid var(--ink-line);
-    border-radius: 24px;
+    border-radius: 0;
     background: var(--ink-2);
     color: var(--cream);
     text-decoration: none;
@@ -292,7 +292,7 @@ onBeforeUnmount(() => gsapContext?.revert());
 
 .bento__kicker {
     color: var(--muted);
-    font-family: $font_mono;
+    font-family: $font_default;
     font-size: 1.1rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -301,8 +301,7 @@ onBeforeUnmount(() => gsapContext?.revert());
 .bento__title {
     font-family: $font_display;
     font-size: 2.8rem;
-    font-weight: 400;
-    font-variation-settings: 'opsz' 72;
+    font-weight: 700;
     line-height: 1.05;
     letter-spacing: -0.02em;
 
@@ -329,7 +328,7 @@ onBeforeUnmount(() => gsapContext?.revert());
     width: 44px;
     height: 44px;
     border: 1px solid var(--ink-line);
-    border-radius: 50%;
+    border-radius: 0;
     color: var(--cream);
     transition: transform 0.6s $ease_out_expo, background-color 0.3s ease, color 0.3s ease;
 }
@@ -346,7 +345,7 @@ onBeforeUnmount(() => gsapContext?.revert());
 
     i {
         aspect-ratio: 1 / 2.2;
-        border-radius: 14px;
+        border-radius: 0;
         animation: remix 9s ease-in-out infinite;
         animation-delay: calc(var(--n) * -0.9s);
 
@@ -367,8 +366,7 @@ onBeforeUnmount(() => gsapContext?.revert());
 .viz-wcag__sample {
     font-family: $font_display;
     font-size: 7.2rem;
-    font-style: italic;
-    font-weight: 300;
+    font-weight: 100;
     line-height: 1;
     background: linear-gradient(90deg, var(--gogh-yellow), var(--gogh-green));
     -webkit-background-clip: text;
@@ -383,9 +381,9 @@ onBeforeUnmount(() => gsapContext?.revert());
     b {
         padding: 6px 10px;
         border: 1px solid rgba(46, 204, 113, 0.5);
-        border-radius: 999px;
+        border-radius: 0;
         color: var(--gogh-green);
-        font-family: $font_mono;
+        font-family: $font_default;
         font-size: 1.1rem;
         font-weight: 500;
     }
@@ -402,7 +400,7 @@ onBeforeUnmount(() => gsapContext?.revert());
     i {
         flex: 1;
         height: var(--h);
-        border-radius: 6px 6px 2px 2px;
+        border-radius: 0;
         background: linear-gradient(180deg, var(--gogh-blue), color-mix(in srgb, var(--gogh-blue) 20%, transparent));
         transform-origin: bottom;
         animation: bar 3.6s $ease_in_out infinite alternate;
@@ -424,7 +422,7 @@ onBeforeUnmount(() => gsapContext?.revert());
         aspect-ratio: 16 / 10;
         object-fit: cover;
         border: 1px solid var(--ink-line);
-        border-radius: 12px;
+        border-radius: 0;
         box-shadow: 0 20px 40px -16px rgba(0, 0, 0, 0.8);
         transform: rotate(calc((var(--n) - 1) * -5deg));
         transition: transform 0.8s $ease_out_expo;
@@ -448,7 +446,7 @@ onBeforeUnmount(() => gsapContext?.revert());
     span {
         flex: 0 0 40px;
         color: rgba(244, 239, 230, 0.35);
-        font-family: $font_mono;
+        font-family: $font_default;
         font-size: 2rem;
         line-height: 40px;
         animation: terms 16s steps(8) infinite;
