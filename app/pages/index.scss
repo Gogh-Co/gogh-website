@@ -836,3 +836,114 @@
 .background-lightbox__content {
     border-radius: 0;
 }
+
+/**
+* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+* ·······  Collection reveal (driven by useGalleryReveal)
+* ·······  Hidden states only exist under .is-animated (added on mount), so
+* ·······  server HTML and reduced-motion visitors always see every card.
+* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+*/
+$reveal_delay: var(--reveal-delay, 0ms);
+
+.gallery-grid.is-animated {
+    // The cards' own mount animation would fight the reveal.
+    :deep(.compact-card) {
+        animation: none;
+    }
+
+    .gallery-card {
+        .terminal-preview {
+            opacity: 0;
+            clip-path: inset(0 0 100% 0);
+            transform: translateY(48px) scale(0.96);
+            transition:
+                opacity 0.45s ease $reveal_delay,
+                clip-path 1s $ease_out_expo $reveal_delay,
+                transform 1.1s $ease_out_expo $reveal_delay;
+        }
+
+        // Before the colors arrive every swatch shows its bit.
+        :deep(.compact-card__swatch) {
+            transform: scale(0.7);
+            transition: transform 0.7s $ease_out_expo;
+
+            &::after {
+                opacity: 1;
+                transition: opacity 0.35s ease;
+            }
+        }
+
+        // A scan line sweeps down the card as it wipes in.
+        .terminal-preview::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            left: 0;
+            top: 0;
+            z-index: 3;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #f1c40f, #2ecc71, #3498db, transparent);
+            opacity: 0;
+            pointer-events: none;
+        }
+    }
+
+    .gallery-card.is-revealed {
+        .terminal-preview {
+            opacity: 1;
+            clip-path: inset(0 0 0 0);
+            transform: none;
+
+            &::after {
+                animation: card-scan 0.9s $ease_out_expo $reveal_delay both;
+            }
+        }
+
+        // Bits flip to colors one by one: first row, then the bright row.
+        :deep(.compact-card__swatches) {
+            @for $row from 1 through 2 {
+                &:nth-of-type(#{$row + 1}) .compact-card__swatch {
+                    @for $n from 1 through 8 {
+                        &:nth-child(#{$n}) {
+                            $wait: calc(var(--reveal-delay, 0ms) + #{320 + ($row - 1) * 110 + $n * 34}ms);
+                            transform: none;
+                            transition-delay: $wait;
+
+                            &::after {
+                                opacity: 0;
+                                transition-delay: $wait;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Reveal finished: no clip (so hover shadows show) and the normal hover lift.
+    .gallery-card.is-settled .terminal-preview {
+        clip-path: none;
+        transition: transform 0.6s $ease_out_expo;
+
+        &:hover {
+            transform: translateY(-6px);
+        }
+    }
+}
+
+@keyframes card-scan {
+    0% {
+        top: 0;
+        opacity: 1;
+    }
+
+    85% {
+        opacity: 1;
+    }
+
+    100% {
+        top: 100%;
+        opacity: 0;
+    }
+}

@@ -1,7 +1,7 @@
 <template>
     <div
         class="compact-card"
-        :style="{ backgroundColor: theme.background, color: theme.foreground }"
+        :style="{ backgroundColor: theme.background, color: theme.foreground, '--card-bg': theme.background }"
     >
         <div class="compact-card__header">
             <span class="compact-card__name">{{ displayName }}</span>
@@ -12,6 +12,7 @@
                 v-for="key in normalColorKeys"
                 :key="key"
                 class="compact-card__swatch"
+                :data-bit="bitFor(theme[key])"
                 :style="{ backgroundColor: theme[key] }"
             ></span>
         </div>
@@ -20,6 +21,7 @@
                 v-for="key in brightColorKeys"
                 :key="key"
                 class="compact-card__swatch"
+                :data-bit="bitFor(theme[key])"
                 :style="{ backgroundColor: theme[key] }"
             ></span>
         </div>
@@ -36,6 +38,13 @@ const props = defineProps({
         required: true,
     },
 });
+
+// One bit per color, derived from its hex so server and client agree. The
+// gallery's reveal animation shows these bits before the colors flood in.
+function bitFor(hex) {
+    const value = parseInt(String(hex || '').replace('#', ''), 16);
+    return Number.isNaN(value) ? '0' : String(value % 2);
+}
 
 const displayName = computed(() => (props.theme?.name || props.theme?.theme || '').toString());
 </script>

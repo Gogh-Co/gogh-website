@@ -40,9 +40,28 @@
 }
 
 .compact-card__swatch {
+    position: relative;
     flex: 1 1 0;
     aspect-ratio: 1;
     border-radius: 0;
+
+    // The swatch's bit, drawn over it in the card's own colors. Hidden by
+    // default; the gallery's reveal shows it, then fades it to the color.
+    &::after {
+        content: attr(data-bit);
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--card-bg);
+        color: currentColor;
+        font-family: 'Roboto Mono', monospace;
+        font-size: 11px;
+        line-height: 1;
+        opacity: 0;
+        pointer-events: none;
+    }
 }
 
 @keyframes slideIn {

@@ -18,7 +18,7 @@
                 <div class="gallery__heading">
                     <!-- Hidden for the 100ms setFilter() blanks the filter, so it never flashes "0". -->
                     <p class="gallery__count" aria-live="polite" :style="{ visibility: filter === '' ? 'hidden' : 'visible' }">
-                        <strong>{{ filteredThemes.length }}</strong>
+                        <strong ref="galleryCount">{{ filteredThemes.length }}</strong>
                         {{ filteredThemes.length === 1 ? 'theme' : 'themes' }}
                         <span v-if="filteredThemes.length !== themes.length">of {{ themes.length }}</span>
                     </p>
@@ -144,9 +144,9 @@
         </div>
 
         <div class="container-fluid">
-            <div class="row ">
+            <div ref="galleryGrid" class="row gallery-grid" :class="{ 'is-animated': galleryReveal.enabled.value }">
                 <template v-for="theme in visibleThemes" :key="getThemeName(theme) || theme.background + theme.foreground">
-                    <div :class="viewMode === 'compact' ? 'col-6 col-md-4 col-lg-3 col-xl-2' : 'col-12 col-md-6  col-xl-4'">
+                    <div class="gallery-card" :class="viewMode === 'compact' ? 'col-6 col-md-4 col-lg-3 col-xl-2' : 'col-12 col-md-6  col-xl-4'">
                         <div
                             class="terminal-preview"
                             :class="{ 'terminal-preview--detailed': viewMode === 'detailed' }"
@@ -168,6 +168,13 @@
                     </div>
                 </template>
             </div>
+
+            <GalleryLoader
+                v-if="filteredThemes.length"
+                :loaded="visibleThemes.length"
+                :total="filteredThemes.length"
+                :loading="loadingMore"
+            />
 
             <div ref="loadMoreSentinel" class="load-more-sentinel" aria-hidden="true"></div>
         </div>
@@ -362,9 +369,14 @@ import ThemeShowcase from '@/components/Home/ThemeShowcase.vue';
 import FeatureBento from '@/components/Home/FeatureBento.vue';
 import TerminalsStrip from '@/components/Home/TerminalsStrip.vue';
 import InstallSteps from '@/components/Home/InstallSteps.vue';
+import GalleryLoader from '@/components/Home/GalleryLoader.vue';
 
 const smoothScroll = useSmoothScroll();
 const galleryHeader = ref(null);
+const galleryGrid = ref(null);
+const galleryCount = ref(null);
+const galleryReveal = useGalleryReveal(galleryGrid);
+const loadingMore = ref(false);
 let galleryMotion = null;
 
 function scrollToGallery() {
@@ -1001,6 +1013,47 @@ const filteredThemes = computed(() => {
 });
 const visibleThemes = computed(() => filteredThemes.value.slice(0, visibleCount.value));
 
+// Infinite scroll. With animations on, each batch "decodes" for a beat (the
+// loader's bit stream races) before the cards arrive and wave in.
+const LOAD_DECODE_MS = 450;
+let sentinelInView = false;
+let loadMoreTimer = null;
+
+function loadMore() {
+    if (loadingMore.value || visibleCount.value >= filteredThemes.value.length) {
+        return;
+    }
+    const grow = () => {
+        visibleCount.value = Math.min(visibleCount.value + THEMES_PAGE_SIZE, filteredThemes.value.length);
+        loadingMore.value = false;
+        // Tall screens: keep loading while the end of the list is still visible.
+        nextTick(() => {
+            if (sentinelInView) {
+                loadMore();
+            }
+        });
+    };
+    if (!galleryReveal.enabled.value) {
+        grow();
+        return;
+    }
+    loadingMore.value = true;
+    loadMoreTimer = setTimeout(grow, LOAD_DECODE_MS);
+}
+
+// New cards (another batch, or a different filter's results) join the reveal.
+watch(visibleThemes, () => nextTick(galleryReveal.observeNew));
+
+// A different filter, sort or view replays the whole wave.
+watch([filter, colorFilterValue, sortMode, sortDirection, viewMode, shuffleOrder], () => {
+    nextTick(galleryReveal.replay);
+});
+
+// The theme count decodes from binary whenever the result set changes.
+watch(() => filteredThemes.value.length, () => {
+    nextTick(() => binaryDecode(galleryCount.value, { duration: 520 }));
+});
+
 watch([filter, searchQuery, colorFilterValue], () => {
     visibleCount.value = THEMES_PAGE_SIZE;
 });
@@ -1035,7 +1088,15 @@ onMounted(() => {
                 duration: 1.2,
                 stagger: 0.08,
                 ease: 'expo.out',
-                scrollTrigger: { trigger: galleryHeader.value, start: 'top 85%' },
+                scrollTrigger: {
+                    trigger: galleryHeader.value,
+                    start: 'top 85%',
+                    // The label and the count decode from binary as they arrive.
+                    onEnter: () => {
+                        binaryDecode(galleryHeader.value?.querySelector('.gallery__eyebrow'), { delay: 150, duration: 700 });
+                        binaryDecode(galleryCount.value, { delay: 300, duration: 800 });
+                    },
+                },
             });
         }, galleryHeader.value);
     }
@@ -1085,15 +1146,17 @@ onMounted(() => {
 
     if (loadMoreSentinel.value && typeof IntersectionObserver !== 'undefined') {
         loadMoreObserver = new IntersectionObserver((entries) => {
-            if (entries.some((entry) => entry.isIntersecting) && visibleCount.value < filteredThemes.value.length) {
-                visibleCount.value = Math.min(visibleCount.value + THEMES_PAGE_SIZE, filteredThemes.value.length);
+            sentinelInView = entries.some((entry) => entry.isIntersecting);
+            if (sentinelInView) {
+                loadMore();
             }
-        });
+        }, { rootMargin: '0px 0px 120px 0px' });
         loadMoreObserver.observe(loadMoreSentinel.value);
     }
 });
 
 onUnmounted(() => {
+    clearTimeout(loadMoreTimer);
     galleryMotion?.revert();
     setPageScrollLocked(false);
     smoothScroll.stop();
