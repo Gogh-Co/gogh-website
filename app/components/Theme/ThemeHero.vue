@@ -1,5 +1,5 @@
 <template>
-    <section ref="root" class="theme-hero" :class="`theme-hero--${variant}`" :style="heroStyle">
+    <section ref="root" class="theme-hero" :class="[`theme-hero--${variant}`, `is-${reveal}`]" :style="heroStyle">
         <ClientOnly>
             <StarryCanvas :palette="palette" :background="background" />
         </ClientOnly>
@@ -153,12 +153,40 @@ const heroStyle = computed(() => ({
     '--hero-cursor': safeHex(props.theme.cursor) || foreground.value,
 }));
 
-onMounted(() => {
-    // The name and the meta line arrive as bits and resolve into text.
-    binaryDecode(title.value, { delay: 380, duration: 900 });
-    binaryDecode(eyebrow.value, { delay: 220, duration: 700 });
+// The name and the meta line stay hidden until the page is interactive, then
+// fade in where they stand already written in bits and resolve into text.
+// (Revealing the server-rendered name first and swapping it for bits later
+// played two animations on top of each other.) If the page takes too long
+// to become interactive, CSS shows them as plain text on their own; then
+// there is no decode, so real text is never swapped for bits.
+const TITLE_DECODE = { delay: 200, duration: 900 };
+// 'waiting' | 'ready' (fade in + decode) | 'shown' (already visible as text)
+const reveal = ref('waiting');
+let unlockTimer = null;
 
-    if (prefersReducedMotion()) {
+onMounted(() => {
+    const reduced = prefersReducedMotion();
+    const alreadyShown = !!title.value && parseFloat(getComputedStyle(title.value).opacity) > 0.01;
+    if (alreadyShown) {
+        reveal.value = 'shown';
+    } else if (!reduced) {
+        // Bits are wider than most letters: hold every word at its real
+        // width while it decodes so the title never reflows.
+        const words = [...(title.value?.querySelectorAll('.theme-hero__word') ?? [])];
+        words.forEach((word) => {
+            word.style.width = `${word.getBoundingClientRect().width}px`;
+        });
+        binaryDecode(title.value, TITLE_DECODE);
+        binaryDecode(eyebrow.value, { delay: 120, duration: 700 });
+        unlockTimer = setTimeout(() => {
+            words.forEach((word) => word.style.removeProperty('width'));
+        }, TITLE_DECODE.delay + TITLE_DECODE.duration + 100);
+    }
+    if (!alreadyShown) {
+        reveal.value = 'ready';
+    }
+
+    if (reduced) {
         return;
     }
 
@@ -179,7 +207,10 @@ onMounted(() => {
     }, root.value);
 });
 
-onBeforeUnmount(() => gsapContext?.revert());
+onBeforeUnmount(() => {
+    clearTimeout(unlockTimer);
+    gsapContext?.revert();
+});
 </script>
 
 <style lang="scss" scoped>
@@ -280,7 +311,6 @@ onBeforeUnmount(() => gsapContext?.revert());
     font-size: 1.4rem;
     letter-spacing: 0.02em;
     opacity: 0;
-    animation: fade-up 1s $ease_out_expo 0.2s forwards;
 
     a {
         color: var(--hero-fg);
@@ -321,21 +351,58 @@ onBeforeUnmount(() => gsapContext?.revert());
     line-height: 0.88;
     letter-spacing: -0.045em;
     overflow-wrap: anywhere;
+    opacity: 0;
+}
+
+// Name and meta line: hidden until the page is interactive (.is-ready), then
+// a fade where they stand while the bits resolve (see onMounted). No rise:
+// the motion and the binary effect never overlap.
+.theme-hero__eyebrow,
+.theme-hero__title {
+    // Safety net: if the page is not interactive by then, show them as text.
+    animation: fade-in 0.6s ease 1.4s forwards;
+}
+
+.is-ready {
+    .theme-hero__eyebrow {
+        animation: fade-in 0.6s ease 0.05s forwards;
+    }
+
+    .theme-hero__title {
+        animation: title-in 0.8s $ease_out_expo forwards;
+    }
+}
+
+// The safety net already showed them (.is-shown): keep them, no decode.
+.is-shown {
+    .theme-hero__eyebrow,
+    .theme-hero__title {
+        animation: none;
+        opacity: 1;
+    }
+}
+
+// Without JavaScript there is no reveal: show them as they are.
+@media (scripting: none) {
+    .theme-hero__eyebrow,
+    .theme-hero__title {
+        animation: none;
+        opacity: 1;
+    }
 }
 
 .theme-hero__line {
     display: block;
-    overflow: hidden;
     padding: 0 0.04em 0.18em;
     margin-bottom: -0.18em;
 }
 
+// Centred and unwrapped, so while its width is held (during the decode) the
+// bits overflow evenly on both sides instead of pushing the layout.
 .theme-hero__word {
-    display: inline-block;
-    transform: translateY(110%) rotate(4deg);
-    transform-origin: center bottom;
-    animation: word-rise 1.3s $ease_out_expo forwards;
-    animation-delay: calc(0.25s + var(--i) * 0.1s);
+    display: inline-flex;
+    justify-content: center;
+    white-space: nowrap;
 }
 
 .theme-hero__swatches {
@@ -407,7 +474,7 @@ onBeforeUnmount(() => gsapContext?.revert());
     }
 }
 
-// Share row under the install command, in the theme's own colors.
+// Share row under the install command, in the own colors of the theme.
 .theme-hero__share {
     margin-top: 22px;
     opacity: 0;
@@ -514,9 +581,21 @@ onBeforeUnmount(() => gsapContext?.revert());
     }
 }
 
-@keyframes word-rise {
+@keyframes fade-in {
     to {
-        transform: translateY(0) rotate(0);
+        opacity: 1;
+    }
+}
+
+@keyframes title-in {
+    from {
+        opacity: 0;
+        transform: scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
     }
 }
 

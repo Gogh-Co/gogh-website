@@ -1,5 +1,5 @@
 <template>
-    <section ref="root" class="hero" :style="heroStyle">
+    <section ref="root" class="hero" :class="`is-${reveal}`" :style="heroStyle">
         <ClientOnly>
             <StarryCanvas :palette="palette" :background="activeTheme.background" />
         </ClientOnly>
@@ -51,9 +51,7 @@
                 <span class="hero__painting-swatches" aria-hidden="true">
                     <span v-for="(color, index) in palette.slice(0, 6)" :key="index" :style="{ backgroundColor: color }"></span>
                 </span>
-                <Transition name="name-swap" mode="out-in">
-                    <span :key="activeThemeName" class="hero__painting-name">{{ activeThemeName }}</span>
-                </Transition>
+                <span ref="paintingName" class="hero__painting-name">{{ activeThemeName }}</span>
                 <svg class="hero__painting-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 20q-3.35 0-5.675-2.325T4 12t2.325-5.675T12 4q1.725 0 3.3.712T18 6.75V4h2v7h-7V9h4.2q-.8-1.4-2.187-2.2T12 6Q9.5 6 7.75 7.75T6 12t1.75 4.25T12 18q1.925 0 3.475-1.1T17.65 14h2.1q-.7 2.65-2.85 4.325T12 20"/></svg>
             </button>
 
@@ -188,7 +186,52 @@ function nextTheme(fromUser = false) {
     activeIndex.value = (activeIndex.value + 1) % rotation.value.length;
 }
 
+// The theme name in "Painting with" decodes from bits on every change, in
+// place (a fade-out/fade-in swap left the pill empty for half a second).
+const paintingName = ref(null);
+watch(activeThemeName, () => {
+    if (!prefersReducedMotion()) {
+        nextTick(() => binaryDecode(paintingName.value, { duration: 550 }));
+    }
+});
+
+// "Gogh" and "terminal schemes" stay hidden until the page is interactive,
+// then fade in where they stand already written in bits and resolve into
+// text. (Rising the server-rendered words out of a clipping mask showed them
+// cut in pieces; now the motion and the binary effect never overlap.)
+// If the page takes too long to become interactive, CSS shows the title as
+// plain text on its own; then there is no decode, so real text is never
+// swapped for bits.
+const title = ref(null);
+// 'waiting' | 'ready' (fade in + decode) | 'shown' (already visible as text)
+const reveal = ref('waiting');
+const TITLE_DECODE = { delay: 200, duration: 900 };
+let unlockTimer = null;
+
+function revealTitle() {
+    if (title.value && parseFloat(getComputedStyle(title.value).opacity) > 0.01) {
+        reveal.value = 'shown';
+        return;
+    }
+    if (!prefersReducedMotion()) {
+        // Bits are wider than most letters: hold every word at its real
+        // width while it decodes so the title never reflows. Each word is
+        // decoded on its own (the heading also holds visually hidden text).
+        const words = [...(title.value?.querySelectorAll('.hero__word') ?? [])];
+        words.forEach((word, index) => {
+            word.style.width = `${word.getBoundingClientRect().width}px`;
+            binaryDecode(word, { delay: TITLE_DECODE.delay + index * 150, duration: TITLE_DECODE.duration });
+        });
+        unlockTimer = setTimeout(() => {
+            words.forEach((word) => word.style.removeProperty('width'));
+        }, TITLE_DECODE.delay + TITLE_DECODE.duration + words.length * 150 + 100);
+    }
+    reveal.value = 'ready';
+}
+
 onMounted(() => {
+    revealTitle();
+
     window.addEventListener('scroll', onStickyScroll, { passive: true });
     window.addEventListener('resize', onStickyScroll, { passive: true });
     // The header hides/shows itself on its own frame; follow it when it does.
@@ -229,6 +272,7 @@ onBeforeUnmount(() => {
     window.removeEventListener('resize', onStickyScroll);
     headerObserver?.disconnect();
     clearInterval(rotateTimer);
+    clearTimeout(unlockTimer);
     gsapContext?.revert();
 });
 </script>
@@ -298,6 +342,29 @@ onBeforeUnmount(() => {
     font-weight: 400;
     line-height: 0.84;
     letter-spacing: -0.04em;
+    opacity: 0;
+    // Safety net: if the page is not interactive by then, show it as text.
+    animation: title-show 0.6s ease 1.4s forwards;
+}
+
+// Interactive in time (.is-ready): a fade where it stands while the words
+// resolve from bits (see revealTitle). No rise.
+.is-ready .hero__title {
+    animation: title-in 0.8s $ease_out_expo forwards;
+}
+
+// The safety net already showed it (.is-shown): keep it, no decode.
+.is-shown .hero__title {
+    animation: none;
+    opacity: 1;
+}
+
+// Without JavaScript there is no reveal: show it as it is.
+@media (scripting: none) {
+    .hero__title {
+        animation: none;
+        opacity: 1;
+    }
 }
 
 // "terminal schemes": a thin, colored line under the heavy wordmark.
@@ -314,23 +381,23 @@ onBeforeUnmount(() => {
 
 .hero__line {
     display: block;
-    // Masks each line so words rise into view from below the baseline.
-    overflow: hidden;
     padding: 0 0.04em 0.2em;
     margin-bottom: -0.2em;
 }
 
+// Centred and unwrapped, so while its width is held (during the decode) the
+// bits overflow evenly on both sides instead of pushing the layout.
 .hero__word {
-    display: inline-block;
-    transform: translateY(110%) rotate(4deg);
-    transform-origin: center bottom;
-    animation: word-rise 1.3s $ease_out_expo forwards;
-    animation-delay: calc(0.25s + var(--i) * 0.12s);
+    display: inline-flex;
+    justify-content: center;
+    white-space: nowrap;
 }
 
 .hero__brand {
     display: inline-block;
 
+    // A soft shadow keeps the light wordmark clear of the logo glow that the
+    // ink uncovers behind it.
     .hero__word {
         text-shadow: 0 0.01em 0.08em rgba(10, 15, 20, 0.45);
     }
@@ -345,8 +412,11 @@ onBeforeUnmount(() => {
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    animation: word-rise 1.3s $ease_out_expo forwards, shimmer 9s linear infinite;
-    animation-delay: calc(0.25s + var(--i) * 0.12s), 0s;
+    animation: shimmer 9s linear infinite;
+    // The gradient only paints inside the box: give it room on both sides so
+    // bits wider than the letters (while the width is held) are not cut off.
+    padding-inline: 0.5em;
+    margin-inline: -0.5em;
 }
 
 
@@ -361,8 +431,6 @@ onBeforeUnmount(() => {
         display: flex;
         flex-direction: column;
         align-items: center;
-    // A soft shadow keeps the light wordmark clear of the logo glow that the
-    // ink uncovers behind it.
     }
 
     :deep(.install-cmd__box) {
@@ -559,21 +627,6 @@ onBeforeUnmount(() => {
     }
 }
 
-.name-swap-enter-active,
-.name-swap-leave-active {
-    transition: opacity 0.3s ease, transform 0.45s $ease_out_expo;
-}
-
-.name-swap-enter-from {
-    opacity: 0;
-    transform: translateY(6px);
-}
-
-.name-swap-leave-to {
-    opacity: 0;
-    transform: translateY(-6px);
-}
-
 .hero-sticky-cta {
     position: fixed;
     left: 50%;
@@ -694,9 +747,21 @@ onBeforeUnmount(() => {
     }
 }
 
-@keyframes word-rise {
+@keyframes title-show {
     to {
-        transform: translateY(0) rotate(0);
+        opacity: 1;
+    }
+}
+
+@keyframes title-in {
+    from {
+        opacity: 0;
+        transform: scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
     }
 }
 

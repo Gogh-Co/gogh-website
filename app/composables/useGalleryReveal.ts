@@ -1,8 +1,9 @@
 import type { Ref } from 'vue';
 
 // Reveals gallery cards as they scroll into view: each batch of cards that
-// enters together is staggered in reading order (a wave), the card wipes in,
-// its swatches flip from bits to colors, and its name decodes from binary.
+// enters together is staggered in reading order (a wave), the card fades in
+// where it stands, then its swatches flip from bits to colors and its name
+// decodes from binary (only once the card is in place, so they never mix).
 //
 // Cards are `.gallery-card` elements inside `grid`. The hidden starting state
 // only applies while the grid has `.is-animated`, which is added on mount,
@@ -30,12 +31,12 @@ export function useGalleryReveal(grid: Ref<HTMLElement | null>) {
     function reveal(card: HTMLElement, delay: number) {
         card.style.setProperty('--reveal-delay', `${delay}ms`);
         card.classList.add('is-revealed');
-        binaryDecode(card.querySelector(NAME_SELECTOR), { delay: delay + 180, duration: 650 });
+        binaryDecode(card.querySelector(NAME_SELECTOR), { delay: delay + 360, duration: 600 });
         // Detailed view: the color lines and the command decode as they type in.
         binaryDecode(card.querySelector('.body__txt'), { delay: delay + 420, duration: 900 });
         binaryDecode(card.querySelector('.cmd'), { delay: delay + 1000, duration: 500 });
         later(() => {
-            // Done: drop the delay and the clip so hover effects work normally.
+            // Done: drop the delay so hover effects work normally.
             card.classList.add('is-settled');
             card.style.removeProperty('--reveal-delay');
         }, delay + SETTLE_MS);
