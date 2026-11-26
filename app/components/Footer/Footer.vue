@@ -8,6 +8,11 @@
                         <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="m5.825 21l1.625-7.025L2 9.25l7.2-.625L12 2l2.8 6.625l7.2.625l-5.45 4.725L18.175 21L12 17.275z"/></svg>
                         Star Gogh on GitHub
                     </a>
+
+                    <div class="gogh-footer__share">
+                        <span class="gogh-footer__col-title">Share Gogh</span>
+                        <ThemeShareButtons :url="shareUrl" :theme="GOGH_SHARE_THEME" :previews="false" align="start" />
+                    </div>
                 </div>
 
                 <nav class="gogh-footer__col" aria-label="Explore">
@@ -67,6 +72,19 @@
 </template>
 
 <script setup>
+import ThemeShareButtons from '@/components/Terminal/ThemeShareButtons.vue';
+
+// Share buttons for whatever page is open, tinted with the Gogh palette
+// (the buttons pick each network's colour from a theme's ANSI slots).
+const GOGH_SHARE_THEME = {
+    background: '#0A0F14',
+    foreground: '#ECF0F1',
+    ...Object.fromEntries(GOGH_LOGO_COLORS.map((color, index) => [`color_${String(index + 1).padStart(2, '0')}`, color])),
+};
+
+const route = useRoute();
+const shareUrl = computed(() => canonicalUrl(route.path));
+
 const PALETTE = [
     '#243342', '#C54133', '#27AE60', '#EDB20A', '#2479D0', '#7D3EA0', '#1D8579', '#C9CCCD',
     '#34495E', '#E74C3C', '#2ECC71', '#F1C40F', '#3498DB', '#9B59B6', '#2AA198', '#ECF0F1',

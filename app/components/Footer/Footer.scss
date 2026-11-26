@@ -70,6 +70,14 @@
     }
 }
 
+// "Share Gogh": the page's share buttons under the star CTA.
+.gogh-footer__share {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 36px;
+}
+
 .gogh-footer__col {
     display: flex;
     flex-direction: column;

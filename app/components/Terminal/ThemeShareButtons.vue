@@ -1,6 +1,6 @@
 <template>
-    <div class="share">
-        <div class="share-buttons" role="group" :aria-label="`Share ${themeName}`">
+    <div class="share" :class="{ 'share--start': align === 'start' }">
+        <div class="share-buttons" role="group" :aria-label="`Share ${themeName || 'Gogh'}`">
             <a
                 v-for="network in networks"
                 :key="network.id"
@@ -33,7 +33,7 @@
             <span class="share-buttons__status" role="status" aria-live="polite">{{ copied ? 'Link copied' : '' }}</span>
         </div>
 
-        <nav class="share-previews" aria-label="Preview the share card">
+        <nav v-if="previews" class="share-previews" aria-label="Preview the share card">
             <span class="share-previews__label">Preview card</span>
             <template v-for="(tool, index) in previewTools" :key="tool.id">
                 <span v-if="index" class="share-previews__sep" aria-hidden="true">·</span>
@@ -69,6 +69,16 @@ const props = defineProps({
     url: {
         type: String,
         default: '',
+    },
+    // The "Preview card" debugger links under the icons.
+    previews: {
+        type: Boolean,
+        default: true,
+    },
+    // 'center' (lightbox, theme page) or 'start' (footer).
+    align: {
+        type: String,
+        default: 'center',
     },
 });
 
@@ -184,6 +194,15 @@ onBeforeUnmount(() => clearTimeout(copiedTimer));
 // page's filter buttons. px: this site's rem is 10px.
 .share {
     margin: 0 0 24px;
+}
+
+.share--start {
+    margin: 0;
+
+    .share-buttons,
+    .share-previews {
+        justify-content: flex-start;
+    }
 }
 
 .share-buttons {
