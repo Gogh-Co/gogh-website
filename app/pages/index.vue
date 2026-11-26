@@ -16,9 +16,6 @@
             <header ref="galleryHeader" class="gallery__header">
                 <p class="section-eyebrow gallery__eyebrow"><span>06</span> The collection</p>
                 <div class="gallery__heading">
-                    <h2 class="page-title gallery__title">
-                        Every theme,<br><em>one click away.</em>
-                    </h2>
                     <!-- Hidden for the 100ms setFilter() blanks the filter, so it never flashes "0". -->
                     <p class="gallery__count" aria-live="polite" :style="{ visibility: filter === '' ? 'hidden' : 'visible' }">
                         <strong>{{ filteredThemes.length }}</strong>

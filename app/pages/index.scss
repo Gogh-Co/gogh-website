@@ -766,22 +766,6 @@
     gap: 24px;
 }
 
-.gallery.gogh-content h2.gallery__title {
-    margin: 0;
-    color: var(--site-foreground);
-    font-size: clamp(4.4rem, 7vw, 10rem);
-    font-weight: 900;
-    line-height: 0.92;
-    letter-spacing: -0.05em;
-    text-align: left;
-
-    em {
-        font-style: normal;
-        font-weight: 100;
-        letter-spacing: -0.035em;
-        color: #c54133;
-    }
-}
 
 .gallery.gogh-content p.gallery__count {
     margin: 0;
