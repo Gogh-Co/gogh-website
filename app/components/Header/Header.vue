@@ -39,7 +39,8 @@
                         class="gogh-header__theme-toggle gogh-header__random"
                         :class="{ 'is-loading': randomLoading }"
                         aria-label="Open a random theme"
-                        title="Random theme"
+                        aria-keyshortcuts="r"
+                        title="Random theme (R)"
                         :aria-busy="randomLoading"
                         :disabled="randomLoading"
                         @pointerenter="prefetchThemePaths"
@@ -152,6 +153,28 @@ function prefetchThemePaths() {
     loadThemePagePaths().catch(() => {});
 }
 
+// The R key does what the dice button does, unless the key belongs to
+// something else: a text field, an open dialog or filter, or a shortcut with
+// modifiers (Ctrl+R / Cmd+R still reload the page).
+const RANDOM_KEY_OWNERS = 'input, textarea, select, [contenteditable]:not([contenteditable="false"])';
+
+function onRandomKeydown(event) {
+    if (event.key !== 'r' && event.key !== 'R') {
+        return;
+    }
+    if (event.defaultPrevented || event.repeat || event.altKey || event.ctrlKey || event.metaKey) {
+        return;
+    }
+    if (event.target instanceof Element && event.target.closest(RANDOM_KEY_OWNERS)) {
+        return;
+    }
+    if (document.querySelector('[aria-modal="true"], .color-filter-lightbox')) {
+        return;
+    }
+    event.preventDefault();
+    openRandomTheme();
+}
+
 async function openRandomTheme() {
     if (randomLoading.value) {
         return;
@@ -235,6 +258,7 @@ onMounted(async () => {
     lastScrollY = window.scrollY;
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('keydown', onRandomKeydown);
 
     await checkAuth();
 
@@ -250,6 +274,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
     window.removeEventListener('scroll', onScroll);
+    window.removeEventListener('keydown', onRandomKeydown);
     document.documentElement.classList.remove('gogh-menu-open');
 });
 </script>
