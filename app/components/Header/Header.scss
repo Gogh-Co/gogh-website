@@ -92,8 +92,10 @@ $header_height: 72px;
 .gogh-header__logo-bar {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
-    gap: 2px;
-    width: 58px;
+    grid-template-rows: repeat(2, 1fr);
+    // Blocks sit flush against each other, one solid bar.
+    gap: 0;
+    width: 56px;
     height: 16px;
 }
 
@@ -301,6 +303,33 @@ $header_height: 72px;
     }
 }
 
+// The dice tumbles while the theme list loads.
+.gogh-header__random {
+    &:hover {
+        transform: rotate(90deg);
+    }
+
+    &:disabled {
+        cursor: progress;
+    }
+
+    &.is-loading svg {
+        animation: gogh-header-dice-roll 0.6s $ease_out_expo infinite;
+    }
+
+    @media (max-width: 991.98px) {
+        &:hover {
+            transform: none;
+        }
+    }
+}
+
+@keyframes gogh-header-dice-roll {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 // Two-line burger that morphs into an X.
 .gogh-header__toggle {
     position: relative;
@@ -354,9 +383,18 @@ $header_height: 72px;
     border-radius: 0;
     padding: 0 16px;
 
+    // In the mobile menu it's one more row, like the Random/background ones.
     @media (max-width: 991.98px) {
+        gap: 10px;
         height: auto;
+        min-height: $tap_target_min;
+        padding: 11px 4px;
+        border: 0;
+        border-bottom: 1px solid var(--ink-line);
         border-radius: 0;
+        font-size: 1.5rem;
+        font-weight: 500;
+        letter-spacing: 0;
     }
 }
 

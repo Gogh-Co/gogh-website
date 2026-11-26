@@ -1,15 +1,38 @@
 <template>
     <section ref="root" class="hero" :style="heroStyle">
         <ClientOnly>
-            <StarryCanvas :palette="palette" :background="activeTheme.background" scene />
+            <StarryCanvas :palette="palette" :background="activeTheme.background" />
         </ClientOnly>
         <div class="hero__veil" aria-hidden="true"></div>
+        <ClientOnly>
+            <CodeReveal :theme="activeTheme" />
+        </ClientOnly>
         <div class="hero__grain" aria-hidden="true"></div>
 
         <div ref="content" class="hero__content">
-            <h1 class="hero__title">
+            <h1 ref="title" class="hero__title">
+                <!-- The logo's color bar as a soft, blurred rectangle behind
+                     "GOGH". Shows on hover, or while a finger is on it. -->
+                <span
+                    class="hero__glow"
+                    :class="{ 'is-revealed': cubesRevealed }"
+                    :style="glowStyle"
+                    aria-hidden="true"
+                >
+                    <span v-for="(color, index) in GOGH_LOGO_COLORS" :key="index" :style="{ backgroundColor: color }"></span>
+                </span>
                 <span class="hero__line hero__line--brand">
-                    <span class="hero__word" style="--i: 0">GOGH</span>
+                    <span
+                        ref="brand"
+                        class="hero__brand"
+                        @pointerenter="onBrandPointerEnter"
+                        @pointerleave="onBrandPointerLeave"
+                        @pointerdown="onBrandPointerDown"
+                        @pointerup="onBrandPointerEnd"
+                        @pointercancel="onBrandPointerEnd"
+                    >
+                        <span class="hero__word" style="--i: 0">GOGH</span>
+                    </span>
                 </span>
                 <span class="hero__line hero__line--sub">
                     <em class="hero__word hero__word--accent" style="--i: 1">terminal schemes</em>
@@ -90,6 +113,7 @@
 
 <script setup>
 import StarryCanvas from './StarryCanvas.vue';
+import CodeReveal from './CodeReveal.vue';
 import InstallCommand from './InstallCommand.vue';
 
 const props = defineProps({
@@ -127,6 +151,67 @@ const stickyVisible = ref(false);
 const stickyTop = ref(88);
 let stickyTicking = false;
 let headerObserver = null;
+
+// The glow sits behind the wordmark and shows while the mouse is
+// on "GOGH", or while a finger is (lingering a moment after it lifts).
+const brand = ref(null);
+const cubesRevealed = ref(false);
+const glowStyle = ref({});
+let cubesTimer = null;
+
+const title = ref(null);
+
+// A wide rectangle centered on "GOGH", a bit larger than the word itself.
+function placeGlow() {
+    const box = title.value?.getBoundingClientRect();
+    const word = brand.value?.getBoundingClientRect();
+    if (!box || !word) {
+        return;
+    }
+    const em = parseFloat(getComputedStyle(title.value).fontSize) || 0;
+    const width = word.width + em * 0.7;
+    const height = em * 0.8;
+    glowStyle.value = {
+        left: `${word.left - box.left + (word.width - width) / 2}px`,
+        top: `${word.top - box.top + (word.height - height) / 2}px`,
+        width: `${width}px`,
+        height: `${height}px`,
+    };
+}
+
+function revealCubes() {
+    clearTimeout(cubesTimer);
+    placeGlow();
+    cubesRevealed.value = true;
+}
+
+function onBrandPointerEnter(event) {
+    if (event.pointerType === 'mouse') {
+        revealCubes();
+    }
+}
+
+function onBrandPointerLeave(event) {
+    if (event.pointerType === 'mouse') {
+        cubesRevealed.value = false;
+    }
+}
+
+function onBrandPointerDown(event) {
+    if (event.pointerType !== 'mouse') {
+        revealCubes();
+    }
+}
+
+function onBrandPointerEnd(event) {
+    if (event.pointerType === 'mouse') {
+        return;
+    }
+    clearTimeout(cubesTimer);
+    cubesTimer = setTimeout(() => {
+        cubesRevealed.value = false;
+    }, 1200);
+}
 
 // Visible once the hero button has scrolled up under the header, hidden
 // again as soon as the gallery (#themes) starts entering the screen.
@@ -218,6 +303,7 @@ onBeforeUnmount(() => {
     window.removeEventListener('resize', onStickyScroll);
     headerObserver?.disconnect();
     clearInterval(rotateTimer);
+    clearTimeout(cubesTimer);
     gsapContext?.revert();
 });
 </script>
@@ -250,8 +336,8 @@ onBeforeUnmount(() => {
     inset: 0;
     z-index: 1;
     background:
-        radial-gradient(46% 48% at 50% 50%, color-mix(in srgb, var(--hero-bg) 82%, transparent) 0%, color-mix(in srgb, var(--hero-bg) 45%, transparent) 55%, transparent 85%),
-        linear-gradient(180deg, transparent 92%, var(--hero-bg) 100%);
+        radial-gradient(60% 65% at 50% 50%, color-mix(in srgb, var(--hero-bg) 90%, transparent) 0%, color-mix(in srgb, var(--hero-bg) 55%, transparent) 50%, transparent 80%),
+        linear-gradient(180deg, transparent 60%, var(--hero-bg) 100%);
     pointer-events: none;
     transition: background 1.2s ease;
 }
@@ -279,6 +365,7 @@ onBeforeUnmount(() => {
 
 
 .hero__title {
+    position: relative;
     margin: 0 0 40px;
     color: var(--cream);
     font-family: $font_display;
@@ -313,6 +400,50 @@ onBeforeUnmount(() => {
     transform-origin: center bottom;
     animation: word-rise 1.3s $ease_out_expo forwards;
     animation-delay: calc(0.25s + var(--i) * 0.12s);
+}
+
+.hero__brand {
+    display: inline-block;
+    -webkit-tap-highlight-color: transparent;
+
+    .hero__word {
+        transition: text-shadow 0.6s ease;
+    }
+}
+
+// A soft shadow keeps the light wordmark clear of the lighter colors.
+.hero__title:has(.hero__glow.is-revealed) .hero__brand .hero__word {
+    text-shadow: 0 0.01em 0.08em rgba(10, 15, 20, 0.45);
+}
+
+// The logo's 8x2 color bar as one soft rectangle behind "GOGH" (placed by
+// placeGlow). It lives in the title, not in the masked line, so its blur
+// never gets clipped. Hidden until hover/touch.
+.hero__glow {
+    position: absolute;
+    z-index: -1;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    opacity: 0;
+    filter: blur(0.1em) saturate(1.2);
+    transform: scale(0.92, 0.8);
+    transition:
+        opacity 0.6s ease,
+        filter 0.9s $ease_out_expo,
+        transform 0.9s $ease_out_expo;
+    pointer-events: none;
+
+    &.is-revealed {
+        opacity: 0.6;
+        filter: blur(0.05em) saturate(1.2);
+        transform: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        transform: none;
+        transition: opacity 0.4s ease;
+    }
 }
 
 .hero__word--accent {

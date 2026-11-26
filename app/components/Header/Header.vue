@@ -8,7 +8,7 @@
         }"
     >
         <div class="gogh-header__inner">
-            <NuxtLink to="/" class="gogh-header__brand" aria-label="Gogh home" @click="mobileNavOpen = false">
+            <NuxtLink to="/" class="gogh-header__brand" aria-label="Gogh home" @click="onBrandClick">
                 <span class="gogh-header__brand-text">Gogh</span>
                 <span class="gogh-header__logo-bar" aria-hidden="true">
                     <span
@@ -34,6 +34,22 @@
                 </NuxtLink>
 
                 <div class="gogh-header__tools">
+                    <button
+                        type="button"
+                        class="gogh-header__theme-toggle gogh-header__random"
+                        :class="{ 'is-loading': randomLoading }"
+                        aria-label="Open a random theme"
+                        title="Random theme"
+                        :aria-busy="randomLoading"
+                        :disabled="randomLoading"
+                        @pointerenter="prefetchThemePaths"
+                        @focus="prefetchThemePaths"
+                        @click="openRandomTheme"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2m2.5 3a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3m9 0a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3M12 10.5a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3M7.5 15a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3m9 0a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3"/></svg>
+                        <span class="gogh-header__theme-toggle-label">Random theme</span>
+                    </button>
+
                     <button
                         type="button"
                         class="gogh-header__theme-toggle"
@@ -98,10 +114,45 @@ const { pageTheme, togglePageTheme, initPageTheme } = usePageTheme();
 const { user, checkAuth } = useAuth();
 const { initFavorites, mergeAfterLogin, mergedThisSession } = useFavorites();
 
-const logoBarColors = [
-    '#243342', '#C54133', '#27AE60', '#EDB20A', '#2479D0', '#7D3EA0', '#1D8579', '#C9CCCD',
-    '#34495E', '#E74C3C', '#2ECC71', '#F1C40F', '#3498DB', '#9B59B6', '#2AA198', '#ECF0F1',
-];
+const logoBarColors = GOGH_LOGO_COLORS;
+
+const route = useRoute();
+const randomLoading = ref(false);
+
+// Already on the home page the link would be a no-op, so it scrolls back to
+// the top instead (after the mobile menu has released the page scroll).
+async function onBrandClick(event) {
+    mobileNavOpen.value = false;
+    if (route.path !== '/') {
+        return;
+    }
+    event.preventDefault();
+    await nextTick();
+    scrollToTarget(0, 0);
+}
+
+// Warm the theme list on hover/focus so the click itself feels instant.
+function prefetchThemePaths() {
+    loadThemePagePaths().catch(() => {});
+}
+
+async function openRandomTheme() {
+    if (randomLoading.value) {
+        return;
+    }
+    randomLoading.value = true;
+    try {
+        const path = await pickRandomThemePagePath(route.path);
+        if (path) {
+            mobileNavOpen.value = false;
+            await navigateTo(path);
+        }
+    } catch {
+        // Theme list unavailable (offline / API rate limit): stay put.
+    } finally {
+        randomLoading.value = false;
+    }
+}
 
 let lastScrollY = 0;
 let ticking = false;

@@ -39,11 +39,16 @@
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
     // "glass" sits on the animated hero, "solid" on plain dark sections.
     tone: {
         type: String,
         default: 'glass',
+    },
+    // Installs this theme directly instead of opening the interactive menu.
+    themeName: {
+        type: String,
+        default: '',
     },
 });
 
@@ -56,7 +61,10 @@ const os = ref('linux');
 const copied = ref(false);
 let copiedTimer = null;
 
-const command = computed(() => OPTIONS.find((option) => option.id === os.value)?.command ?? OPTIONS[0].command);
+const command = computed(() => {
+    const base = OPTIONS.find((option) => option.id === os.value)?.command ?? OPTIONS[0].command;
+    return props.themeName ? `${base} -- "${props.themeName.replace(/"/g, '\\"')}"` : base;
+});
 const indicatorStyle = computed(() => {
     const index = OPTIONS.findIndex((option) => option.id === os.value);
     return { transform: `translateX(${index * 100}%)` };

@@ -3,10 +3,14 @@
         <NuxtPage />
     </NuxtLayout>
     <Footer />
+    <ClientOnly>
+        <GoToTop />
+    </ClientOnly>
 </template>
 
 <script setup>
 import Footer from '@/components/Footer/Footer.vue';
+import GoToTop from '@/components/Buttons/GoToTop.vue';
 
 const { app } = useRuntimeConfig();
 
@@ -98,6 +102,7 @@ useSeoMeta({
     twitterCard: 'summary_large_image',
     twitterImage: SITE_IMAGE,
     twitterImageAlt: SITE_IMAGE_ALT,
+    twitterSite: SITE_AUTHOR.twitter,
     twitterCreator: SITE_AUTHOR.twitter,
 });
 </script>

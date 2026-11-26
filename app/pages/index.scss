@@ -749,12 +749,19 @@
     }
 }
 
+// Eyebrow and theme count share one line, on a common baseline.
 .gallery__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px 24px;
     max-width: 2100px;
-    margin: 0 auto 56px;
+    margin: 0 auto 32px;
 }
 
-.gallery__eyebrow {
+.gallery__eyebrow.section-eyebrow {
+    margin: 0;
     color: color-mix(in srgb, var(--site-foreground) 60%, transparent);
 }
 
