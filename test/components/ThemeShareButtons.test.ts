@@ -43,6 +43,17 @@ describe('ThemeShareButtons', () => {
         expect(wrapper.find('button.share-buttons__btn').attributes('aria-label')).toBe('Link copied');
     });
 
+    it('swaps the native tooltip for a visible name when asked', async () => {
+        const plain = await mountSuspended(ThemeShareButtons, { props: { themeName: 'Dracula' } });
+        expect(plain.find('.share-buttons__label').exists()).toBe(false);
+        expect(plain.find('a[aria-label="Share on X"]').attributes('title')).toBe('X');
+
+        const labelled = await mountSuspended(ThemeShareButtons, { props: { themeName: 'Dracula', labels: true } });
+        const labels = labelled.findAll('.share-buttons__label').map((label) => label.text());
+        expect(labels).toEqual(['X', 'Facebook', 'LinkedIn', 'Reddit', 'Bluesky', 'WhatsApp', 'Telegram', 'Copy link']);
+        expect(labelled.find('a[aria-label="Share on X"]').attributes('title')).toBeUndefined();
+    });
+
     it('colours each network from the open theme', async () => {
         const theme = {
             background: '#101010', foreground: '#eeeeee',

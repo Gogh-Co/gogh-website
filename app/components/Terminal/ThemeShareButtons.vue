@@ -10,11 +10,12 @@
                 target="_blank"
                 rel="noopener noreferrer"
                 :aria-label="`Share on ${network.label}`"
-                :title="network.label"
+                :title="labels ? null : network.label"
             >
                 <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true">
                     <path v-for="(d, index) in network.paths" :key="index" fill="currentColor" :d="d" />
                 </svg>
+                <span v-if="labels" class="share-buttons__label" aria-hidden="true">{{ network.label }}</span>
             </a>
 
             <button
@@ -23,12 +24,13 @@
                 :class="{ 'is-copied': copied }"
                 :style="copied ? null : { '--brand': copyColor.color, '--brand-ink': copyColor.ink }"
                 :aria-label="copied ? 'Link copied' : 'Copy link'"
-                :title="copied ? 'Copied' : 'Copy link'"
+                :title="labels ? null : (copied ? 'Copied' : 'Copy link')"
                 @click="copyLink"
             >
                 <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true">
                     <path v-for="(d, index) in (copied ? ICONS.check : ICONS.link)" :key="index" fill="currentColor" :d="d" />
                 </svg>
+                <span v-if="labels" class="share-buttons__label" aria-hidden="true">{{ copied ? 'Copied' : 'Copy link' }}</span>
             </button>
             <span class="share-buttons__status" role="status" aria-live="polite">{{ copied ? 'Link copied' : '' }}</span>
         </div>
@@ -50,7 +52,7 @@
 </template>
 
 <script setup>
-// Icon-only share links for the lightbox: no marketing copy, just the site
+// Icon-only share links: no marketing copy, just the site
 // URL (the theme name rides along as the post text where a network takes
 // one). Icons: Bootstrap Icons (MIT), 16x16 viewBox. Colours come from the
 // theme being previewed, so the row matches whatever scheme is open.
@@ -65,7 +67,7 @@ const props = defineProps({
         type: Object,
         default: null,
     },
-    // Page to share; the site root when empty (the gallery lightbox).
+    // Page to share; the site root when empty.
     url: {
         type: String,
         default: '',
@@ -75,7 +77,13 @@ const props = defineProps({
         type: Boolean,
         default: true,
     },
-    // 'center' (lightbox, theme page) or 'start' (footer).
+    // A visible name per button (styled by the parent) instead of the
+    // native title tooltip.
+    labels: {
+        type: Boolean,
+        default: false,
+    },
+    // 'center' (theme page) or 'start' (footer).
     align: {
         type: String,
         default: 'center',
@@ -197,7 +205,7 @@ onBeforeUnmount(() => clearTimeout(copiedTimer));
 </script>
 
 <style lang="scss" scoped>
-// Square, bordered, icon-only: same language as the lightbox tabs and the
+// Square, bordered, icon-only: same language as the preview tabs and the
 // page's filter buttons. px: this site's rem is 10px.
 .share {
     margin: 0 0 24px;
