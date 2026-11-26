@@ -11,7 +11,9 @@
 // with the real hex values (each one painted in its color), a few lines of
 // shell, and rows of bits that keep flipping, a handful of them lit. A click
 // splashes the ink; holding the press spreads it until the whole hero is code,
-// and letting go lets the paint flow back.
+// and letting go lets the paint flow back. Behind the wordmark, the hidden
+// layer also holds the logo's color bar, softly blurred: the ink finds it
+// wherever it passes over "Gogh".
 
 const props = defineProps({
     // A Gogh theme: name, background, foreground, color_01 .. color_16.
@@ -19,7 +21,19 @@ const props = defineProps({
         type: Object,
         required: true,
     },
+    // The element the logo glow sits behind (the "Gogh" wordmark), and the
+    // logo's 16 colors (8 columns x 2 rows).
+    glowAnchor: {
+        type: Object,
+        default: null,
+    },
+    glowColors: {
+        type: Array,
+        default: () => [],
+    },
 });
+
+const GLOW_ALPHA = 0.6;
 
 const CODE_FONT = '"Roboto Mono", ui-monospace, monospace';
 // One mask pixel covers MASK_SCALE x MASK_SCALE CSS pixels.
@@ -363,11 +377,12 @@ function cellColor(cell) {
     return cell.hot ? colors.hot : cell.color;
 }
 
+// The text layer is transparent: the paper and the glow go under it when the
+// layers are composited.
 function paintText() {
     const { cols, rows, charW, lineH, size, cells } = grid;
     textCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    textCtx.fillStyle = colors.paper;
-    textCtx.fillRect(0, 0, width, height);
+    textCtx.clearRect(0, 0, width, height);
     textCtx.font = `500 ${size}px ${CODE_FONT}`;
     textCtx.textBaseline = 'middle';
     textCtx.textAlign = 'left';
@@ -396,8 +411,7 @@ function paintCell(index) {
     const cell = cells[index];
     const x = (index % cols) * charW;
     const y = Math.floor(index / cols) * lineH;
-    textCtx.fillStyle = colors.paper;
-    textCtx.fillRect(x - 0.5, y, charW + 1, lineH);
+    textCtx.clearRect(x - 0.5, y, charW + 1, lineH);
     textCtx.font = `500 ${size}px ${CODE_FONT}`;
     textCtx.fillStyle = cellColor(cell);
     textCtx.fillText(cell.ch, x, y + lineH / 2);
@@ -668,6 +682,7 @@ function step(now) {
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, width, height);
+    ctx.globalAlpha = 1;
 
     const saved = head.r;
     head.r = headR;
@@ -675,6 +690,9 @@ function step(now) {
     if (covered) {
         // Fully open: no edge on screen, so skip the mask altogether.
         flipBits(now, { x0: 0, y0: 0, x1: width, y1: height });
+        ctx.fillStyle = colors.paper;
+        ctx.fillRect(0, 0, width, height);
+        paintGlow();
         ctx.drawImage(text, 0, 0, width * dpr, height * dpr, 0, 0, width, height);
     } else if (box) {
         const area = paintMask(box, now);
@@ -687,7 +705,12 @@ function step(now) {
             ctx.imageSmoothingEnabled = true;
             ctx.globalCompositeOperation = 'source-over';
             ctx.drawImage(ink, area.x0, area.y0, area.w, area.h, sx, sy, sw, sh);
+            // Inside the ink: paper, then the logo glow, then the code.
             ctx.globalCompositeOperation = 'source-in';
+            ctx.fillStyle = colors.paper;
+            ctx.fillRect(sx, sy, sw, sh);
+            ctx.globalCompositeOperation = 'source-atop';
+            paintGlow();
             ctx.drawImage(text, sx * dpr, sy * dpr, sw * dpr, sh * dpr, sx, sy, sw, sh);
             ctx.globalCompositeOperation = 'source-over';
             ctx.drawImage(rim, area.x0, area.y0, area.w, area.h, sx, sy, sw, sh);
@@ -806,6 +829,65 @@ function onVisibilityChange() {
         release();
         pause();
     }
+}
+
+/* ------------------------------------------------------------------ glow */
+
+// The logo's color bar as a soft rectangle a bit larger than "Gogh",
+// pre-blurred once per size so each frame only has to stamp it.
+let glow = null;
+let glowKey = '';
+
+function glowBox() {
+    const anchor = props.glowAnchor;
+    if (!anchor?.getBoundingClientRect || !canvas.value) return null;
+    const word = anchor.getBoundingClientRect();
+    if (!word.width) return null;
+    const host = canvas.value.getBoundingClientRect();
+    const em = parseFloat(getComputedStyle(anchor).fontSize) || word.height;
+    const w = word.width + em * 0.7;
+    const h = em * 0.8;
+    return {
+        x: word.left - host.left + (word.width - w) / 2,
+        y: word.top - host.top + (word.height - h) / 2,
+        w,
+        h,
+        blur: em * 0.05,
+    };
+}
+
+function buildGlow(box) {
+    const key = `${Math.round(box.w)}x${Math.round(box.h)}@${dpr}:${props.glowColors.join()}`;
+    if (glow && glowKey === key) return;
+    glowKey = key;
+    const pad = Math.ceil(box.blur * 3);
+    glow = glow || document.createElement('canvas');
+    glow.width = Math.ceil((box.w + pad * 2) * dpr);
+    glow.height = Math.ceil((box.h + pad * 2) * dpr);
+    glow.pad = pad;
+    const g = glow.getContext('2d');
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.clearRect(0, 0, glow.width, glow.height);
+    if ('filter' in g) g.filter = `blur(${box.blur}px) saturate(1.2)`;
+    const cols = 8;
+    const cellW = box.w / cols;
+    const cellH = box.h / 2;
+    props.glowColors.slice(0, 16).forEach((color, index) => {
+        g.fillStyle = color;
+        // Overlap by a hair so the blur leaves no seams between cells.
+        g.fillRect(pad + (index % cols) * cellW - 0.5, pad + Math.floor(index / cols) * cellH - 0.5, cellW + 1, cellH + 1);
+    });
+}
+
+// Stamps the glow where "Gogh" is right now (it drifts as the hero scrolls).
+function paintGlow() {
+    if (!props.glowColors.length) return;
+    const box = glowBox();
+    if (!box) return;
+    buildGlow(box);
+    ctx.globalAlpha = GLOW_ALPHA;
+    ctx.drawImage(glow, 0, 0, glow.width, glow.height, box.x - glow.pad, box.y - glow.pad, glow.width / dpr, glow.height / dpr);
+    ctx.globalAlpha = 1;
 }
 
 /* ---------------------------------------------------------------- layout */
