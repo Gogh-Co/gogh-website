@@ -28,7 +28,9 @@
             <PersistenceBanner />
         </div>
 
-        <div class="container-fluid">
+        <!-- Sticks under the header while the collection scrolls; once stuck
+             it condenses into a single scrollable row. -->
+        <div ref="galleryToolbar" class="container-fluid gallery__toolbar" :class="{ 'is-stuck': toolbarStuck }">
             <div class="row">
                 <div class="col-md-12">
                     <div class="filters">
@@ -146,7 +148,11 @@
         <div class="container-fluid">
             <div ref="galleryGrid" class="row gallery-grid" :class="{ 'is-animated': galleryReveal.enabled.value }">
                 <template v-for="theme in visibleThemes" :key="getThemeName(theme) || theme.background + theme.foreground">
-                    <div class="gallery-card" :class="viewMode === 'compact' ? 'col-6 col-md-4 col-lg-3 col-xl-2' : 'col-12 col-md-6  col-xl-4'">
+                    <div
+                        class="gallery-card"
+                        :class="viewMode === 'compact' ? 'col-6 col-md-4 col-lg-3 col-xl-2' : 'col-12 col-md-6  col-xl-4'"
+                        :style="{ '--card-bg': theme.background, '--card-fg': theme.foreground }"
+                    >
                         <div
                             class="terminal-preview"
                             :class="{ 'terminal-preview--detailed': viewMode === 'detailed' }"
@@ -377,6 +383,35 @@ const galleryGrid = ref(null);
 const galleryCount = ref(null);
 const galleryReveal = useGalleryReveal(galleryGrid);
 const loadingMore = ref(false);
+const galleryToolbar = ref(null);
+const toolbarStuck = ref(false);
+let toolbarTicking = false;
+
+// The toolbar is "stuck" once its top reaches the sticky offset set in CSS.
+function updateToolbarStuck() {
+    toolbarTicking = false;
+    const element = galleryToolbar.value;
+    if (!element) {
+        return;
+    }
+    const stickyTop = parseFloat(getComputedStyle(element).top) || 0;
+    const rect = element.getBoundingClientRect();
+    const stuck = rect.top <= stickyTop + 1 && window.scrollY > 0;
+    if (stuck === toolbarStuck.value) {
+        return;
+    }
+    // Freeze the toolbar's height while stuck: the filters condense to one
+    // row, but the page below mustn't jump (or the stuck state would flicker).
+    element.style.height = stuck ? `${element.offsetHeight}px` : '';
+    toolbarStuck.value = stuck;
+}
+
+function onToolbarScroll() {
+    if (!toolbarTicking) {
+        toolbarTicking = true;
+        requestAnimationFrame(updateToolbarStuck);
+    }
+}
 let galleryMotion = null;
 
 function scrollToGallery() {
@@ -1143,6 +1178,8 @@ onMounted(() => {
     }
 
     window.addEventListener('keydown', onWindowKeydown);
+    window.addEventListener('scroll', onToolbarScroll, { passive: true });
+    updateToolbarStuck();
 
     if (loadMoreSentinel.value && typeof IntersectionObserver !== 'undefined') {
         loadMoreObserver = new IntersectionObserver((entries) => {
@@ -1161,6 +1198,7 @@ onUnmounted(() => {
     setPageScrollLocked(false);
     smoothScroll.stop();
     window.removeEventListener('keydown', onWindowKeydown);
+    window.removeEventListener('scroll', onToolbarScroll);
     loadMoreObserver?.disconnect();
 });
 </script>

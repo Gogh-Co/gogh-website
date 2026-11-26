@@ -11,7 +11,7 @@ import type { Ref } from 'vue';
 const STAGGER_MS = 38;
 const MAX_STAGGER_STEPS = 22;
 // Matches the longest CSS transition in the reveal (see index.scss).
-const SETTLE_MS = 1400;
+const SETTLE_MS = 2000;
 const NAME_SELECTOR = '.compact-card__name, .bar__title';
 
 export function useGalleryReveal(grid: Ref<HTMLElement | null>) {
@@ -31,6 +31,9 @@ export function useGalleryReveal(grid: Ref<HTMLElement | null>) {
         card.style.setProperty('--reveal-delay', `${delay}ms`);
         card.classList.add('is-revealed');
         binaryDecode(card.querySelector(NAME_SELECTOR), { delay: delay + 180, duration: 650 });
+        // Detailed view: the color lines and the command decode as they type in.
+        binaryDecode(card.querySelector('.body__txt'), { delay: delay + 420, duration: 900 });
+        binaryDecode(card.querySelector('.cmd'), { delay: delay + 1000, duration: 500 });
         later(() => {
             // Done: drop the delay and the clip so hover effects work normally.
             card.classList.add('is-settled');
