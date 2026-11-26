@@ -1,14 +1,13 @@
 <template>
-    <!-- Sits beside FavoriteButton on a gallery card. Clicks and Enter/Space
-         must not bubble to the card, which would open the lightbox instead. -->
+    <!-- Sits beside FavoriteButton on a gallery card as a visual cue: the
+         card itself is already a link to the same page, so this one stays
+         out of the tab order and away from screen readers. -->
     <NuxtLink
         class="theme-page-link"
         :to="themePagePath(themeName)"
-        :aria-label="`Open the ${themeName} theme page`"
         :title="`${themeName} theme page`"
-        @click.stop
-        @keydown.enter.stop
-        @keydown.space.stop
+        tabindex="-1"
+        aria-hidden="true"
     >
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
             <!-- Material Symbols "arrow_outward" (Apache 2.0) -->

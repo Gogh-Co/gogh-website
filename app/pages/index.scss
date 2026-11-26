@@ -568,13 +568,25 @@
 
 /**
 * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-* ······· Lighbox
+* ······· Gallery cards
 * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 */
 
 .terminal-preview {
     position: relative;
-    cursor: zoom-in;
+}
+
+// The card's link to its theme page, stretched over the whole card. The
+// favorite and page buttons sit above it (z-index 2).
+.terminal-preview__link {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+
+    &:focus-visible {
+        outline: 2px solid var(--site-foreground, currentColor);
+        outline-offset: 4px;
+    }
 }
 
 // In detailed view the card is a full terminal: keep the favorite button
@@ -599,111 +611,6 @@
         bottom: 16px;
         right: 50px;
     }
-}
-
-.terminal-lightbox {
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    background-color: rgba(5, 8, 12, 0.94);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-    animation: lightbox-backdrop-in 0.2s ease forwards;
-}
-
-.terminal-lightbox__content {
-    width: min(1200px, 100%);
-    max-height: 100%;
-    overflow: auto;
-    animation: lightbox-content-in 0.28s ease forwards;
-
-    .code-wrap {
-        margin-bottom: 20px;
-
-        .code-holder {
-            display: inline-block;
-        }
-    }
-
-    .terminal {
-        box-shadow: 2px 4px 20px rgba(27, 27, 27, 0.95);
-    }
-
-    // Install command under the preview: one flat block (no outer frame
-    // with a gap around the code) with the copy button as a full-height
-    // segment on its right. Sizes in px: this site's rem is 10px.
-    .lightbox-code-holder {
-        max-width: 100%;
-        overflow: hidden;
-        text-align: center;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
-
-        pre[class*="language-"] {
-            margin: 0;
-            padding: 0;
-            border-radius: 0;
-        }
-
-        .language-bash {
-            display: block;
-            padding: 16px 76px 16px 24px;
-            text-align: center;
-        }
-
-        .btn-copy {
-            top: 0;
-            right: 0;
-            bottom: 0;
-            align-items: center;
-            justify-content: center;
-            width: 56px;
-            max-width: none;
-            height: auto;
-            padding: 0;
-            border-radius: 0;
-            background-color: #121f2a;
-
-            svg {
-                width: 22px;
-                height: 22px;
-                fill: #ECF0F1;
-            }
-
-            &:hover {
-                background-color: #000000;
-            }
-
-            &:focus-visible {
-                outline: 2px solid #FF0883;
-                outline-offset: -2px;
-            }
-        }
-    }
-}
-
-.terminal-lightbox__install {
-    text-align: center;
-}
-
-.terminal-lightbox__close {
-    position: absolute;
-    top: 14px;
-    right: 18px;
-    border: 0;
-    border-radius: 0;
-    background: rgba(255, 255, 255, 0.15);
-    color: #ffffff;
-    width: 44px;
-    height: 44px;
-    font-size: 30px;
-    line-height: 1;
-    cursor: pointer;
-}
-
-.terminal-lightbox__close:hover {
-    background: rgba(255, 255, 255, 0.25);
 }
 
 .load-more-sentinel {
@@ -831,8 +738,7 @@
     }
 }
 
-// Lightbox: rounder, softer entrance to match the rest of the redesign.
-.terminal-lightbox,
+// Filter dialogs: blur the page behind them.
 .color-filter-lightbox,
 .background-lightbox {
     backdrop-filter: blur(10px);

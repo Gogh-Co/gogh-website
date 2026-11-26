@@ -5,7 +5,7 @@
                 <p class="section-eyebrow previews__eyebrow"><span>03</span> In the wild</p>
                 <h2 id="theme-previews-title" class="section-title previews__title">See it <em>at work.</em></h2>
                 <p class="previews__lede">
-                    A palette view, the same terminals as the gallery lightbox, then a blog, an Omarchy desktop and a
+                    A palette view, a Linux home and a JavaScript file, then a blog, an Omarchy desktop and a
                     Quickshell desktop, so you can judge {{ themeName }} on everyday output instead of swatches. Each
                     one lists the colors it uses and what they paint.
                 </p>
@@ -320,7 +320,7 @@ onBeforeUnmount(() => gsapContext?.revert());
     }
 }
 
-// Window first on narrow screens: it's what the text describes.
+// Window first on narrow screens: it is what the text describes.
 .preview__stage {
     order: -1;
     min-width: 0;

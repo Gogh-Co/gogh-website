@@ -1,6 +1,6 @@
 import chroma from 'chroma-js';
 
-// What each palette slot is and where the lightbox previews paint it. The
+// What each palette slot is and where the theme page previews paint it. The
 // roles mirror HomePreviewTerminal (dircolors / PS1 / git status) and
 // CodePreviewTerminal (TOKEN_COLOR_KEYS), so the text on a theme page
 // describes exactly what its previews show.

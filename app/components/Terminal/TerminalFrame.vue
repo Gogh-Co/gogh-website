@@ -18,7 +18,7 @@
 </template>
 
 <script setup>
-// Window chrome shared by the lightbox's alternative previews (Linux home,
+// Window chrome shared by the theme page's terminal previews (Linux home,
 // JS code). Mirrors the title bar of Terminal.vue so every slide reads as
 // the same window.
 defineProps({

@@ -3,7 +3,7 @@
 
     <main class="home">
         <HeroSection :themes="themes" @browse="scrollToGallery" />
-        <ThemeMarquee :themes="themes" @open="openThemeLightbox" />
+        <ThemeMarquee :themes="themes" />
         <ManifestoText />
         <ThemeShowcase :themes="themes" />
         <FeatureBento />
@@ -156,12 +156,14 @@
                         <div
                             class="terminal-preview"
                             :class="{ 'terminal-preview--detailed': viewMode === 'detailed' }"
-                            role="button"
-                            tabindex="0"
-                            @click="openThemeLightbox(theme)"
-                            @keydown.enter.prevent="openThemeLightbox(theme)"
-                            @keydown.space.prevent="openThemeLightbox(theme)"
                         >
+                            <!-- The whole card opens the theme page: a real link
+                                 stretched over it, under the favorite and page buttons. -->
+                            <NuxtLink
+                                class="terminal-preview__link"
+                                :to="themePagePath(getThemeName(theme))"
+                                :aria-label="`${getThemeName(theme)} theme page`"
+                            />
                             <FavoriteButton
                                 :active="isFavorite(getThemeName(theme))"
                                 :theme-name="getThemeName(theme)"
@@ -183,39 +185,6 @@
             />
 
             <div ref="loadMoreSentinel" class="load-more-sentinel" aria-hidden="true"></div>
-        </div>
-
-        <div
-            v-if="lightboxVisible && lightboxTheme"
-            class="terminal-lightbox"
-            data-lenis-prevent
-            @click.self="closeThemeLightbox"
-        >
-            <button
-                type="button"
-                class="terminal-lightbox__close"
-                aria-label="Close fullscreen preview"
-                @click="closeThemeLightbox"
-            >
-                ×
-            </button>
-
-
-
-            <div class="terminal-lightbox__content">
-                <ThemePreviewSlider v-model="lightboxSlide" :theme="lightboxTheme" />
-
-                <div v-if="lightboxTheme" class="code-wrap terminal-lightbox__install">
-                    <div class="code-holder lightbox-code-holder">
-                        <pre><code class="language-bash" :id="getLightboxInstallCodeId(lightboxTheme)">{{ getLightboxInstallCommand(lightboxTheme) }}</code></pre>
-                        <button type="button" class="btn-copy" :data-clipboard-target="`#${getLightboxInstallCodeId(lightboxTheme)}`" aria-label="Copy install command">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="#000" width="48" height="48"> <path d="M27.4,14.7l-6.1-6.1C21,8.2,20.5,8,20,8h-8c-1.1,0-2,0.9-2,2v18c0,1.1,0.9,2,2,2h14c1.1,0,2-0.9,2-2V16.1C28,15.6,27.8,15.1,27.4,14.7z M20,10l5.9,6H20V10z M12,28V10h6v6c0,1.1,0.9,2,2,2h6l0,10H12z"/> <path d="M6,18H4V4c0-1.1,0.9-2,2-2h14v2H6V18z"/> <rect width="32" height="32" fill="none"/> </svg>
-                        </button>
-                    </div>
-                </div>
-
-                <ThemeShareButtons :theme-name="getThemeName(lightboxTheme)" :theme="lightboxTheme" />
-            </div>
         </div>
 
         <div
@@ -343,8 +312,6 @@
 
 <script setup>
 import chroma from 'chroma-js';
-import ClipboardJS from 'clipboard';
-import Prism from 'prismjs';
 
 const title = 'Gogh - Terminal Color Schemes';
 const description = SITE_DESCRIPTION;
@@ -366,8 +333,6 @@ import PreviewTerminal from '@/components/Terminal/PreviewTerminal.vue';
 import CompactThemeCard from '@/components/Terminal/CompactThemeCard.vue';
 import FavoriteButton from '@/components/Terminal/FavoriteButton.vue';
 import ThemePageLink from '@/components/Terminal/ThemePageLink.vue';
-import ThemePreviewSlider from '@/components/Terminal/ThemePreviewSlider.vue';
-import ThemeShareButtons from '@/components/Terminal/ThemeShareButtons.vue';
 import FavoritesSignInBanner from '@/components/Terminal/FavoritesSignInBanner.vue';
 import PersistenceBanner from '@/components/Banner/PersistenceBanner.vue';
 import Header from '@/components/Header/Header.vue';
@@ -657,14 +622,9 @@ const colorFilterFieldMenuOpen = ref(false);
 const colorFilterValueMenuOpen = ref(false);
 const colorFilterValueSortMode = ref('color');
 const colorFilterValueSortDirection = ref('desc');
-const lightboxVisible = ref(false);
 const visibleCount = ref(THEMES_PAGE_SIZE);
 const loadMoreSentinel = ref(null);
 let loadMoreObserver = null;
-const lightboxTheme = ref(null);
-// Which lightbox preview (palette / Linux home / JS code) is showing. Kept
-// across openings so a visitor comparing themes stays on the same view.
-const lightboxSlide = ref(0);
 const searchQuery = ref('');
 
 function lightOrDark(color) {
@@ -732,7 +692,7 @@ const pageContentStyle = computed(() => (pageTheme.value === 'dark' ? PAGE_THEME
 
 // Overlays pause the smooth scroll so the page doesn't move behind them.
 watch(
-    () => lightboxVisible.value || colorFilterFieldMenuOpen.value || colorFilterValueMenuOpen.value,
+    () => colorFilterFieldMenuOpen.value || colorFilterValueMenuOpen.value,
     (open) => setPageScrollLocked(open),
 );
 
@@ -838,29 +798,9 @@ function setColorFilterValueSortMode(mode) {
     colorFilterValueSortMode.value = mode;
 }
 
-function openThemeLightbox(theme) {
-    lightboxTheme.value = theme;
-    lightboxVisible.value = true;
-
-    nextTick(() => {
-        requestAnimationFrame(() => {
-            Prism.highlightAll();
-        });
-    });
-}
-
-function closeThemeLightbox() {
-    lightboxVisible.value = false;
-    lightboxTheme.value = null;
-}
-
 function onWindowKeydown(event) {
     if (event.key !== 'Escape') {
         return;
-    }
-
-    if (lightboxVisible.value) {
-        closeThemeLightbox();
     }
 
     if (colorFilterValueMenuOpen.value) {
@@ -868,20 +808,6 @@ function onWindowKeydown(event) {
     } else if (colorFilterFieldMenuOpen.value) {
         closeColorFilterFieldMenu();
     }
-}
-
-function getLightboxThemeName(theme) {
-    return (theme?.name || theme?.theme || 'Theme').replace(/\"/g, '\\"');
-}
-
-function getLightboxInstallCodeId(theme) {
-    const themeName = (theme?.name || theme?.theme || 'theme').toLowerCase();
-    const safeThemeName = themeName.replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    return `code-lightbox-${safeThemeName || 'theme'}`;
-}
-
-function getLightboxInstallCommand(theme) {
-    return `bash -c "$(wget -qO- https://gogh.website/gogh)" -- "${getLightboxThemeName(theme)}"`;
 }
 
 function getThemeName(theme) {
@@ -1111,8 +1037,6 @@ themes.value = rawThemes.map((theme) => ({
 }));
 
 onMounted(() => {
-    new ClipboardJS('.btn-copy');
-
     smoothScroll.start();
 
     const { gsap, ScrollTrigger } = useGsap();

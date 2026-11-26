@@ -11,16 +11,15 @@
                     <div class="marquee__track" :style="{ '--duration': `${70 + rowIndex * 12}s` }">
                         <!-- Rendered twice so the -50% loop is seamless; the copy is hidden from AT. -->
                         <template v-for="copy in 2" :key="copy">
-                            <button
+                            <NuxtLink
                                 v-for="theme in row"
                                 :key="`${copy}-${theme.name}`"
-                                type="button"
+                                :to="themePagePath(theme.name)"
                                 class="mini-term"
                                 :style="{ '--bg': theme.background, '--fg': theme.foreground }"
                                 :aria-hidden="copy === 2"
                                 :tabindex="copy === 2 ? -1 : 0"
-                                :aria-label="`Preview ${theme.name}`"
-                                @click="emit('open', theme)"
+                                :aria-label="`${theme.name} theme page`"
                             >
                                 <span class="mini-term__bar">
                                     <span class="mini-term__dots" aria-hidden="true"><i></i><i></i><i></i></span>
@@ -33,7 +32,7 @@
                                 <span class="mini-term__swatches" aria-hidden="true">
                                     <i v-for="key in SWATCH_KEYS" :key="key" :style="{ backgroundColor: theme[key] }"></i>
                                 </span>
-                            </button>
+                            </NuxtLink>
                         </template>
                     </div>
                 </div>
@@ -49,8 +48,6 @@ const props = defineProps({
         default: () => [],
     },
 });
-
-const emit = defineEmits(['open']);
 
 const SWATCH_KEYS = Array.from({ length: 8 }, (_, index) => `color_${String(index + 1).padStart(2, '0')}`);
 const ROW_COUNT = 2;
@@ -157,6 +154,7 @@ onBeforeUnmount(() => gsapContext?.revert());
     background: var(--bg);
     color: var(--fg);
     text-align: left;
+    text-decoration: none;
     cursor: pointer;
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset;
     transition: transform 0.6s $ease_out_expo, box-shadow 0.6s $ease_out_expo;
