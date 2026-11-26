@@ -263,9 +263,9 @@ onBeforeUnmount(() => {
     color: var(--cream);
     font-family: $font_display;
     font-size: clamp(9.6rem, min(24vw, 30vh), 30rem);
-    font-weight: 900;
+    font-weight: 400;
     line-height: 0.84;
-    letter-spacing: -0.06em;
+    letter-spacing: -0.04em;
 }
 
 // "terminal schemes": a thin, colored line under the heavy wordmark.
