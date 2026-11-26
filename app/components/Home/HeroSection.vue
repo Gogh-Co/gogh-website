@@ -13,20 +13,14 @@
             </p>
 
             <h1 class="hero__title">
-                <span class="hero__line">
-                    <span class="hero__word" style="--i: 0">Paint</span>
-                    <span class="hero__word" style="--i: 1">your</span>
+                <span class="hero__line hero__line--brand">
+                    <span class="hero__word" style="--i: 0">GOGH</span>
                 </span>
-                <span class="hero__line">
-                    <em class="hero__word hero__word--accent" style="--i: 2">terminal.</em>
+                <span class="hero__line hero__line--sub">
+                    <em class="hero__word hero__word--accent" style="--i: 1">terminal schemes</em>
                 </span>
                 <span class="visually-hidden"> Color schemes for GNOME Terminal, Alacritty, Kitty, iTerm2 and more.</span>
             </h1>
-
-            <p class="hero__lead">
-                <strong>{{ themeCountLabel }}</strong> color schemes for GNOME Terminal, Alacritty,
-                Kitty, Ghostty, iTerm2, Konsole and more. Pick one, run one command, done.
-            </p>
 
             <div class="hero__install">
                 <InstallCommand tone="glass" />
@@ -114,12 +108,6 @@ const activeTheme = computed(() => rotation.value[activeIndex.value % rotation.v
 const activeThemeName = computed(() => String(activeTheme.value.name || activeTheme.value.theme || 'Gogh'));
 const palette = computed(() => CHROMATIC_KEYS.map((key) => activeTheme.value[key]).filter(Boolean));
 
-const themeCountLabel = computed(() => {
-    const count = props.themes.length;
-    // Round down to a tidy "350+" style figure; fall back to plain copy.
-    return count > 50 ? `${Math.floor(count / 10) * 10}+` : 'Hundreds of';
-});
-
 const heroStyle = computed(() => ({
     '--hero-bg': activeTheme.value.background,
     '--hero-a': palette.value[2] || '#F1C40F',
@@ -189,14 +177,14 @@ onBeforeUnmount(() => {
     }
 }
 
-// Darkens the left (text) side and the bottom so the copy always reads over
-// the moving strokes, whatever the palette.
+// Darkens the centre (where the copy sits) and the bottom so the text always
+// reads over the moving strokes, whatever the palette.
 .hero__veil {
     position: absolute;
     inset: 0;
     z-index: 1;
     background:
-        radial-gradient(120% 90% at 0% 60%, color-mix(in srgb, var(--hero-bg) 92%, transparent) 0%, color-mix(in srgb, var(--hero-bg) 55%, transparent) 45%, transparent 75%),
+        radial-gradient(60% 65% at 50% 50%, color-mix(in srgb, var(--hero-bg) 90%, transparent) 0%, color-mix(in srgb, var(--hero-bg) 55%, transparent) 50%, transparent 80%),
         linear-gradient(180deg, transparent 60%, var(--hero-bg) 100%);
     pointer-events: none;
     transition: background 1.2s ease;
@@ -218,6 +206,7 @@ onBeforeUnmount(() => {
     width: 100%;
     max-width: 1400px;
     margin: 0 auto;
+    text-align: center;
     will-change: transform, opacity;
 }
 
@@ -250,13 +239,24 @@ onBeforeUnmount(() => {
 }
 
 .hero__title {
-    margin: 0 0 28px;
+    margin: 0 0 40px;
     color: var(--cream);
     font-family: $font_display;
-    font-size: clamp(6.4rem, min(12.5vw, 18vh), 19rem);
+    font-size: clamp(9.6rem, min(24vw, 30vh), 30rem);
     font-weight: 900;
-    line-height: 0.88;
-    letter-spacing: -0.055em;
+    line-height: 0.84;
+    letter-spacing: -0.06em;
+}
+
+// "terminal schemes": a thin, colored line under the heavy wordmark.
+.hero__line--sub {
+    margin-top: 0.06em;
+    font-size: 0.4em;
+    line-height: 1;
+
+    @media (max-width: 575.98px) {
+        font-size: 0.36em;
+    }
 }
 
 .hero__line {
@@ -269,9 +269,8 @@ onBeforeUnmount(() => {
 
 .hero__word {
     display: inline-block;
-    margin-right: 0.18em;
     transform: translateY(110%) rotate(4deg);
-    transform-origin: left bottom;
+    transform-origin: center bottom;
     animation: word-rise 1.3s $ease_out_expo forwards;
     animation-delay: calc(0.25s + var(--i) * 0.12s);
 }
@@ -289,33 +288,29 @@ onBeforeUnmount(() => {
     animation-delay: calc(0.25s + var(--i) * 0.12s), 0s;
 }
 
-.hero__lead {
-    max-width: 640px;
-    margin: 0 0 32px;
-    color: var(--muted);
-    font-size: 1.7rem;
-    line-height: 1.55;
-    opacity: 0;
-    animation: fade-up 1.1s $ease_out_expo 0.75s forwards;
-
-    strong {
-        color: var(--cream);
-        font-weight: 600;
-    }
-
-    @include m768 {
-        font-size: 1.9rem;
-    }
-}
 
 .hero__install {
+    display: flex;
+    justify-content: center;
+    text-align: left;
     opacity: 0;
     animation: fade-up 1.1s $ease_out_expo 0.9s forwards;
+
+    :deep(.install-cmd) {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    :deep(.install-cmd__box) {
+        width: 100%;
+    }
 }
 
 .hero__actions {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     gap: 12px;
     margin-top: 24px;
     opacity: 0;
