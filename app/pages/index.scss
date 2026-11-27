@@ -43,13 +43,6 @@
     .code-holder {
         position: relative;
 
-        pre[class*="language-"],
-        code[class*="language-"] {
-            background: var(--code-block-background, #f5f2f0);
-            color: var(--code-block-foreground, black);
-            transition: background-color 0.18s ease, color 0.18s ease;
-        }
-
         .btn-copy {
             position: absolute;
             right: 0;

@@ -70,7 +70,6 @@ This repository uses Nuxt's `app/` source directory layout.
 - `app/components/Terminal/`: terminal preview component
 - `app/components/Header/`: top header/logo component
 - `app/assets/sass/`: shared styles, mixins, and base partials
-- `app/assets/static/prism.client.ts`: Prism highlighting plugin
 - `server/api/themes.get.ts`: server endpoint that fetches and decodes theme JSON from GitHub API
 
 ## Data source

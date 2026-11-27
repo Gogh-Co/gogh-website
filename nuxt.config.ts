@@ -120,9 +120,6 @@ export default defineNuxtConfig({
     optimizeDeps: {
       include: [
         'chroma-js',
-        'clipboard',
-        'prismjs',
-        'prismjs/components/prism-bash',
       ],
     },
 
@@ -160,10 +157,6 @@ export default defineNuxtConfig({
 
   modules: [
     'nuxt-color-picker',
-  ],
-
-  plugins: [
-    '~/assets/static/prism.client',
   ],
 
   devtools: {

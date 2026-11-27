@@ -133,7 +133,6 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import axios from 'axios'
 import Header from '@/components/Header/Header.vue'
 import WcsgThemeCard from '@/components/Wcsg/WcsgThemeCard.vue'
 import ButtonFilter from '@/components/Buttons/ButtonFilter.vue'
@@ -282,12 +281,13 @@ const filteredThemes = computed(() => {
 })
 
 onMounted(() => {
-  axios
-    .get(
-      'https://raw.githubusercontent.com/Gogh-Co/Gogh/refs/heads/master/data/wcag-min.json'
+  // raw.githubusercontent.com serves text/plain, so parse it here.
+  $fetch(
+      'https://raw.githubusercontent.com/Gogh-Co/Gogh/refs/heads/master/data/wcag-min.json',
+      { parseResponse: JSON.parse }
     )
     .then((response) => {
-      data.value = response.data
+      data.value = response
     })
     .catch((error) => {
             console.error('Error fetching data:', error)
