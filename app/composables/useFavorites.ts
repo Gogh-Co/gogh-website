@@ -26,6 +26,10 @@ const SYNC_DEBOUNCE_MS = 700;
 // quick succession must still coalesce into one PUT, not race two
 // independent timers.
 let debounceHandle: ReturnType<typeof setTimeout> | null = null;
+// One PUT at a time: a slow answer must not overwrite clicks made while it
+// was in flight, and a second PUT must not go out with a stale revision.
+let syncInFlight = false;
+let syncAgain = false;
 
 export type SyncState = 'idle' | 'syncing' | 'synced' | 'error';
 
@@ -34,6 +38,8 @@ interface FavoritesApiData {
     gistId: string;
     gistUrl: string;
     updatedAt: string;
+    // Older Workers don't send it; updatedAt is their revision.
+    revision?: string;
     createdAt: string;
     recreated: boolean;
     conflict?: boolean;
@@ -116,30 +122,45 @@ export function useFavorites() {
     }
 
     async function syncNow(ghId: number) {
+        if (syncInFlight) {
+            syncAgain = true;
+            return;
+        }
+        syncInFlight = true;
         syncState.value = 'syncing';
         try {
-            const res = await $fetch<{ ok: true; data: FavoritesApiData }>('/api/favorites', {
-                method: 'PUT',
-                body: {
-                    favorites: favorites.value,
-                    gistId: getCachedGistId(ghId),
-                    expectedRevision: lastKnownRevision.value,
-                },
-                timeout: 12000,
-            });
+            do {
+                syncAgain = false;
+                const res = await $fetch<{ ok: true; data: FavoritesApiData }>('/api/favorites', {
+                    method: 'PUT',
+                    body: {
+                        favorites: favorites.value,
+                        gistId: getCachedGistId(ghId),
+                        expectedRevision: lastKnownRevision.value,
+                    },
+                    timeout: 12000,
+                });
 
-            // Reconcile with the authoritative server result: on a detected
-            // conflict this is a union, not necessarily what we optimistically
-            // sent - overwrite local state so the UI never drifts from the
-            // Gist (see docs/API.md "Multi-device conflict strategy").
-            favorites.value = res.data.favorites;
-            persistLocal();
-            setCachedGistId(ghId, res.data.gistId);
-            lastKnownRevision.value = res.data.updatedAt;
+                setCachedGistId(ghId, res.data.gistId);
+                lastKnownRevision.value = res.data.revision ?? res.data.updatedAt;
+
+                // Reconcile with the authoritative server result: on a detected
+                // conflict this is a union, not necessarily what we optimistically
+                // sent - overwrite local state so the UI never drifts from the
+                // Gist (see docs/API.md "Multi-device conflict strategy").
+                // Unless the user clicked meanwhile: their list is newer, and
+                // the next PUT sends it.
+                if (!syncAgain && !debounceHandle) {
+                    favorites.value = res.data.favorites;
+                    persistLocal();
+                }
+            } while (syncAgain);
             syncState.value = 'synced';
         } catch (error) {
             syncState.value = 'error';
             appendSyncLog({ at: new Date().toISOString(), message: describeError(error) });
+        } finally {
+            syncInFlight = false;
         }
     }
 
@@ -183,7 +204,7 @@ export function useFavorites() {
             });
 
             setCachedGistId(ghId, res.data.gistId);
-            lastKnownRevision.value = res.data.updatedAt;
+            lastKnownRevision.value = res.data.revision ?? res.data.updatedAt;
 
             const remote = res.data.favorites;
             const union = Array.from(new Set([...remote, ...favorites.value])).sort();

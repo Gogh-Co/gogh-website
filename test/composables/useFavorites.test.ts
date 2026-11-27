@@ -85,6 +85,40 @@ describe('useFavorites - optimistic toggling + debounced sync (authenticated)', 
         expect(syncState.value).toBe('synced');
     });
 
+    it('keeps a click made while a slow PUT is in flight, and sends it next with the fresh revision', async () => {
+        const putBodies: { favorites: string[]; expectedRevision?: string }[] = [];
+        let releaseFirst: () => void = () => {};
+        const firstHeld = new Promise<void>((resolve) => {
+            releaseFirst = resolve;
+        });
+        registerEndpoint('/api/favorites', {
+            method: 'PUT',
+            handler: async (event) => {
+                const body = await readBody(event);
+                putBodies.push(body);
+                if (putBodies.length === 1) await firstHeld;
+                return { ok: true, data: { favorites: body.favorites, gistId: 'g1', gistUrl: 'x', updatedAt: 't', revision: `r${putBodies.length}`, createdAt: 't0', recreated: false } };
+            },
+        });
+
+        const { favorites, toggleFavorite, initFavorites, syncState } = useFavorites();
+        initFavorites();
+
+        toggleFavorite('dracula', 42);
+        await vi.waitUntil(() => putBodies.length === 1, { timeout: 3000 });
+
+        // Clicked while the first PUT is still waiting; let its debounce fire too.
+        toggleFavorite('nord', 42);
+        await new Promise((r) => setTimeout(r, 900));
+        expect(putBodies).toHaveLength(1);
+
+        releaseFirst();
+        await vi.waitUntil(() => putBodies.length === 2 && syncState.value === 'synced', { timeout: 3000 });
+
+        expect(putBodies[1]).toMatchObject({ favorites: ['dracula', 'nord'], expectedRevision: 'r1' });
+        expect(favorites.value).toEqual(['dracula', 'nord']);
+    });
+
     it('sets syncState to "error" and logs it when the PUT fails, without throwing', async () => {
         vi.useFakeTimers();
         registerEndpoint('/api/favorites', {
