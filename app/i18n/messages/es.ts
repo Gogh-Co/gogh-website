@@ -367,7 +367,6 @@ export default {
         kind: 'esquema de color para terminal',
         by: 'por {author}',
         watchSession: 'Ver {name} en una sesión de terminal en vivo',
-        paintedWith: 'Pintado con',
         previousAria: 'Tema anterior: {name} (flecha izquierda)',
         nextAria: 'Tema siguiente: {name} (flecha derecha)',
         prev: 'Ant.',

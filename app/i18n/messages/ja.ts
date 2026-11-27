@@ -365,7 +365,6 @@ export default {
         kind: 'ターミナル配色スキーム',
         by: '作者：{author}',
         watchSession: '{name} をライブのターミナルセッションで見る',
-        paintedWith: '配色',
         previousAria: '前のテーマ：{name}（左矢印キー）',
         nextAria: '次のテーマ：{name}（右矢印キー）',
         prev: '前へ',

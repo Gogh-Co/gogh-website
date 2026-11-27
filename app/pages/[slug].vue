@@ -10,7 +10,6 @@
             :variant="summary.variant"
             :author-name="authorName"
             :author-url="authorUrl"
-            :url="pageUrl"
             :previous="previous"
             :next="next"
             :pressed-key="pressedArrow"
@@ -38,6 +37,10 @@
         <ThemeInstallDock :theme="theme" :theme-name="themeName" />
         <ThemeSwipe :previous="previous" :next="next" />
     </ClientOnly>
+
+    <!-- Same floating share button as the home page, sharing this theme in
+         its own colors. -->
+    <ShareSite :url="pageUrl" :theme="theme" :theme-name="themeName" />
 </template>
 
 <script setup>
@@ -50,6 +53,7 @@ import ThemePreviews from '@/components/Theme/ThemePreviews.vue';
 import ThemePager from '@/components/Theme/ThemePager.vue';
 import ThemeInstallDock from '@/components/Theme/ThemeInstallDock.vue';
 import ThemeSwipe from '@/components/Theme/ThemeSwipe.vue';
+import ShareSite from '@/components/Buttons/ShareSite.vue';
 
 // The previews section follows the page's light/dark toggle (the gallery's
 // paper and ink); the hero and the reading section wear the theme itself.

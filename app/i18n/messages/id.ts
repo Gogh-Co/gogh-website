@@ -365,7 +365,6 @@ export default {
         kind: 'skema warna terminal',
         by: 'karya {author}',
         watchSession: 'Tonton {name} dalam sesi terminal langsung',
-        paintedWith: 'Dilukis dengan',
         previousAria: 'Tema sebelumnya: {name} (tombol panah kiri)',
         nextAria: 'Tema berikutnya: {name} (tombol panah kanan)',
         prev: 'Sblm',

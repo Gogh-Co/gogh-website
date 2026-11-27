@@ -368,7 +368,6 @@ export default {
         kind: 'Terminal-Farbschema',
         by: 'von {author}',
         watchSession: '{name} in einer Live-Terminalsitzung ansehen',
-        paintedWith: 'Gemalt mit',
         previousAria: 'Vorheriges Theme: {name} (Pfeiltaste links)',
         nextAria: 'Nächstes Theme: {name} (Pfeiltaste rechts)',
         prev: 'Zurück',

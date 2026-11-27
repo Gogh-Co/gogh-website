@@ -7,7 +7,7 @@
             @mouseover="decodeLabel"
             @focusin="decodeLabel"
         >
-            <ThemeShareButtons :url="SITE_SHARE_URL" :theme="GOGH_SHARE_THEME" :previews="false" labels />
+            <ThemeShareButtons :url="url || SITE_SHARE_URL" :theme="theme || GOGH_SHARE_THEME" :theme-name="themeName" :previews="false" labels />
         </div>
 
         <canvas ref="bits" class="share-site__bits" aria-hidden="true"></canvas>
@@ -18,8 +18,8 @@
             class="share-site__toggle"
             :aria-expanded="open"
             aria-controls="share-site-panel"
-            :aria-label="open ? t('share.siteClose') : t('share.siteOpen')"
-            :title="open ? t('common.close') : t('share.siteOpen')"
+            :aria-label="open ? t('share.siteClose') : openLabel"
+            :title="open ? t('common.close') : openLabel"
             @click="open = !open"
         >
             <svg v-if="!open" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M17 22q-1.25 0-2.125-.875T14 19q0-.15.075-.7L7.05 14.2q-.4.375-.925.588T5 15q-1.25 0-2.125-.875T2 12t.875-2.125T5 9q.6 0 1.125.213t.925.587l7.025-4.1q-.05-.175-.062-.337T14 5q0-1.25.875-2.125T17 2t2.125.875T20 5t-.875 2.125T17 8q-.6 0-1.125-.213T14.95 7.2l-7.025 4.1q.05.175.063.338T8 12t-.012.363t-.063.337l7.025 4.1q.4-.375.925-.587T17 16q1.25 0 2.125.875T20 19t-.875 2.125T17 22"/></svg>
@@ -29,12 +29,32 @@
 </template>
 
 <script setup>
-// A small floating button in the bottom-left corner of the home page: it
-// unfolds the share buttons for gogh.website itself (not the current theme).
+// A small floating button in the bottom-left corner: it unfolds the share
+// buttons. On the home page it shares gogh.website itself; a theme page
+// passes its own URL, colors and name.
 import ThemeShareButtons from '@/components/Terminal/ThemeShareButtons.vue';
+
+const props = defineProps({
+    // Page to share; gogh.website when empty.
+    url: {
+        type: String,
+        default: '',
+    },
+    // Colors for the network icons; Gogh's own palette when null.
+    theme: {
+        type: Object,
+        default: null,
+    },
+    // Names the toggle ("Share Dracula") and rides along as the post text.
+    themeName: {
+        type: String,
+        default: '',
+    },
+});
 
 const SITE_SHARE_URL = `${SITE_URL}/`;
 const { t } = useI18n();
+const openLabel = computed(() => (props.themeName ? t('share.groupAria', { name: props.themeName }) : t('share.siteOpen')));
 
 const root = ref(null);
 const toggle = ref(null);

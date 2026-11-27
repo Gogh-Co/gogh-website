@@ -365,7 +365,6 @@ export default {
         kind: '终端配色方案',
         by: '作者 {author}',
         watchSession: '在实时终端会话中观看 {name}',
-        paintedWith: '配色',
         previousAria: '上一个主题：{name}（左方向键）',
         nextAria: '下一个主题：{name}（右方向键）',
         prev: '上一个',

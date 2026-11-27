@@ -380,7 +380,6 @@ export default {
         kind: 'terminal color scheme',
         by: 'by {author}',
         watchSession: 'Watch {name} in a live terminal session',
-        paintedWith: 'Painted with',
         previousAria: 'Previous theme: {name} (Left arrow key)',
         nextAria: 'Next theme: {name} (Right arrow key)',
         prev: 'Prev',

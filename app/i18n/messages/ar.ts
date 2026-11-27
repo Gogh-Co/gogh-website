@@ -376,7 +376,6 @@ export default {
         kind: 'نظام ألوان للطرفية',
         by: 'من إعداد {author}',
         watchSession: 'شاهد {name} في جلسة طرفية حية',
-        paintedWith: 'مرسوم بألوان',
         previousAria: 'السمة السابقة: {name} (مفتاح السهم الأيسر)',
         nextAria: 'السمة التالية: {name} (مفتاح السهم الأيمن)',
         prev: 'السابق',

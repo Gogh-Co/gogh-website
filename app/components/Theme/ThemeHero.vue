@@ -68,24 +68,9 @@
             <div id="theme-install" ref="install" class="theme-hero__install">
                 <InstallCommand tone="glass" place="theme-hero" :theme-name="themeName" />
             </div>
-
-            <div class="theme-hero__share">
-                <ThemeShareButtons
-                    :theme-name="themeName"
-                    :theme="theme"
-                    :url="url"
-                    :backdrop="background"
-                    :previews="false"
-                />
-            </div>
         </div>
 
         <div class="theme-hero__footer">
-            <span class="theme-hero__painting">
-                <span class="theme-hero__painting-label">{{ t('themeHero.paintedWith') }}</span>
-                <span class="theme-hero__painting-name">{{ themeName }}</span>
-            </span>
-
             <!-- Scroll cue flanked by the keyboard shortcuts for the neighbour
                  themes: keycaps for the arrow keys, which press in when the
                  key is pressed. Hovering shows where each one leads. -->
@@ -138,7 +123,6 @@
 import StarryCanvas from '@/components/Home/StarryCanvas.vue';
 import CodeReveal from '@/components/Home/CodeReveal.vue';
 import InstallCommand from '@/components/Home/InstallCommand.vue';
-import ThemeShareButtons from '@/components/Terminal/ThemeShareButtons.vue';
 import I18nT from '@/components/I18nT';
 
 const { t } = useI18n();
@@ -161,11 +145,6 @@ const props = defineProps({
         default: '',
     },
     authorUrl: {
-        type: String,
-        default: '',
-    },
-    // This page's canonical URL, for the share buttons.
-    url: {
         type: String,
         default: '',
     },
@@ -252,7 +231,7 @@ const heroStyle = computed(() => ({
 // around the name (CodeReveal's intro) and, out of it, each word comes up
 // already written in bits: out of focus and faint, it sharpens in place and
 // its letters settle one by one. The meta line decodes alongside; the
-// swatches, the install command, the share row and the footer follow, timed
+// swatches, the install command and the footer follow, timed
 // from that same moment. If the page takes too long to become interactive,
 // CSS shows it all as plain text on its own; then there is no decode, so
 // real text is never swapped for bits.
@@ -608,25 +587,6 @@ onBeforeUnmount(() => {
     }
 }
 
-// Share row under the install command, in the own colors of the theme.
-.theme-hero__share {
-    margin-top: 22px;
-    opacity: 0;
-    animation: fade-up 1.1s $ease_out_expo 1.8s forwards;
-
-    .is-ready & {
-        animation: hero-rise 1.2s $ease_out_expo 1.3s forwards;
-    }
-
-    :deep(.share) {
-        margin: 0;
-    }
-
-    :deep(.share-buttons__btn) {
-        backdrop-filter: blur(8px);
-    }
-}
-
 .theme-hero__footer {
     position: absolute;
     right: 20px;
@@ -635,7 +595,8 @@ onBeforeUnmount(() => {
     z-index: 3;
     display: flex;
     align-items: flex-end;
-    justify-content: space-between;
+    // The bottom-left corner is left to the floating share button.
+    justify-content: flex-end;
     gap: 16px;
     max-width: 1400px;
     margin: 0 auto;
@@ -654,23 +615,6 @@ onBeforeUnmount(() => {
         right: 48px;
         left: 48px;
     }
-}
-
-.theme-hero__painting {
-    display: inline-flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.theme-hero__painting-label {
-    font-size: 1rem;
-    letter-spacing: 0.2em;
-}
-
-.theme-hero__painting-name {
-    color: var(--hero-fg);
-    font-weight: 600;
-    letter-spacing: 0.04em;
 }
 
 .theme-hero__codes {

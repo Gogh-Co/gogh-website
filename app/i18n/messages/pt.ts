@@ -367,7 +367,6 @@ export default {
         kind: 'esquema de cores para terminal',
         by: 'por {author}',
         watchSession: 'Ver {name} em uma sessão de terminal ao vivo',
-        paintedWith: 'Pintado com',
         previousAria: 'Tema anterior: {name} (seta para a esquerda)',
         nextAria: 'Próximo tema: {name} (seta para a direita)',
         prev: 'Ant.',

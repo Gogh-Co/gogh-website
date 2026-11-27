@@ -367,7 +367,6 @@ export default {
         kind: 'palette de couleurs pour terminal',
         by: 'par {author}',
         watchSession: 'Voir {name} dans une session de terminal en direct',
-        paintedWith: 'Peint avec',
         previousAria: 'Thème précédent : {name} (flèche gauche)',
         nextAria: 'Thème suivant : {name} (flèche droite)',
         prev: 'Préc.',

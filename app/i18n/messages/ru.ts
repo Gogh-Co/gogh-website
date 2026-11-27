@@ -371,7 +371,6 @@ export default {
         kind: 'цветовая схема для терминала',
         by: 'от {author}',
         watchSession: 'Смотреть {name} в живой сессии терминала',
-        paintedWith: 'Нарисовано в',
         previousAria: 'Предыдущая тема: {name} (стрелка влево)',
         nextAria: 'Следующая тема: {name} (стрелка вправо)',
         prev: 'Назад',
