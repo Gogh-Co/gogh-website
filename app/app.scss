@@ -17,6 +17,10 @@
 @import '@fontsource/roboto/latin-800.css';
 @import '@fontsource/roboto-mono/latin-400.css';
 @import '@fontsource/roboto-mono/latin-500.css';
+// Bold and italic for the terminal mock-ups (prompts, comments); browsers
+// only download them where a page uses them.
+@import '@fontsource/roboto-mono/latin-700.css';
+@import '@fontsource/roboto-mono/latin-400-italic.css';
 @import 'bootstrap/dist/css/bootstrap.min.css';
 
 /**

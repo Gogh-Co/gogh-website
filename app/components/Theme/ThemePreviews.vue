@@ -2,7 +2,7 @@
     <section ref="root" class="previews" aria-labelledby="theme-previews-title">
         <div class="previews__inner">
             <header class="previews__header">
-                <p class="section-eyebrow previews__eyebrow"><span>03</span> In the wild</p>
+                <p class="section-eyebrow previews__eyebrow"><span>04</span> In the wild</p>
                 <h2 id="theme-previews-title" class="section-title previews__title">See it <em>at work.</em></h2>
                 <p class="previews__lede">
                     A palette view, a Linux home and a JavaScript file, then a blog, an Omarchy desktop and a

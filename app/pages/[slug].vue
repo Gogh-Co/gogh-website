@@ -11,11 +11,16 @@
             :author-name="authorName"
             :author-url="authorUrl"
             :url="pageUrl"
+            :previous="previous"
+            :next="next"
+            :pressed-key="pressedArrow"
         />
 
         <ThemePalette :theme="theme" :theme-name="themeName" :summary="summary" />
 
         <ThemeReading :theme="theme" :theme-name="themeName" :sentences="summary.sentences" />
+
+        <ThemeSession :theme="theme" :theme-name="themeName" />
 
         <ThemePreviews :theme="theme" :theme-name="themeName" />
 
@@ -40,6 +45,7 @@ import Header from '@/components/Header/Header.vue';
 import ThemeHero from '@/components/Theme/ThemeHero.vue';
 import ThemePalette from '@/components/Theme/ThemePalette.vue';
 import ThemeReading from '@/components/Theme/ThemeReading.vue';
+import ThemeSession from '@/components/Theme/ThemeSession.vue';
 import ThemePreviews from '@/components/Theme/ThemePreviews.vue';
 import ThemePager from '@/components/Theme/ThemePager.vue';
 import ThemeInstallDock from '@/components/Theme/ThemeInstallDock.vue';
@@ -147,11 +153,44 @@ function refreshTriggers() {
     ScrollTrigger.refresh();
 }
 
+// A shared link such as /dracula/#live-session: the router jumps to the
+// anchor before fonts, the hero and the scroll triggers settle the layout, so
+// it lands off. Glide back to it, and check again once the glide ends in case
+// the page moved meanwhile (a few tries at most). Any scroll or tap from the
+// visitor wins and stops the corrections.
+const USER_SCROLL_EVENTS = ['wheel', 'touchstart', 'keydown', 'pointerdown'];
+let hashSettleTimer = 0;
+
+function stopHashSettle() {
+    window.clearTimeout(hashSettleTimer);
+    hashSettleTimer = 0;
+    USER_SCROLL_EVENTS.forEach((type) => window.removeEventListener(type, stopHashSettle));
+}
+
+function settleHashScroll(tries = 3) {
+    const id = decodeURIComponent(window.location.hash.slice(1));
+    const target = id && document.getElementById(id);
+    if (!target || tries <= 0) {
+        stopHashSettle();
+        return;
+    }
+    if (tries === 3) {
+        USER_SCROLL_EVENTS.forEach((type) => window.addEventListener(type, stopHashSettle, { passive: true }));
+    }
+    const offset = anchorOffset(target);
+    if (Math.abs(target.getBoundingClientRect().top + offset) > 2) {
+        scrollToTarget(target, offset);
+    }
+    hashSettleTimer = window.setTimeout(() => settleHashScroll(tries - 1), 1600);
+}
+
 // Left/right arrows step to the previous/next theme, unless the key belongs
 // to something else: a text field, a widget that uses arrows itself, an open
 // dialog or the mobile menu, or a shortcut with modifiers.
 const ARROW_KEY_OWNERS = 'input, textarea, select, [contenteditable]:not([contenteditable="false"]), '
     + '[role="slider"], [role="tab"], [role="tablist"], [role="menu"], [role="menuitem"], [role="listbox"], [role="option"], [role="radiogroup"]';
+
+const pressedArrow = ref('');
 
 function onArrowKeydown(event) {
     if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') {
@@ -170,6 +209,8 @@ function onArrowKeydown(event) {
     const target = event.key === 'ArrowLeft' ? previous.value : next.value;
     if (target?.path) {
         event.preventDefault();
+        // The hero's keycap for this key presses in while the page changes.
+        pressedArrow.value = event.key;
         navigateTo(target.path);
     }
 }
@@ -178,13 +219,17 @@ onMounted(() => {
     window.addEventListener('keydown', onArrowKeydown);
     smoothScroll.start();
     // Fonts and the preview mockups change section heights after first layout.
-    document.fonts?.ready.then(refreshTriggers);
+    document.fonts?.ready.then(() => {
+        refreshTriggers();
+        settleHashScroll();
+    });
     window.addEventListener('load', refreshTriggers, { once: true });
 });
 
 onUnmounted(() => {
     window.removeEventListener('keydown', onArrowKeydown);
     window.removeEventListener('load', refreshTriggers);
+    stopHashSettle();
     smoothScroll.stop();
 });
 </script>

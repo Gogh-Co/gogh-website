@@ -1,7 +1,7 @@
 <template>
     <section id="theme-more" ref="root" class="pager" aria-labelledby="theme-pager-title">
         <div class="pager__inner">
-            <p class="section-eyebrow pager__eyebrow"><span>04</span> Keep exploring</p>
+            <p class="section-eyebrow pager__eyebrow"><span>05</span> Keep exploring</p>
             <h2 id="theme-pager-title" class="visually-hidden">More themes</h2>
 
             <nav class="pager__nav" aria-label="More themes">

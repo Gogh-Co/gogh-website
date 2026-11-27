@@ -37,13 +37,21 @@
             </p>
 
             <h1 ref="title" class="theme-hero__title" :style="{ '--title-vw': titleVw }">
-                <!-- The space between lines keeps the heading's text "Dracula Lost",
-                     not "DraculaLost"; the flex layout doesn't render it. -->
-                <template v-for="(word, index) in titleWords" :key="index">
-                    {{ index ? ' ' : '' }}<span class="theme-hero__line">
-                        <span class="theme-hero__word" :style="{ '--i': index }">{{ word }}</span>
-                    </span>
-                </template>
+                <!-- The name links to the live terminal session further down. -->
+                <a
+                    :href="`#${SESSION_ANCHOR}`"
+                    class="theme-hero__title-link"
+                    :title="`Watch ${themeName} in a live terminal session`"
+                    @click="goToSession"
+                >
+                    <!-- The space between lines keeps the heading's text "Dracula Lost",
+                         not "DraculaLost"; the flex layout doesn't render it. -->
+                    <template v-for="(word, index) in titleWords" :key="index">
+                        {{ index ? ' ' : '' }}<span class="theme-hero__line">
+                            <span class="theme-hero__word" :style="{ '--i': index }">{{ word }}</span>
+                        </span>
+                    </template>
+                </a>
             </h1>
 
             <!-- The 16 colors drop in one by one, normal row over bright row. -->
@@ -77,9 +85,44 @@
                 <span class="theme-hero__painting-name">{{ themeName }}</span>
             </span>
 
-            <div class="theme-hero__scroll" aria-hidden="true">
-                <span>Scroll</span>
-                <span class="theme-hero__scroll-line"></span>
+            <!-- Scroll cue flanked by the keyboard shortcuts for the neighbour
+                 themes: keycaps for the arrow keys, which press in when the
+                 key is pressed. Hovering shows where each one leads. -->
+            <div class="theme-hero__center">
+                <NuxtLink
+                    v-if="previous?.path"
+                    :to="previous.path"
+                    rel="prev"
+                    class="theme-hero__key-link theme-hero__key-link--prev"
+                    :class="{ 'is-pressed': pressedKey === 'ArrowLeft' }"
+                    :aria-label="`Previous theme: ${previous.name} (Left arrow key)`"
+                >
+                    <span class="theme-hero__key-name" aria-hidden="true">{{ previous.name }}</span>
+                    <kbd class="theme-hero__key" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"><path fill="currentColor" d="M20 11v2H8l5.5 5.5l-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5L8 11z"/></svg>
+                    </kbd>
+                    <span class="theme-hero__key-label" aria-hidden="true">Prev</span>
+                </NuxtLink>
+
+                <div class="theme-hero__scroll" aria-hidden="true">
+                    <span>Scroll</span>
+                    <span class="theme-hero__scroll-line"></span>
+                </div>
+
+                <NuxtLink
+                    v-if="next?.path"
+                    :to="next.path"
+                    rel="next"
+                    class="theme-hero__key-link theme-hero__key-link--next"
+                    :class="{ 'is-pressed': pressedKey === 'ArrowRight' }"
+                    :aria-label="`Next theme: ${next.name} (Right arrow key)`"
+                >
+                    <span class="theme-hero__key-name" aria-hidden="true">{{ next.name }}</span>
+                    <span class="theme-hero__key-label" aria-hidden="true">Next</span>
+                    <kbd class="theme-hero__key" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"><path fill="currentColor" d="M4 11v2h12l-5.5 5.5l1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5L16 11z"/></svg>
+                    </kbd>
+                </NuxtLink>
             </div>
 
             <span class="theme-hero__codes" aria-hidden="true">
@@ -122,6 +165,21 @@ const props = defineProps({
         type: String,
         default: '',
     },
+    // Neighbour themes ({ name, path }) for the arrow-key cues.
+    previous: {
+        type: Object,
+        default: null,
+    },
+    next: {
+        type: Object,
+        default: null,
+    },
+    // The arrow key just pressed ('ArrowLeft' | 'ArrowRight'), so its keycap
+    // presses in while the next page loads.
+    pressedKey: {
+        type: String,
+        default: '',
+    },
 });
 
 // The chromatic colors (no blacks or whites), so the strokes read on the
@@ -145,6 +203,27 @@ const swatches = computed(() => Array.from({ length: 16 }, (_, index) => {
     const slot = String(index + 1).padStart(2, '0');
     return safeHex(props.theme[`color_${slot}`]) || 'transparent';
 }));
+
+// The live session's terminal (ThemeSession) lives at #live-session.
+const SESSION_ANCHOR = 'live-session';
+
+// Glides down until the terminal is centered on screen and leaves its anchor
+// in the URL, so the link can be shared. Router state stays in history.state
+// for back/forward.
+function goToSession(event) {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+        return;
+    }
+    const target = document.getElementById(SESSION_ANCHOR);
+    if (!target) {
+        return;
+    }
+    event.preventDefault();
+    // Lenis also handles anchor clicks; one scroll is enough.
+    event.stopPropagation();
+    scrollToTarget(target, anchorOffset(target));
+    history.replaceState(history.state, '', `#${SESSION_ANCHOR}`);
+}
 
 // Long names wrap onto a line per word; the size shrinks with the longest
 // word so it never overflows the viewport.
@@ -364,6 +443,29 @@ onBeforeUnmount(() => {
     opacity: 0;
 }
 
+// The link takes over the heading's line layout; on hover the name warms
+// toward the theme's accent.
+.theme-hero__title-link {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    column-gap: inherit;
+    width: 100%;
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.35s ease;
+
+    &:hover {
+        color: color-mix(in srgb, var(--hero-fg) 55%, var(--hero-a));
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--hero-a);
+        outline-offset: 8px;
+    }
+}
+
 // Name and meta line: hidden until the page is interactive (.is-ready).
 .theme-hero__eyebrow,
 .theme-hero__title {
@@ -581,20 +683,136 @@ onBeforeUnmount(() => {
     }
 }
 
-.theme-hero__scroll {
+// Scroll cue in the middle, arrow-key cues on either side, all on the line of
+// the "Scroll" label. Desktop only: phones get swipes (ThemeSwipe).
+.theme-hero__center {
     position: absolute;
     bottom: 0;
     left: 50%;
     display: none;
     transform: translateX(-50%);
+    align-items: flex-start;
+    gap: 56px;
+
+    @media (min-width: 1200px) and (min-height: 760px) {
+        display: flex;
+    }
+}
+
+.theme-hero__scroll {
+    display: flex;
     flex-direction: column;
     align-items: center;
     gap: 10px;
     font-size: 1.05rem;
     letter-spacing: 0.2em;
+}
 
-    @media (min-width: 1200px) and (min-height: 760px) {
-        display: flex;
+.theme-hero__key-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    // Centres the keycap on the "Scroll" label's line.
+    margin-top: -6px;
+    color: color-mix(in srgb, var(--hero-fg) 70%, transparent);
+    font-size: 1.05rem;
+    letter-spacing: 0.2em;
+    text-decoration: none;
+    transition: color 0.3s ease;
+
+    &:hover,
+    &:focus-visible {
+        color: var(--hero-fg);
+    }
+
+    &:focus-visible {
+        outline: 1px solid var(--hero-a);
+        outline-offset: 6px;
+    }
+}
+
+// A small keycap: hairline border with a lip underneath, frosted over the
+// canvas. The arrow takes the theme's accent on hover.
+.theme-hero__key {
+    display: inline-grid;
+    place-items: center;
+    width: 26px;
+    height: 23px;
+    padding: 0;
+    border: 1px solid color-mix(in srgb, var(--hero-fg) 30%, transparent);
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--hero-bg) 55%, transparent);
+    box-shadow: 0 2px 0 0 color-mix(in srgb, var(--hero-fg) 22%, transparent);
+    color: var(--hero-fg);
+    font: inherit;
+    backdrop-filter: blur(6px);
+    transition:
+        transform 0.18s $ease_out_expo,
+        box-shadow 0.18s $ease_out_expo,
+        border-color 0.3s ease,
+        color 0.3s ease;
+
+    svg {
+        display: block;
+        transition: transform 0.35s $ease_out_expo;
+    }
+
+    .theme-hero__key-link:hover &,
+    .theme-hero__key-link:focus-visible & {
+        border-color: color-mix(in srgb, var(--hero-fg) 55%, transparent);
+        box-shadow: 0 2px 0 0 color-mix(in srgb, var(--hero-a) 70%, transparent);
+        color: var(--hero-a);
+    }
+
+    .theme-hero__key-link--prev:hover & svg {
+        transform: translateX(-2px);
+    }
+
+    .theme-hero__key-link--next:hover & svg {
+        transform: translateX(2px);
+    }
+
+    // Pressed: by click or by the arrow key itself.
+    .theme-hero__key-link:active &,
+    .theme-hero__key-link.is-pressed & {
+        transform: translateY(2px);
+        box-shadow: 0 0 0 0 transparent;
+        border-color: var(--hero-a);
+        color: var(--hero-a);
+    }
+}
+
+// Where the key leads, faded in above it on hover.
+.theme-hero__key-name {
+    position: absolute;
+    bottom: calc(100% + 12px);
+    max-width: 220px;
+    overflow: hidden;
+    color: var(--hero-fg);
+    font-size: 1.1rem;
+    letter-spacing: 0.04em;
+    text-overflow: ellipsis;
+    text-transform: none;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateY(4px);
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.4s $ease_out_expo;
+
+    .theme-hero__key-link--prev & {
+        left: 0;
+    }
+
+    .theme-hero__key-link--next & {
+        right: 0;
+    }
+
+    .theme-hero__key-link:hover &,
+    .theme-hero__key-link:focus-visible &,
+    .theme-hero__key-link.is-pressed & {
+        opacity: 1;
+        transform: none;
     }
 }
 

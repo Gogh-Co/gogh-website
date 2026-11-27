@@ -85,6 +85,17 @@ export function getLenis(): Lenis | null {
     return lenis;
 }
 
+// Scroll offset for an anchor target. Elements marked data-anchor="center"
+// (the theme page's live terminal) sit in the middle of the viewport, never
+// under the fixed header; anything else lines up with the top.
+export function anchorOffset(element: Element, headerSpace = 88): number {
+    if (!import.meta.client || (element as HTMLElement).dataset?.anchor !== 'center') {
+        return 0;
+    }
+    const free = window.innerHeight - element.getBoundingClientRect().height;
+    return -Math.max(headerSpace, free / 2);
+}
+
 // Smoothly scrolls to a target (element, selector or pixel offset), using
 // Lenis when it's running and the native API otherwise.
 export function scrollToTarget(target: string | HTMLElement | number, offset = -72) {
