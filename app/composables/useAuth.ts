@@ -55,7 +55,7 @@ export function useAuth() {
      * closed before completing) - the caller's current page is preserved as
      * `return_to` so the user lands back where they started.
      */
-    function login(returnTo: string): Promise<LoginResult> {
+    function login(returnTo: string, source = 'header'): Promise<LoginResult> {
         const expectedOrigin = window.location.origin;
         const loginUrl = (mode: 'popup' | 'redirect') =>
             `/auth/login?mode=${mode}&return_to=${encodeURIComponent(returnTo)}`;
@@ -85,6 +85,7 @@ export function useAuth() {
                 if (!isAuthMessage(event.data)) return;
 
                 if (event.data.type === 'auth_success') {
+                    trackEvent('Sign In', { source });
                     checkAuth().then(() => finish({ ok: true }));
                 } else {
                     finish({ ok: false, error: event.data.code ?? 'unknown_error' });

@@ -97,7 +97,7 @@ async function onSignIn() {
     if (pending.value) return;
     pending.value = true;
     try {
-        const result = await login(useRoute().fullPath);
+        const result = await login(useRoute().fullPath, 'persistence-banner');
         if (result.ok && user.value) {
             await mergeAfterLogin(user.value.id);
         }

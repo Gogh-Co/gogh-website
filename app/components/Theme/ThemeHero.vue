@@ -65,7 +65,7 @@
             </div>
 
             <div id="theme-install" ref="install" class="theme-hero__install">
-                <InstallCommand tone="glass" :theme-name="themeName" />
+                <InstallCommand tone="glass" place="theme-hero" :theme-name="themeName" />
             </div>
 
             <div class="theme-hero__share">

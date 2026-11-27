@@ -170,6 +170,7 @@ async function copy(color) {
         // No clipboard access (insecure context): the hex is on screen anyway.
     }
     copiedKey.value = color.key;
+    trackEvent('Color Copy', { slot: color.key });
     clearTimeout(copiedTimer);
     copiedTimer = setTimeout(() => {
         copiedKey.value = '';

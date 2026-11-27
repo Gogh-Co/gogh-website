@@ -4,7 +4,7 @@
             <a
                 v-for="network in networks"
                 :key="network.id"
-                class="share-buttons__btn"
+                :class="['share-buttons__btn', 'plausible-event-name=Share', `plausible-event-network=${network.id}`]"
                 :style="{ '--brand': network.color, '--brand-ink': network.ink }"
                 :href="network.href"
                 target="_blank"
@@ -195,6 +195,7 @@ async function copyLink() {
         return;
     }
     copied.value = true;
+    trackEvent('Share', { network: 'copy-link' });
     clearTimeout(copiedTimer);
     copiedTimer = setTimeout(() => {
         copied.value = false;

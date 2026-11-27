@@ -36,7 +36,7 @@
                                 :href="`/wallpapers/${wallpaper.file}`"
                                 :download="wallpaper.file"
                                 :aria-label="`Download ${wallpaper.name} wallpaper`"
-                                @click.stop
+                                @click.stop="trackWallpaperDownload(wallpaper)"
                             >
                                 Download
                             </a>
@@ -96,6 +96,7 @@
                         :href="`/wallpapers/${lightboxWallpaper.file}`"
                         :download="lightboxWallpaper.file"
                         :aria-label="`Download ${lightboxWallpaper.name} wallpaper`"
+                        @click="trackWallpaperDownload(lightboxWallpaper)"
                     >
                         Download
                     </a>
@@ -143,6 +144,10 @@ const lightboxIndex = ref(null);
 const lightboxWallpaper = computed(() => (
     lightboxIndex.value !== null ? wallpapers[lightboxIndex.value] : null
 ));
+
+function trackWallpaperDownload(wallpaper) {
+    trackEvent('Download', { kind: 'wallpaper', file: wallpaper?.file });
+}
 
 function openWallpaperLightbox(index) {
     lightboxIndex.value = index;

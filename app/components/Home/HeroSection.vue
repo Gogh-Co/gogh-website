@@ -27,7 +27,7 @@
             </h1>
 
             <div class="hero__install">
-                <InstallCommand tone="glass" />
+                <InstallCommand tone="glass" place="home-hero" />
             </div>
 
             <div class="hero__actions">

@@ -53,7 +53,7 @@
                                 :class="{ 'is-active': index === activeChapter }"
                                 :aria-current="index === activeChapter ? 'step' : undefined"
                                 :aria-label="`Jump to ${chapter.label}`"
-                                @click="seek(chapter.stepIndex)"
+                                @click="jumpTo(chapter)"
                             >
                                 <span class="session__track"><span ref="fills" class="session__fill"></span></span>
                                 <span class="session__label">{{ chapter.label }}</span>
@@ -251,6 +251,7 @@ async function download(format) {
     exportProgress.value = 0;
     exportAbort = new AbortController();
     announce(`Rendering the ${format === 'gif' ? 'GIF' : 'video'}…`);
+    trackEvent('Session', { action: 'export-start', format: formatName(format) });
     try {
         const exporter = format === 'gif' ? exportSessionGif : exportSessionVideo;
         const result = await exporter(props.theme, props.themeName, {
@@ -260,9 +261,11 @@ async function download(format) {
             },
         });
         saveBlob(result);
+        trackEvent('Download', { kind: format === 'gif' ? 'session-gif' : 'session-mp4', theme: props.themeName });
         announce(`Saved ${result.filename} (${(result.blob.size / 1048576).toFixed(1)} MB).`);
     } catch (error) {
         announce(error?.name === 'AbortError' ? 'Export cancelled.' : 'This browser could not create the file.');
+        trackEvent('Session', { action: error?.name === 'AbortError' ? 'export-cancel' : 'export-error', format: formatName(format) });
         if (error?.name !== 'AbortError') console.error(error);
     } finally {
         exporting.value = '';
@@ -270,8 +273,20 @@ async function download(format) {
     }
 }
 
+function formatName(format) {
+    return format === 'gif' ? 'gif' : 'mp4';
+}
+
+// Only the visitor's own clicks are tracked: seek() also runs on its own
+// when the loop restarts.
+function jumpTo(chapter) {
+    seek(chapter.stepIndex);
+    trackEvent('Session', { action: 'chapter', chapter: chapter.label });
+}
+
 function toggle() {
     playing.value = !playing.value;
+    trackEvent('Session', { action: playing.value ? 'play' : 'pause' });
     if (playing.value) {
         if (!started) {
             seek(0);

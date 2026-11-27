@@ -197,7 +197,7 @@ async function onSignIn() {
     try {
         // No need to call load() here on success - the watch(user, ...)
         // below reacts to the checkAuth() that login() runs internally.
-        await login(useRoute().fullPath);
+        await login(useRoute().fullPath, 'admin');
     } finally {
         signingIn.value = false;
     }

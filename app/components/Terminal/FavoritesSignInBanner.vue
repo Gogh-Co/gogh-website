@@ -45,7 +45,7 @@ const pending = ref(false);
 async function onSignIn() {
     pending.value = true;
     try {
-        const result = await login(useRoute().fullPath);
+        const result = await login(useRoute().fullPath, 'favorites-banner');
         if (result.ok && user.value) {
             await mergeAfterLogin(user.value.id);
             emit('close');

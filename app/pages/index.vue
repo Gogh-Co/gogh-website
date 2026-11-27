@@ -80,11 +80,11 @@
                                 <span class="filters__group-label">View</span>
 
                                 <div class="filters__group-scroll">
-                                    <ButtonFilter :active="viewMode === 'compact'" @click="setViewMode('compact')">
+                                    <ButtonFilter :active="viewMode === 'compact'" @click="pickViewMode('compact')">
                                         Compact
                                     </ButtonFilter>
 
-                                    <ButtonFilter :active="viewMode === 'detailed'" @click="setViewMode('detailed')">
+                                    <ButtonFilter :active="viewMode === 'detailed'" @click="pickViewMode('detailed')">
                                         Detailed
                                     </ButtonFilter>
                                 </div>
@@ -415,7 +415,9 @@ function dismissFavoritesBanner() {
 }
 
 function onToggleFavorite(theme) {
-    toggleFavorite(getThemeName(theme), user.value?.id ?? null);
+    const name = getThemeName(theme);
+    toggleFavorite(name, user.value?.id ?? null);
+    trackEvent('Favorite', { action: isFavorite(name) ? 'add' : 'remove', theme: name });
     if (!user.value && !isFavoritesBannerDismissed()) {
         showFavoritesBanner.value = true;
     }
@@ -666,10 +668,17 @@ async function fetchData() {
 }
 
 function setFilter(f) {
+    trackEvent('Gallery Filter', { filter: f });
     filter.value = '';
     setTimeout(() => {
         filter.value = f;
     }, 100);
+}
+
+// The view buttons themselves (setViewMode also runs for the Popular filter).
+function pickViewMode(mode) {
+    setViewMode(mode);
+    trackEvent('Gallery View', { view: mode });
 }
 
 function setViewMode(mode) {
@@ -785,6 +794,7 @@ function closeColorFilterValueMenu() {
 
 function selectColorFilterValue(hex) {
     colorFilterValue.value = hex.toLowerCase();
+    trackEvent('Gallery Filter', { filter: 'color', field: colorFilterField.value });
     colorFilterValueMenuOpen.value = false;
 }
 
@@ -1035,6 +1045,28 @@ watch([filter, searchQuery, colorFilterValue], () => {
     visibleCount.value = THEMES_PAGE_SIZE;
 });
 
+// One "Search" event once the visitor stops typing, not one per keystroke.
+// "results: 0" is the interesting part: themes people expect and don't find.
+const SEARCH_TRACK_DELAY_MS = 2000;
+let searchTrackTimer = null;
+let lastTrackedSearch = '';
+
+watch(searchQuery, (value) => {
+    clearTimeout(searchTrackTimer);
+    const query = String(value || '').trim().toLowerCase().slice(0, 60);
+    if (query.length < 2) {
+        return;
+    }
+    searchTrackTimer = setTimeout(() => {
+        if (query === lastTrackedSearch) {
+            return;
+        }
+        lastTrackedSearch = query;
+        const count = filteredThemes.value.length;
+        trackEvent('Search', { query, results: count === 0 ? '0' : count <= 5 ? '1-5' : '6+' });
+    }, SEARCH_TRACK_DELAY_MS);
+});
+
 const { data: themesData } = await useAsyncData('themes', () => fetchData(), {
     default: () => [],
 });
@@ -1143,6 +1175,7 @@ onMounted(() => {
 
 onUnmounted(() => {
     clearTimeout(loadMoreTimer);
+    clearTimeout(searchTrackTimer);
     galleryMotion?.revert();
     setPageScrollLocked(false);
     smoothScroll.stop();

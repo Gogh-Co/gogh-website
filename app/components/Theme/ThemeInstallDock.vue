@@ -74,9 +74,12 @@ const dockStyle = computed(() => ({
     '--dock-d': palette.value[4] || '#9B59B6',
 }));
 
+function isMac() {
+    return /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+}
+
 function command() {
-    const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
-    const base = isMac
+    const base = isMac()
         ? 'bash -c "$(curl -fsSL https://gogh.website/gogh)"'
         : 'bash -c "$(wget -qO- https://gogh.website/gogh)"';
     return `${base} -- "${props.themeName.replace(/"/g, '\\"')}"`;
@@ -92,6 +95,7 @@ async function copy() {
         return;
     }
     copied.value = true;
+    trackEvent('Install Copy', { place: 'theme-dock', os: isMac() ? 'mac' : 'linux', theme: props.themeName });
     clearTimeout(copiedTimer);
     copiedTimer = setTimeout(() => {
         copied.value = false;

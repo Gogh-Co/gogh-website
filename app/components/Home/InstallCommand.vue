@@ -50,6 +50,11 @@ const props = defineProps({
         type: String,
         default: '',
     },
+    // Where the box sits, for analytics ("home-hero", "theme-hero"...).
+    place: {
+        type: String,
+        default: '',
+    },
 });
 
 const OPTIONS = [
@@ -91,6 +96,7 @@ async function copy() {
     }
 
     copied.value = true;
+    trackEvent('Install Copy', { place: props.place, os: os.value, theme: props.themeName || 'menu' });
     clearTimeout(copiedTimer);
     copiedTimer = setTimeout(() => {
         copied.value = false;

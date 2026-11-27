@@ -15,7 +15,7 @@
             <div class="row">
                 <div class="col-12 wcsg-download-row">
                     <a
-                        class="btn wcsg-download-link"
+                        class="btn wcsg-download-link plausible-event-name=Download plausible-event-kind=wcag-data"
                         href="https://raw.githubusercontent.com/Gogh-Co/Gogh/master/data/wcag-min.json"
                         target="_blank"
                         rel="noopener noreferrer"

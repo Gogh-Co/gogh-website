@@ -45,7 +45,7 @@
                         :disabled="randomLoading"
                         @pointerenter="prefetchThemePaths"
                         @focus="prefetchThemePaths"
-                        @click="openRandomTheme"
+                        @click="openRandomTheme('button')"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2m2.5 3a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3m9 0a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3M12 10.5a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3M7.5 15a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3m9 0a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3"/></svg>
                         <span class="gogh-header__theme-toggle-label">Random theme</span>
@@ -172,10 +172,10 @@ function onRandomKeydown(event) {
         return;
     }
     event.preventDefault();
-    openRandomTheme();
+    openRandomTheme('key');
 }
 
-async function openRandomTheme() {
+async function openRandomTheme(via = 'button') {
     if (randomLoading.value) {
         return;
     }
@@ -183,6 +183,7 @@ async function openRandomTheme() {
     try {
         const path = await pickRandomThemePagePath(route.path);
         if (path) {
+            trackEvent('Random Theme', { via });
             mobileNavOpen.value = false;
             await navigateTo(path);
         }

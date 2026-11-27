@@ -8,7 +8,7 @@
             </h2>
 
             <div class="install__command">
-                <InstallCommand tone="solid" />
+                <InstallCommand tone="solid" place="home-steps" />
             </div>
 
             <ol class="install__steps">

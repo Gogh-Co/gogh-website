@@ -598,6 +598,7 @@ function downloadTheme() {
   link.download = downloadFileName.value;
   link.click();
   URL.revokeObjectURL(url);
+  trackEvent('Download', { kind: 'generator' });
 }
 
 function onTerminalColorUpdate({ key, value }) {
