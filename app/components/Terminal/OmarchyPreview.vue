@@ -3,7 +3,7 @@
          windows - Neovim with neo-tree, a terminal, btop and Files - all
          recoloured by the theme, the way an Omarchy theme switch does it. -->
     <ScaledStage :width="1100" :height="620">
-        <div class="desktop" :style="vars" role="img" :aria-label="`Omarchy desktop mockup in ${themeName}`">
+        <div class="desktop" :style="vars" role="img" :aria-label="t('previews.omarchy.aria', { name: themeName })">
             <div class="waybar">
                 <div class="waybar__left">
                     <span class="waybar__logo"></span>
@@ -165,6 +165,7 @@
 </template>
 
 <script setup>
+const { t } = useI18n();
 import ScaledStage from './mock/ScaledStage.vue';
 import MockIcon from './mock/MockIcon.vue';
 

@@ -1,5 +1,5 @@
 <template>
-    <section ref="root" class="marquee" aria-label="A sample of the theme collection">
+    <section ref="root" class="marquee" :aria-label="t('marquee.aria')">
         <div class="marquee__mask">
             <div
                 v-for="(row, rowIndex) in rows"
@@ -19,7 +19,7 @@
                                 :style="{ '--bg': theme.background, '--fg': theme.foreground }"
                                 :aria-hidden="copy === 2"
                                 :tabindex="copy === 2 ? -1 : 0"
-                                :aria-label="`${theme.name} theme page`"
+                                :aria-label="t('common.themePage', { name: theme.name })"
                             >
                                 <span class="mini-term__bar">
                                     <span class="mini-term__dots" aria-hidden="true"><i></i><i></i><i></i></span>
@@ -48,6 +48,8 @@ const props = defineProps({
         default: () => [],
     },
 });
+
+const { t } = useI18n();
 
 const SWATCH_KEYS = Array.from({ length: 8 }, (_, index) => `color_${String(index + 1).padStart(2, '0')}`);
 const ROW_COUNT = 2;

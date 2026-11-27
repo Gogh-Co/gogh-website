@@ -8,7 +8,7 @@
         }"
     >
         <div class="gogh-header__inner">
-            <NuxtLink to="/" class="gogh-header__brand" aria-label="Gogh home" @click="onBrandClick">
+            <NuxtLink to="/" class="gogh-header__brand" :aria-label="t('header.home')" @click="onBrandClick">
                 <span class="gogh-header__brand-text">Gogh</span>
                 <span class="gogh-header__logo-bar" aria-hidden="true">
                     <span
@@ -20,7 +20,7 @@
                 </span>
             </NuxtLink>
 
-            <nav id="gogh-header-nav" class="gogh-header__nav" :class="{ 'is-open': mobileNavOpen }" aria-label="Primary">
+            <nav id="gogh-header-nav" class="gogh-header__nav" :class="{ 'is-open': mobileNavOpen }" :aria-label="t('header.primaryNav')">
                 <NuxtLink
                     v-for="(link, index) in NAV_LINKS"
                     :key="link.to"
@@ -30,7 +30,7 @@
                     @click="onNavClick($event, link)"
                 >
                     <span class="gogh-header__nav-index" aria-hidden="true">{{ String(index + 1).padStart(2, '0') }}</span>
-                    {{ link.label }}
+                    {{ t(link.label) }}
                 </NuxtLink>
 
                 <div class="gogh-header__tools">
@@ -38,9 +38,9 @@
                         type="button"
                         class="gogh-header__theme-toggle gogh-header__random"
                         :class="{ 'is-loading': randomLoading }"
-                        aria-label="Open a random theme"
+                        :aria-label="t('header.randomAria')"
                         aria-keyshortcuts="r"
-                        title="Random theme (R)"
+                        :title="t('header.randomTitle')"
                         :aria-busy="randomLoading"
                         :disabled="randomLoading"
                         @pointerenter="prefetchThemePaths"
@@ -48,20 +48,22 @@
                         @click="openRandomTheme('button')"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2m2.5 3a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3m9 0a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3M12 10.5a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3M7.5 15a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3m9 0a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3"/></svg>
-                        <span class="gogh-header__theme-toggle-label">Random theme</span>
+                        <span class="gogh-header__theme-toggle-label">{{ t('header.random') }}</span>
                     </button>
 
                     <button
                         type="button"
                         class="gogh-header__theme-toggle"
-                        :aria-label="pageTheme === 'dark' ? 'Switch page to light background' : 'Switch page to dark background'"
+                        :aria-label="pageTheme === 'dark' ? t('header.toLight') : t('header.toDark')"
                         :aria-pressed="pageTheme === 'dark'"
                         @click="togglePageTheme"
                     >
                         <svg v-if="pageTheme === 'dark'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M12 7a5 5 0 1 0 0 10a5 5 0 0 0 0-10m0-5a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1m0 18a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1M3 11a1 1 0 0 1 0 2H2a1 1 0 1 1 0-2zm19 0a1 1 0 0 1 0 2h-1a1 1 0 1 1 0-2zM4.929 4.929a1 1 0 0 1 1.414 0l.707.707A1 1 0 1 1 5.636 7.05l-.707-.707a1 1 0 0 1 0-1.414m12.02 12.02a1 1 0 0 1 1.415 0l.707.707a1 1 0 1 1-1.414 1.414l-.707-.707a1 1 0 0 1 0-1.414M19.071 4.929a1 1 0 0 1 0 1.414l-.707.707a1 1 0 1 1-1.414-1.414l.707-.707a1 1 0 0 1 1.414 0M7.05 16.95a1 1 0 0 1 0 1.414l-.707.707a1 1 0 0 1-1.414-1.414l.707-.707a1 1 0 0 1 1.414 0"/></svg>
                         <svg v-else xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M9.822 2.238a.75.75 0 0 1 .174.808a7.5 7.5 0 0 0 9.958 9.958a.75.75 0 0 1 .982.982A9.001 9.001 0 0 1 12 21a9 9 0 0 1-2.834-17.539a.75.75 0 0 1 .656.777"/></svg>
-                        <span class="gogh-header__theme-toggle-label">{{ pageTheme === 'dark' ? 'Light background' : 'Dark background' }}</span>
+                        <span class="gogh-header__theme-toggle-label">{{ pageTheme === 'dark' ? t('header.lightBackground') : t('header.darkBackground') }}</span>
                     </button>
+
+                    <LanguageSwitcher />
 
                     <AuthControl />
                 </div>
@@ -73,7 +75,7 @@
                 :class="{ 'is-open': mobileNavOpen }"
                 :aria-expanded="mobileNavOpen"
                 aria-controls="gogh-header-nav"
-                :aria-label="mobileNavOpen ? 'Close menu' : 'Open menu'"
+                :aria-label="mobileNavOpen ? t('header.closeMenu') : t('header.openMenu')"
                 @click="mobileNavOpen = !mobileNavOpen"
             >
                 <span></span>
@@ -89,6 +91,7 @@
 <script setup>
 import githubButtonsScript from '@/assets/static/buttons.js?raw';
 import AuthControl from '@/components/Auth/AuthControl.vue';
+import LanguageSwitcher from '@/components/I18n/LanguageSwitcher.vue';
 
 defineProps({
     // The home page lets its hero run under a transparent bar; everywhere
@@ -99,16 +102,18 @@ defineProps({
     },
 });
 
+// Labels are message keys.
 const NAV_LINKS = [
     // The collection section on the home page.
-    { to: '/#themes', label: 'Themes' },
-    { to: '/generator', label: 'Generator' },
-    { to: '/wcsg', label: 'WCAG' },
-    { to: '/stats', label: 'Stats' },
-    { to: '/wallpapers', label: 'Wallpapers' },
-    { to: '/terminals', label: 'Terminals' },
+    { to: '/#themes', label: 'header.nav.themes' },
+    { to: '/generator', label: 'header.nav.generator' },
+    { to: '/wcsg', label: 'header.nav.wcag' },
+    { to: '/stats', label: 'header.nav.stats' },
+    { to: '/wallpapers', label: 'header.nav.wallpapers' },
+    { to: '/terminals', label: 'header.nav.terminals' },
 ];
 
+const { t } = useI18n();
 const mobileNavOpen = ref(false);
 const scrolled = ref(false);
 const hidden = ref(false);
@@ -156,7 +161,7 @@ function prefetchThemePaths() {
 // The R key does what the dice button does, unless the key belongs to
 // something else: a text field, an open dialog or filter, or a shortcut with
 // modifiers (Ctrl+R / Cmd+R still reload the page).
-const RANDOM_KEY_OWNERS = 'input, textarea, select, [contenteditable]:not([contenteditable="false"])';
+const RANDOM_KEY_OWNERS = 'input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="listbox"]';
 
 function onRandomKeydown(event) {
     if (event.key !== 'r' && event.key !== 'R') {

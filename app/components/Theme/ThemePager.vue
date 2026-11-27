@@ -1,10 +1,10 @@
 <template>
     <section id="theme-more" ref="root" class="pager" aria-labelledby="theme-pager-title">
         <div class="pager__inner">
-            <p class="section-eyebrow pager__eyebrow"><span>05</span> Keep exploring</p>
-            <h2 id="theme-pager-title" class="visually-hidden">More themes</h2>
+            <p class="section-eyebrow pager__eyebrow"><span>05</span> {{ t('pager.eyebrow') }}</p>
+            <h2 id="theme-pager-title" class="visually-hidden">{{ t('pager.heading') }}</h2>
 
-            <nav class="pager__nav" aria-label="More themes">
+            <nav class="pager__nav" :aria-label="t('pager.heading')">
                 <NuxtLink
                     v-for="link in links"
                     :key="link.rel"
@@ -29,12 +29,12 @@
 
             <div class="pager__foot">
                 <NuxtLink to="/#themes" class="pager__all">
-                    <span>All {{ total.toLocaleString('en-US') }} themes</span>
+                    <span>{{ t('pager.allThemes', { count: total }) }}</span>
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 11v2h12l-5.5 5.5l1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5L16 11z"/></svg>
                 </NuxtLink>
 
                 <div class="pager__share">
-                    <span class="pager__share-title">Share {{ themeName }}</span>
+                    <span class="pager__share-title">{{ t('pager.share', { name: themeName }) }}</span>
                     <ThemeShareButtons :theme-name="themeName" :theme="theme" :url="url" />
                 </div>
             </div>
@@ -72,6 +72,7 @@ const props = defineProps({
     },
 });
 
+const { t } = useI18n();
 const root = ref(null);
 let gsapContext = null;
 
@@ -91,8 +92,8 @@ function linkFor(neighbour, rel, label) {
 }
 
 const links = computed(() => [
-    linkFor(props.previous, 'prev', 'Previous'),
-    linkFor(props.next, 'next', 'Next'),
+    linkFor(props.previous, 'prev', t('common.previous')),
+    linkFor(props.next, 'next', t('common.next')),
 ]);
 
 onMounted(() => {
@@ -211,7 +212,7 @@ onBeforeUnmount(() => gsapContext?.revert());
 .pager__link--next {
     --nudge: 6px;
     align-items: flex-end;
-    text-align: right;
+    text-align: end;
 }
 
 .pager__label {

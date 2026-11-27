@@ -2,9 +2,9 @@
     <section ref="root" class="install">
         <div class="install__glow" aria-hidden="true"></div>
         <div class="install__inner">
-            <p class="section-eyebrow"><span>05</span> Get started</p>
+            <p class="section-eyebrow"><span>05</span> {{ t('steps.eyebrow') }}</p>
             <h2 class="install__title">
-                One line.<br><em>Any theme.</em>
+                {{ t('steps.title') }}<br><em>{{ t('steps.titleAccent') }}</em>
             </h2>
 
             <div class="install__command">
@@ -12,10 +12,10 @@
             </div>
 
             <ol class="install__steps">
-                <li v-for="(step, index) in STEPS" :key="step.title" class="install__step">
+                <li v-for="(step, index) in STEPS" :key="step" class="install__step">
                     <span class="install__step-index">{{ String(index + 1).padStart(2, '0') }}</span>
-                    <span class="install__step-title">{{ step.title }}</span>
-                    <span class="install__step-text">{{ step.text }}</span>
+                    <span class="install__step-title">{{ t(`steps.${step}Title`) }}</span>
+                    <span class="install__step-text">{{ t(`steps.${step}Text`) }}</span>
                 </li>
             </ol>
         </div>
@@ -25,11 +25,10 @@
 <script setup>
 import InstallCommand from './InstallCommand.vue';
 
-const STEPS = [
-    { title: 'Run the command', text: 'Paste it into the terminal you want to theme. Linux uses wget, macOS uses curl.' },
-    { title: 'Pick your themes', text: 'Choose one or several from the numbered list, or open any theme below and copy its own one-liner.' },
-    { title: 'Switch any time', text: 'Run it again whenever you want to try another palette. It takes seconds.' },
-];
+const { t } = useI18n();
+
+// Copy lives in steps.<id>Title / steps.<id>Text.
+const STEPS = ['run', 'pick', 'switch'];
 
 const root = ref(null);
 let gsapContext = null;
@@ -128,7 +127,7 @@ onBeforeUnmount(() => gsapContext?.revert());
     display: flex;
     justify-content: center;
     margin: 0 0 80px;
-    text-align: left;
+    text-align: start;
 
     :deep(.install-cmd) {
         display: flex;
@@ -147,7 +146,7 @@ onBeforeUnmount(() => gsapContext?.revert());
     margin: 0;
     padding: 0;
     list-style: none;
-    text-align: left;
+    text-align: start;
 
     @include m768 {
         grid-template-columns: repeat(3, 1fr);

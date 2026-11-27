@@ -2,12 +2,9 @@
     <section ref="root" class="bento-section">
         <div class="bento-section__inner">
             <header class="bento-section__header">
-                <p class="section-eyebrow"><span>03</span> The toolkit</p>
-                <h2 class="section-title">More than a<br><em>color list.</em></h2>
-                <p class="bento-section__lead">
-                    Build a theme from scratch, check its contrast, explore the numbers behind the collection,
-                    or take the palette to your desktop.
-                </p>
+                <p class="section-eyebrow"><span>03</span> {{ t('bento.eyebrow') }}</p>
+                <h2 class="section-title">{{ t('bento.title') }}<br><em>{{ t('bento.titleAccent') }}</em></h2>
+                <p class="bento-section__lead">{{ t('bento.lead') }}</p>
             </header>
 
             <div class="bento">
@@ -50,9 +47,9 @@
                     </span>
 
                     <span class="bento__text">
-                        <span class="bento__kicker">{{ card.kicker }}</span>
-                        <span class="bento__title">{{ card.title }}</span>
-                        <span class="bento__desc">{{ card.description }}</span>
+                        <span class="bento__kicker">{{ t(`bento.${card.id}.kicker`) }}</span>
+                        <span class="bento__title">{{ t(`bento.${card.id}.title`) }}</span>
+                        <span class="bento__desc">{{ t(`bento.${card.id}.description`) }}</span>
                     </span>
 
                     <span class="bento__arrow" aria-hidden="true">
@@ -65,42 +62,15 @@
 </template>
 
 <script setup>
+const { t } = useI18n();
+
+// Copy lives in bento.<id>.{kicker,title,description}.
 const CARDS = [
-    {
-        id: 'generator',
-        to: '/generator',
-        kicker: 'Generator',
-        title: 'Design your own scheme',
-        description: 'Pick every color with a live preview, then export a ready-to-use Gogh theme file.',
-    },
-    {
-        id: 'wcag',
-        to: '/wcsg',
-        kicker: 'WCAG data',
-        title: 'Readable by design',
-        description: 'Contrast ratios for every theme, filterable by light and dark.',
-    },
-    {
-        id: 'stats',
-        to: '/stats',
-        kicker: 'Stats',
-        title: 'The numbers behind the palette',
-        description: 'Authors, duplicates and color usage across the whole collection.',
-    },
-    {
-        id: 'wallpapers',
-        to: '/wallpapers',
-        kicker: 'Wallpapers',
-        title: 'Take it to your desktop',
-        description: 'Free wallpapers painted in the Gogh palette.',
-    },
-    {
-        id: 'terminals',
-        to: '/terminals',
-        kicker: 'Terminals',
-        title: 'Works where you work',
-        description: 'GNOME Terminal, Konsole, Alacritty, Kitty, WezTerm, iTerm2 and more.',
-    },
+    { id: 'generator', to: '/generator' },
+    { id: 'wcag', to: '/wcsg' },
+    { id: 'stats', to: '/stats' },
+    { id: 'wallpapers', to: '/wallpapers' },
+    { id: 'terminals', to: '/terminals' },
 ];
 
 const STAT_BARS = [38, 62, 45, 80, 56, 92, 70, 48, 66];

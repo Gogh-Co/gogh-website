@@ -121,15 +121,17 @@ const authorUrl = computed(() => {
 const pagePath = themePagePath(getThemeDisplayName(data.value.theme));
 const pageUrl = canonicalUrl(pagePath);
 
-const summary = computed(() => summarizeThemeColors(theme.value));
+const { t } = useI18n();
+const summary = computed(() => summarizeThemeColors(theme.value, t));
 
 const { pageTheme } = usePageTheme();
 const pageContentStyle = computed(() => (pageTheme.value === 'dark' ? PAGE_THEME_DARK_STYLE : PAGE_THEME_LIGHT_STYLE));
 
-const title = `${themeName.value} - Terminal Color Scheme | Gogh`;
-const description = `${themeName.value} is a ${summary.value.variant} terminal color scheme`
-    + `${authorName.value ? ` by ${authorName.value}` : ''}: palette, contrast and live previews. `
-    + 'One command installs it on GNOME Terminal, Konsole, Alacritty, Kitty, Ghostty, WezTerm, iTerm2 and more.';
+const title = () => t('meta.themeTitle', { name: themeName.value });
+const description = () => t(
+    `meta.themeDescription${summary.value.variant === 'light' ? 'Light' : 'Dark'}${authorName.value ? 'By' : ''}`,
+    { name: themeName.value, author: authorName.value },
+);
 
 useSeoMeta({
     title,

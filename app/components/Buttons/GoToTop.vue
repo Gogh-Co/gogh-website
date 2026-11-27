@@ -7,7 +7,7 @@
         :style="{ '--go-top-lift': `${lift}px` }"
         :tabindex="visible ? 0 : -1"
         :aria-hidden="!visible"
-        aria-label="Back to top"
+        :aria-label="t('goTop')"
         @click="goTop"
     >
         <!-- The outline fills up as the page scrolls. -->
@@ -23,6 +23,7 @@
 // screen down, tracks how far they've scrolled, and glides back up with the
 // site's smooth scroll.
 
+const { t } = useI18n();
 const visible = ref(false);
 const progress = ref(0);
 const lift = ref(0);

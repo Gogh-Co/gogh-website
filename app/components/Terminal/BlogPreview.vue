@@ -19,7 +19,7 @@
         <div class="blog" :style="vars">
             <header class="blog__header">
                 <span class="blog__logo">~/notes<span class="blog__caret">_</span></span>
-                <nav class="blog__nav" aria-label="Sample blog navigation">
+                <nav class="blog__nav" :aria-label="t('previews.blog.navAria')">
                     <span class="blog__nav-item blog__nav-item--active">Posts</span>
                     <span class="blog__nav-item">Tags</span>
                     <span class="blog__nav-item">About</span>
@@ -85,6 +85,7 @@
 </template>
 
 <script setup>
+const { t } = useI18n();
 const props = defineProps({
     theme: {
         type: Object,

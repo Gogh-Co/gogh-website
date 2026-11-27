@@ -1,8 +1,8 @@
 <template>
     <section ref="root" class="reading" :style="themeVars" aria-labelledby="theme-reading-title">
         <div class="reading__inner">
-            <p class="section-eyebrow section-eyebrow--themed reading__eyebrow"><span>02</span> Reading the palette</p>
-            <h2 id="theme-reading-title" class="visually-hidden">What the {{ themeName }} palette is like</h2>
+            <p class="section-eyebrow section-eyebrow--themed reading__eyebrow"><span>02</span> {{ t('reading.eyebrow') }}</p>
+            <h2 id="theme-reading-title" class="visually-hidden">{{ t('reading.heading', { name: themeName }) }}</h2>
 
             <!-- The summary lights up word by word as it scrolls through.
                  Color names, hex codes and ratios take the color they talk about. -->
@@ -16,10 +16,7 @@
                 </template>
             </p>
 
-            <p class="reading__note">
-                Ratios are measured against the theme's own background, following WCAG: 4.5:1 is the AA target for body
-                text, 7:1 the AAA target.
-            </p>
+            <p class="reading__note">{{ t('reading.note') }}</p>
         </div>
     </section>
 </template>
@@ -40,8 +37,10 @@ const props = defineProps({
     },
 });
 
+const { t, locale, localeInfo } = useI18n();
 const root = ref(null);
 let gsapContext = null;
+let wordsContext = null;
 
 const themeVars = computed(() => ({
     '--bg': safeHex(props.theme.background) || '#0a0f14',
@@ -51,7 +50,7 @@ const themeVars = computed(() => ({
 // Color names in the summary ("Bright Yellow", "Red"...) mapped to their hex.
 const colorByLabel = computed(() => {
     const map = new Map();
-    for (const slot of [...NORMAL_COLOR_SLOTS, ...BRIGHT_COLOR_SLOTS]) {
+    for (const slot of [...normalColorSlots(t), ...brightColorSlots(t)]) {
         const hex = safeHex(props.theme[slot.key]);
         if (hex) {
             map.set(slot.label, hex);
@@ -104,8 +103,9 @@ const words = computed(() => {
                 }
             });
         }
-        // Sentences are separate strings: always a space between them.
-        if (out.length) {
+        // Sentences are separate strings: a space between them (none in
+        // scripts that don't use spaces).
+        if (out.length && localeInfo.value.spaced) {
             out[out.length - 1].space = true;
         }
     }
@@ -117,20 +117,9 @@ onMounted(() => {
     if (prefersReducedMotion()) {
         return;
     }
+    setupWords();
     const { gsap } = useGsap();
     gsapContext = gsap.context(() => {
-        gsap.fromTo('.reading__word', { opacity: 0.14 }, {
-            opacity: 1,
-            stagger: 0.05,
-            ease: 'none',
-            scrollTrigger: {
-                trigger: '.reading__text',
-                start: 'top 80%',
-                end: 'bottom 50%',
-                scrub: 0.6,
-            },
-        });
-
         // The eyebrow decodes from binary the first time the section comes in.
         gsap.from('.reading__eyebrow', {
             y: 30,
@@ -146,7 +135,35 @@ onMounted(() => {
     }, root.value);
 });
 
-onBeforeUnmount(() => gsapContext?.revert());
+function setupWords() {
+    wordsContext?.revert();
+    const { gsap } = useGsap();
+    wordsContext = gsap.context(() => {
+        gsap.fromTo('.reading__word', { opacity: 0.14 }, {
+            opacity: 1,
+            stagger: 0.05,
+            ease: 'none',
+            scrollTrigger: {
+                trigger: '.reading__text',
+                start: 'top 80%',
+                end: 'bottom 50%',
+                scrub: 0.6,
+            },
+        });
+    }, root.value);
+}
+
+// The summary is rewritten in another language: light up the new words.
+watch(locale, () => {
+    if (wordsContext) {
+        nextTick(setupWords);
+    }
+});
+
+onBeforeUnmount(() => {
+    wordsContext?.revert();
+    gsapContext?.revert();
+});
 </script>
 
 <style lang="scss" scoped>

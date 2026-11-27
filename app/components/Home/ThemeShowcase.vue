@@ -1,10 +1,10 @@
 <template>
-    <section ref="root" class="showcase" :style="themeVars" aria-label="Live theme preview">
+    <section ref="root" class="showcase" :style="themeVars" :aria-label="t('showcase.aria')">
         <div ref="pin" class="showcase__pin">
             <div class="showcase__inner">
                 <div class="showcase__copy">
-                    <p class="section-eyebrow section-eyebrow--themed"><span>02</span> Live preview</p>
-                    <h2 class="showcase__title">One terminal.<br><em>Every mood.</em></h2>
+                    <p class="section-eyebrow section-eyebrow--themed"><span>02</span> {{ t('showcase.eyebrow') }}</p>
+                    <h2 class="showcase__title">{{ t('showcase.title') }}<br><em>{{ t('showcase.titleAccent') }}</em></h2>
 
                     <ol class="showcase__list">
                         <li v-for="(theme, index) in showcaseThemes" :key="theme.name">
@@ -84,6 +84,8 @@ const props = defineProps({
         default: () => [],
     },
 });
+
+const { t } = useI18n();
 
 const SHOWCASE = ['Dracula', 'Nord', 'Gruvbox Dark', 'Catppuccin Mocha', 'Github Light', 'Rose Pine', 'TokyoNight Storm', 'Kanagawa Wave'];
 

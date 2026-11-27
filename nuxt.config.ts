@@ -1,5 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import { themeSlug } from './app/utils/themeSlug'
+import { LOCALE_PENDING_STYLE, localeBootScript } from './app/i18n/config'
 
 const devPort = Number(
   import.meta.env.NUXT_PORT ||
@@ -76,7 +77,17 @@ export default defineNuxtConfig({
         },
       ],
 
+      style: [
+        // Hides a non-English page until its translation is applied (see
+        // app/i18n/config.ts); shown anyway after a moment.
+        { innerHTML: LOCALE_PENDING_STYLE },
+      ],
+
       script: [
+        // Must run before the first paint: picks the visitor's language
+        // (?lang=, cookie, browser) and sets <html lang/dir>.
+        { innerHTML: localeBootScript() },
+
         {
           src: 'https://analytics.arcano.site/js/pa-Fw7nMNFtqNmPh7jU-bDaj.js',
           async: true,

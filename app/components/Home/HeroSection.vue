@@ -20,10 +20,10 @@
                     <!-- The code layer (CodeReveal) hides the logo's color bar
                          behind these words; the ink uncovers it. -->
                     <span ref="glowAnchor" class="hero__glow-anchor">
-                        <em class="hero__word hero__word--accent" style="--i: 1">terminal schemes</em>
+                        <em class="hero__word hero__word--accent" style="--i: 1">{{ t('hero.tagline') }}</em>
                     </span>
                 </span>
-                <span class="visually-hidden"> Color schemes for GNOME Terminal, Alacritty, Kitty, iTerm2 and more.</span>
+                <span class="visually-hidden"> {{ t('hero.srTitle') }}</span>
             </h1>
 
             <div class="hero__install">
@@ -32,12 +32,12 @@
 
             <div class="hero__actions">
                 <a ref="cta" href="#themes" class="hero__cta" @click.prevent="emit('browse')">
-                    Browse the collection
+                    {{ t('hero.browse') }}
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M11 4h2v12l5.5-5.5l1.42 1.42L12 19.84l-7.92-7.92L5.5 10.5L11 16z"/></svg>
                 </a>
                 <a href="https://github.com/Gogh-Co/Gogh" class="hero__ghost" target="_blank" rel="noopener">
                     <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-                    Star on GitHub
+                    {{ t('hero.star') }}
                 </a>
             </div>
         </div>
@@ -46,10 +46,10 @@
             <button
                 type="button"
                 class="hero__painting"
-                :aria-label="`Painting with ${activeThemeName}. Switch to the next theme`"
+                :aria-label="t('hero.paintingAria', { name: activeThemeName })"
                 @click="nextTheme(true)"
             >
-                <span class="hero__painting-label">Painting with</span>
+                <span class="hero__painting-label">{{ t('hero.paintingWith') }}</span>
                 <span class="hero__painting-swatches" aria-hidden="true">
                     <span v-for="(color, index) in palette.slice(0, 6)" :key="index" :style="{ backgroundColor: color }"></span>
                 </span>
@@ -58,7 +58,7 @@
             </button>
 
             <div class="hero__scroll" aria-hidden="true">
-                <span>Scroll</span>
+                <span>{{ t('common.scroll') }}</span>
                 <span class="hero__scroll-line"></span>
             </div>
         </div>
@@ -87,7 +87,7 @@
                 />
                 <span class="hero-sticky-cta__veil" aria-hidden="true"></span>
                 <span class="hero-sticky-cta__label">
-                    Browse the collection
+                    {{ t('hero.browse') }}
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M11 4h2v12l5.5-5.5l1.42 1.42L12 19.84l-7.92-7.92L5.5 10.5L11 16z"/></svg>
                 </span>
             </a>
@@ -108,6 +108,7 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['browse']);
+const { t } = useI18n();
 
 // Dark themes only: the hero copy is light, so it has to stay readable on
 // every background in the rotation.
@@ -227,7 +228,9 @@ function revealTitle() {
 }
 
 onMounted(() => {
-    revealTitle();
+    // The decode holds each word at its measured width: measure the
+    // visitor's language, not the English prerender.
+    whenI18nReady().then(() => nextTick(revealTitle));
 
     window.addEventListener('scroll', onStickyScroll, { passive: true });
     window.addEventListener('resize', onStickyScroll, { passive: true });

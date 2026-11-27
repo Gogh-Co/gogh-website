@@ -6,9 +6,7 @@
         <div class="container-fluid wcsg-container">
             <div class="row">
                 <div class="col-12">
-                    <h1 class="page-title">
-                        WCAG Color Data
-                    </h1>
+                    <h1 class="page-title">{{ t('wcsg.title') }}</h1>
                 </div>
             </div>
 
@@ -20,7 +18,7 @@
                         target="_blank"
                         rel="noopener noreferrer"
                     >
-                        Download Data
+                        {{ t('wcsg.downloadData') }}
                     </a>
                 </div>
             </div>
@@ -29,20 +27,20 @@
                 <div class="col">
                     <div class="filters">
                         <ButtonFilter :active="filter === 'all'" @click="setFilter('all'); resetMenuSelected()">
-                            All
+                            {{ t('common.all') }}
                         </ButtonFilter>
 
                         <ButtonFilter :active="filter === 'light'" @click="setFilter('light'); resetMenuSelected()">
-                            Light Themes
+                            {{ t('common.lightThemes') }}
                         </ButtonFilter>
 
                         <ButtonFilter :active="filter === 'dark'" @click="setFilter('dark'); resetMenuSelected()">
-                            Dark Themes
+                            {{ t('common.darkThemes') }}
                         </ButtonFilter>
 
                         <ButtonFilter :active="selected === 'background' || filter === 'background'"
                             @click="setBackground(); toggleFilterBackground();">
-                            by Background
+                            {{ t('wcsg.byBackground') }}
                         </ButtonFilter>
 
                         <div class="theme-search" role="search">
@@ -50,7 +48,7 @@
                                 v-if="searchQuery"
                                 type="button"
                                 class="theme-search__clear"
-                                aria-label="Clear search"
+                                :aria-label="t('common.clearSearch')"
                                 @click="clearSearchQuery"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M18.3 5.71L12 12l6.3 6.29l-1.41 1.42L10.59 13.4L4.29 19.71L2.88 18.3L9.17 12L2.88 5.71L4.29 4.29l6.3 6.3l6.29-6.3z"/></svg>
@@ -62,8 +60,8 @@
                                 v-model.trim="searchQuery"
                                 class="theme-search__input"
                                 type="search"
-                                placeholder="Search theme by name"
-                                aria-label="Search theme by name"
+                                :placeholder="t('common.searchByName')"
+                                :aria-label="t('common.searchByName')"
                             >
                         </div>
                     </div>
@@ -80,11 +78,11 @@
                             <span class="gogh-banner-anim__color gogh-banner-anim__color--08"></span>
                             <span class="gogh-banner-anim__shine"></span>
                         </div>
-                        <p class="wcsg-loading__text">Loading WCAG data...</p>
+                        <p class="wcsg-loading__text">{{ t('wcsg.loading') }}</p>
                     </div>
 
                     <div v-else-if="errorMessage" class="wcsg-error">
-                        {{ errorMessage }}
+                        {{ t(errorMessage) }}
                     </div>
                 </div>
             </div>
@@ -106,14 +104,14 @@
             <button
                 type="button"
                 class="background-lightbox__close"
-                aria-label="Close background filter"
+                :aria-label="t('wcsg.closeBackground')"
                 @click="toggleFilterBackground(false)"
             >
                 &times;
             </button>
 
             <div class="background-lightbox__content">
-                <h3 class="background-lightbox__title">Filter by background color</h3>
+                <h3 class="background-lightbox__title">{{ t('wcsg.backgroundTitle') }}</h3>
 
                 <div class="background-lightbox__grid">
                     <template v-for="item in themeBackgrounds" :key="item">
@@ -140,8 +138,9 @@ import Header from '@/components/Header/Header.vue'
 import WcsgThemeCard from '@/components/Wcsg/WcsgThemeCard.vue'
 import ButtonFilter from '@/components/Buttons/ButtonFilter.vue'
 
-const title = 'WCAG Contrast Data for Terminal Themes - Gogh';
-const description = 'Explore WCAG contrast ratios and accessibility data for every Gogh terminal color scheme, filterable by light and dark themes.';
+const { t } = useI18n();
+const title = () => t('meta.wcsgTitle');
+const description = () => t('meta.wcsgDescription');
 
 useSeoMeta({
     title,
@@ -292,7 +291,7 @@ onMounted(() => {
     })
     .catch((error) => {
             console.error('Error fetching data:', error)
-            errorMessage.value = 'Could not fetch WCAG data.'
+            errorMessage.value = 'wcsg.error'
     })
         .finally(() => {
             loading.value = false

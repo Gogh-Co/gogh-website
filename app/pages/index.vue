@@ -14,13 +14,14 @@
     <div id="themes" class="gogh-content gallery" :style="pageContentStyle">
         <div class="container-fluid">
             <header ref="galleryHeader" class="gallery__header">
-                <p class="section-eyebrow gallery__eyebrow"><span>06</span> The collection</p>
+                <p class="section-eyebrow gallery__eyebrow"><span>06</span> {{ t('gallery.eyebrow') }}</p>
                 <div class="gallery__heading">
                     <!-- Hidden for the 100ms setFilter() blanks the filter, so it never flashes "0". -->
                     <p class="gallery__count" aria-live="polite" :style="{ visibility: filter === '' ? 'hidden' : 'visible' }">
-                        <strong ref="galleryCount">{{ filteredThemes.length }}</strong>
-                        {{ filteredThemes.length === 1 ? 'theme' : 'themes' }}
-                        <span v-if="filteredThemes.length !== themes.length">of {{ themes.length }}</span>
+                        <I18nT keypath="gallery.count" tag="" :params="{ count: filteredThemes.length }">
+                            <template #count><strong ref="galleryCount">{{ n(filteredThemes.length) }}</strong></template>
+                        </I18nT>
+                        <span v-if="filteredThemes.length !== themes.length">{{ t('gallery.ofTotal', { total: themes.length }) }}</span>
                     </p>
                 </div>
             </header>
@@ -35,34 +36,33 @@
                 <div class="col-md-12">
                     <div class="filters">
                         <div class="filters__row filters__row--filters">
-                            <div class="filters__group" role="group" aria-label="Filter themes">
-                                <span class="filters__group-label">Filter</span>
+                            <div class="filters__group" role="group" :aria-label="t('gallery.filterAria')">
+                                <span class="filters__group-label">{{ t('gallery.filterLabel') }}</span>
 
                                 <div class="filters__group-scroll">
                                     <ButtonFilter extra-class="js-btn--filter" :active="filter === 'all' && !colorFilterField"
                                         @click="setFilter('all'); clearColorFilter()">
-                                        All
-
+                                        {{ t('common.all') }}
                                     </ButtonFilter>
 
                                     <ButtonFilter extra-class="js-btn--filter" :active="filter === 'light' && !colorFilterField"
                                         @click="setFilter('light'); clearColorFilter()">
-                                        Light Themes
+                                        {{ t('common.lightThemes') }}
                                     </ButtonFilter>
 
                                     <ButtonFilter extra-class="js-btn--filter" :active="filter === 'dark' && !colorFilterField"
                                         @click="setFilter('dark'); clearColorFilter()">
-                                        Dark Themes
+                                        {{ t('common.darkThemes') }}
                                     </ButtonFilter>
 
                                     <ButtonFilter extra-class="js-btn--filter" :active="filter === 'popular' && !colorFilterField"
                                         @click="setFilter('popular'); clearColorFilter(); setSortMode('random'); setViewMode('compact')">
-                                        Popular
+                                        {{ t('gallery.popular') }}
                                     </ButtonFilter>
 
                                     <ButtonFilter extra-class="js-btn--filter" :active="filter === 'favorites' && !colorFilterField"
                                         @click="setFilter('favorites'); clearColorFilter()">
-                                        Favorites{{ favorites.length ? ` (${favorites.length})` : '' }}
+                                        {{ favorites.length ? t('gallery.favoritesCount', { count: favorites.length }) : t('gallery.favorites') }}
                                     </ButtonFilter>
 
                                     <ButtonFilter
@@ -71,27 +71,27 @@
                                         :aria-expanded="colorFilterFieldMenuOpen"
                                         @click="openColorFilterFieldMenu"
                                     >
-                                        by Color
+                                        {{ t('gallery.byColor') }}
                                     </ButtonFilter>
                                 </div>
                             </div>
 
-                            <div class="filters__group view-toggle" role="group" aria-label="Gallery view">
-                                <span class="filters__group-label">View</span>
+                            <div class="filters__group view-toggle" role="group" :aria-label="t('gallery.viewAria')">
+                                <span class="filters__group-label">{{ t('gallery.viewLabel') }}</span>
 
                                 <div class="filters__group-scroll">
                                     <ButtonFilter :active="viewMode === 'compact'" @click="pickViewMode('compact')">
-                                        Compact
+                                        {{ t('gallery.compact') }}
                                     </ButtonFilter>
 
                                     <ButtonFilter :active="viewMode === 'detailed'" @click="pickViewMode('detailed')">
-                                        Detailed
+                                        {{ t('gallery.detailed') }}
                                     </ButtonFilter>
                                 </div>
                             </div>
 
-                            <div class="filters__group sort-toggle" role="group" aria-label="Sort themes">
-                                <span class="filters__group-label">Sort</span>
+                            <div class="filters__group sort-toggle" role="group" :aria-label="t('gallery.sortAria')">
+                                <span class="filters__group-label">{{ t('gallery.sortLabel') }}</span>
 
                                 <div class="filters__group-scroll">
                                     <ButtonFilter :active="sortMode === 'alphabetical'" @click="setSortMode('alphabetical')">
@@ -99,7 +99,7 @@
                                     </ButtonFilter>
 
                                     <ButtonFilter :active="sortMode === 'random'" @click="shuffleThemes">
-                                        Shuffle
+                                        {{ t('gallery.shuffle') }}
                                     </ButtonFilter>
                                 </div>
                             </div>
@@ -109,7 +109,7 @@
                                     v-if="searchQuery"
                                     type="button"
                                     class="theme-search__clear"
-                                    aria-label="Clear search"
+                                    :aria-label="t('common.clearSearch')"
                                     @click="clearSearchQuery"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M18.3 5.71L12 12l6.3 6.29l-1.41 1.42L10.59 13.4L4.29 19.71L2.88 18.3L9.17 12L2.88 5.71L4.29 4.29l6.3 6.3l6.29-6.3z"/></svg>
@@ -121,8 +121,8 @@
                                     v-model.trim="searchQuery"
                                     class="theme-search__input"
                                     type="search"
-                                    placeholder="Search theme by name"
-                                    aria-label="Search theme by name"
+                                    :placeholder="t('common.searchByName')"
+                                    :aria-label="t('common.searchByName')"
                                 >
                             </div>
                         </div>
@@ -139,7 +139,7 @@
             <div class="row">
                 <div class="col-12">
                     <div class="themes-status themes-status--error" role="alert">
-                        <p>{{ themesError }}</p>
+                        <p>{{ t(themesError) }}</p>
                     </div>
                 </div>
             </div>
@@ -162,7 +162,7 @@
                             <NuxtLink
                                 class="terminal-preview__link"
                                 :to="themePagePath(getThemeName(theme))"
-                                :aria-label="`${getThemeName(theme)} theme page`"
+                                :aria-label="t('common.themePage', { name: getThemeName(theme) })"
                             />
                             <FavoriteButton
                                 :active="isFavorite(getThemeName(theme))"
@@ -196,22 +196,22 @@
             <button
                 type="button"
                 class="color-filter-lightbox__close"
-                aria-label="Close color filter"
+                :aria-label="t('gallery.closeColorFilter')"
                 @click="closeColorFilterFieldMenu"
             >
                 ×
             </button>
 
             <div class="color-filter-lightbox__content">
-                <div class="color-filter-grid" role="group" aria-label="Filter by color">
+                <div class="color-filter-grid" role="group" :aria-label="t('gallery.colorFilterAria')">
                     <button
                         type="button"
                         class="color-filter-cube color-filter-cube--background"
                         :class="{ active: colorFilterField === 'background' }"
                         :style="'background-color:' + BACKGROUND_FILTER_OPTION.previewColor"
                         :aria-pressed="colorFilterField === 'background'"
-                        :title="BACKGROUND_FILTER_OPTION.label"
-                        :aria-label="'Filter by ' + BACKGROUND_FILTER_OPTION.label"
+                        :title="t(BACKGROUND_FILTER_OPTION.label)"
+                        :aria-label="t('gallery.filterByOption', { color: t(BACKGROUND_FILTER_OPTION.label) })"
                         @click="selectColorFilterField('background')"
                     ></button>
 
@@ -225,8 +225,8 @@
                                 :class="{ active: colorFilterField === option.key }"
                                 :style="'background-color:' + option.previewColor"
                                 :aria-pressed="colorFilterField === option.key"
-                                :title="option.label"
-                                :aria-label="'Filter by ' + option.label"
+                                :title="t(option.label)"
+                                :aria-label="t('gallery.filterByOption', { color: t(option.label) })"
                                 @click="selectColorFilterField(option.key)"
                             ></button>
                         </div>
@@ -240,8 +240,8 @@
                                 :class="{ active: colorFilterField === option.key }"
                                 :style="'background-color:' + option.previewColor"
                                 :aria-pressed="colorFilterField === option.key"
-                                :title="option.label"
-                                :aria-label="'Filter by ' + option.label"
+                                :title="t(option.label)"
+                                :aria-label="t('gallery.filterByOption', { color: t(option.label) })"
                                 @click="selectColorFilterField(option.key)"
                             ></button>
                         </div>
@@ -259,7 +259,7 @@
             <button
                 type="button"
                 class="background-lightbox__close"
-                aria-label="Close color filter"
+                :aria-label="t('gallery.closeColorFilter')"
                 @click="closeColorFilterValueMenu"
             >
                 ×
@@ -267,15 +267,15 @@
 
             <div class="background-lightbox__content">
                 <div class="background-lightbox__header">
-                    <h3 class="background-lightbox__title">Filter by {{ colorFilterFieldLabel }} color</h3>
+                    <h3 class="background-lightbox__title">{{ t('gallery.colorFilterTitle', colorFilterFieldLabel) }}</h3>
 
-                    <div class="background-lightbox__sort" role="group" aria-label="Sort swatches">
+                    <div class="background-lightbox__sort" role="group" :aria-label="t('gallery.sortSwatches')">
                         <ButtonFilter :active="colorFilterValueSortMode === 'color'" @click="setColorFilterValueSortMode('color')">
-                            Color
+                            {{ t('gallery.sortColor') }}
                         </ButtonFilter>
 
                         <ButtonFilter :active="colorFilterValueSortMode === 'count'" @click="setColorFilterValueSortMode('count')">
-                            {{ colorFilterValueSortMode === 'count' && colorFilterValueSortDirection === 'asc' ? 'Least first' : 'Most first' }}
+                            {{ colorFilterValueSortMode === 'count' && colorFilterValueSortDirection === 'asc' ? t('gallery.leastFirst') : t('gallery.mostFirst') }}
                         </ButtonFilter>
                     </div>
                 </div>
@@ -287,7 +287,7 @@
                             class="background-lightbox__swatch"
                             :class="{ active: colorFilterValue === item.hex.toLowerCase() }"
                             :style="'background-color:' + item.hex"
-                            :title="item.count + (item.count === 1 ? ' theme' : ' themes')"
+                            :title="t('common.themesCount', { count: item.count })"
                             @click="selectColorFilterValue(item.hex)"
                         >
                             <span class="background-lightbox__count" :style="{ color: item.textColor, textShadow: item.textShadow }">{{ item.count }}</span>
@@ -313,8 +313,9 @@
 <script setup>
 import chroma from 'chroma-js';
 
-const title = 'Gogh - Terminal Color Schemes';
-const description = SITE_DESCRIPTION;
+const { t, n } = useI18n();
+const title = () => t('meta.homeTitle');
+const description = () => t('meta.siteDescription');
 
 useSeoMeta({
     title,
@@ -346,6 +347,7 @@ import FeatureBento from '@/components/Home/FeatureBento.vue';
 import TerminalsStrip from '@/components/Home/TerminalsStrip.vue';
 import InstallSteps from '@/components/Home/InstallSteps.vue';
 import GalleryLoader from '@/components/Home/GalleryLoader.vue';
+import I18nT from '@/components/I18nT';
 
 const smoothScroll = useSmoothScroll();
 const galleryHeader = ref(null);
@@ -564,32 +566,18 @@ const SORT_DIRECTION_STORAGE_KEY = 'gogh-gallery-sort-direction';
 // Preview colors are lifted verbatim from the "Gogh" theme itself
 // (themes/Gogh.yml on master) rather than generic ANSI primaries, so the
 // filter cubes read as the project's own palette.
-const COLOR_FILTER_SLOTS = [
-    { label: 'Black', previewColor: '#243342' },
-    { label: 'Red', previewColor: '#C54133' },
-    { label: 'Green', previewColor: '#27AE60' },
-    { label: 'Yellow', previewColor: '#EDB20A' },
-    { label: 'Blue', previewColor: '#2479D0' },
-    { label: 'Magenta', previewColor: '#7D3EA0' },
-    { label: 'Cyan', previewColor: '#1D8579' },
-    { label: 'White', previewColor: '#C9CCCD' },
-    { label: 'Bright Black', previewColor: '#34495E' },
-    { label: 'Bright Red', previewColor: '#E74C3C' },
-    { label: 'Bright Green', previewColor: '#2ECC71' },
-    { label: 'Bright Yellow', previewColor: '#F1C40F' },
-    { label: 'Bright Blue', previewColor: '#3498DB' },
-    { label: 'Bright Magenta', previewColor: '#9B59B6' },
-    { label: 'Bright Cyan', previewColor: '#2AA198' },
-    { label: 'Bright White', previewColor: '#ECF0F1' },
+const COLOR_FILTER_SLOT_COLORS = [
+    '#243342', '#C54133', '#27AE60', '#EDB20A', '#2479D0', '#7D3EA0', '#1D8579', '#C9CCCD',
+    '#34495E', '#E74C3C', '#2ECC71', '#F1C40F', '#3498DB', '#9B59B6', '#2AA198', '#ECF0F1',
 ];
 
+// Labels are message keys (colors.*).
 const COLOR_FILTER_OPTIONS = [
-    { key: 'background', label: 'Background', previewColor: '#0D1926' },
-    ...COLOR_FILTER_SLOTS.map((slot, index) => ({
-        key: `color_${String(index + 1).padStart(2, '0')}`,
-        label: slot.label,
-        previewColor: slot.previewColor,
-    })),
+    { key: 'background', label: 'colors.background', previewColor: '#0D1926' },
+    ...COLOR_FILTER_SLOT_COLORS.map((previewColor, index) => {
+        const key = `color_${String(index + 1).padStart(2, '0')}`;
+        return { key, label: `colors.${key}`, previewColor };
+    }),
 ];
 
 const COLOR_FILTER_KEYS = new Set(COLOR_FILTER_OPTIONS.map((option) => option.key));
@@ -662,7 +650,7 @@ async function fetchData() {
         themesError.value = '';
         return remoteThemes;
     } catch {
-        themesError.value = 'Could not fetch theme data from GitHub.';
+        themesError.value = 'common.fetchThemesError';
         return [];
     }
 }
@@ -752,9 +740,11 @@ const colorFilterFieldValues = computed(() => {
         });
 });
 
+// Params for the lightbox title: the label as listed and in lower case.
 const colorFilterFieldLabel = computed(() => {
     const option = COLOR_FILTER_OPTIONS.find((opt) => opt.key === colorFilterField.value);
-    return option ? option.label.toLowerCase() : 'color';
+    const color = option ? t(option.label) : t('gallery.sortColor');
+    return { color, colorLower: color.toLocaleLowerCase() };
 });
 
 function isValidColorFilterKey(key) {

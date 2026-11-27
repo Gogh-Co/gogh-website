@@ -2,17 +2,17 @@
     <div class="theme-wrap">
         <div class="theme-header">{{ theme.theme }}</div>
         <div class="theme-background">
-            Background: {{ theme.background }}
+            {{ t('wcsg.backgroundValue', { hex: theme.background }) }}
             <div class="dot" :style="{ backgroundColor: theme.background }"></div>
         </div>
 
         <table>
             <thead>
                 <tr>
-                    <th>Color</th>
-                    <th>Hex</th>
-                    <th>Score</th>
-                    <th>Ratio</th>
+                    <th>{{ t('wcsg.color') }}</th>
+                    <th>{{ t('wcsg.hex') }}</th>
+                    <th>{{ t('wcsg.score') }}</th>
+                    <th>{{ t('wcsg.ratio') }}</th>
                     <th></th>
                 </tr>
             </thead>
@@ -21,7 +21,7 @@
                     <td class="data-color">{{ formatColorName(result.Color) }}</td>
                     <td class="data-hex">{{ result.Hex }}</td>
                     <td class="data-score" :class="{ fail: result.Score === 'Fail' }">
-                        {{ result.Score }}
+                        {{ t(contrastLevelKey(result.Score)) || result.Score }}
                     </td>
                     <td class="data-ratio">{{ result.Ratio }}</td>
                     <td :style="{ backgroundColor: theme.background }">
@@ -32,10 +32,10 @@
         </table>
 
         <div class="score-counts">
-            <h3>Score Counts:</h3>
+            <h3>{{ t('wcsg.scoreCounts') }}</h3>
             <ul>
                 <li v-for="(score, index) in sortedScoreCounts(theme.scoreCounts)" :key="index">
-                    {{ score.label }}: <span>{{ score.count }}</span>
+                    {{ t(contrastLevelKey(score.label)) }}: <span>{{ score.count }}</span>
                 </li>
             </ul>
         </div>
@@ -43,6 +43,8 @@
 </template>
 
 <script setup>
+const { t } = useI18n();
+
 defineProps({
     theme: {
         type: Object,
@@ -61,7 +63,7 @@ function sortedScoreCounts(scoreCounts) {
 
 function formatColorName(colorName) {
     if (colorName.startsWith('color_')) {
-        return `Color ${colorName.split('_')[1].replace(/^0/, '')}`;
+        return t('wcsg.colorNumber', { number: colorName.split('_')[1].replace(/^0/, '') });
     }
 
     return colorName;

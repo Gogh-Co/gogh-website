@@ -3,7 +3,7 @@
          end-4's dots-hyprland): floating rounded bar, app launcher,
          notifications, an OSD and a dashboard, all from the theme. -->
     <ScaledStage :width="1100" :height="620">
-        <div class="qs" :style="vars" role="img" :aria-label="`Quickshell desktop mockup in ${themeName}`">
+        <div class="qs" :style="vars" role="img" :aria-label="t('previews.quickshell.aria', { name: themeName })">
             <div class="qs__bar">
                 <div class="qs__bar-group">
                     <span class="qs__launcher-btn"><MockIcon name="apps" :size="13" /></span>
@@ -125,6 +125,7 @@
 </template>
 
 <script setup>
+const { t } = useI18n();
 import ScaledStage from './mock/ScaledStage.vue';
 import MockIcon from './mock/MockIcon.vue';
 

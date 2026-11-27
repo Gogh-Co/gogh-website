@@ -17,22 +17,23 @@
         <div class="theme-hero__grain" aria-hidden="true"></div>
 
         <div ref="content" class="theme-hero__content">
-            <nav class="theme-hero__crumbs" aria-label="Breadcrumb">
-                <NuxtLink to="/#themes" class="theme-hero__crumb-link">All themes</NuxtLink>
+            <nav class="theme-hero__crumbs" :aria-label="t('themeHero.breadcrumb')">
+                <NuxtLink to="/#themes" class="theme-hero__crumb-link">{{ t('themeHero.allThemes') }}</NuxtLink>
                 <span aria-hidden="true">/</span>
                 <span aria-current="page">{{ themeName }}</span>
             </nav>
 
             <p ref="eyebrow" class="theme-hero__eyebrow">
-                <span class="theme-hero__badge">{{ variant === 'light' ? 'Light' : 'Dark' }}</span>
-                <span>terminal color scheme</span>
+                <span class="theme-hero__badge">{{ variant === 'light' ? t('themeHero.badgeLight') : t('themeHero.badgeDark') }}</span>
+                <span>{{ t('themeHero.kind') }}</span>
                 <template v-if="authorName">
                     <span class="theme-hero__dot" aria-hidden="true">·</span>
-                    <span>
-                        by
-                        <a v-if="authorUrl" :href="authorUrl" target="_blank" rel="noopener noreferrer">{{ authorName }}</a>
-                        <template v-else>{{ authorName }}</template>
-                    </span>
+                    <I18nT keypath="themeHero.by" tag="span">
+                        <template #author>
+                            <a v-if="authorUrl" :href="authorUrl" target="_blank" rel="noopener noreferrer">{{ authorName }}</a>
+                            <template v-else>{{ authorName }}</template>
+                        </template>
+                    </I18nT>
                 </template>
             </p>
 
@@ -41,7 +42,7 @@
                 <a
                     :href="`#${SESSION_ANCHOR}`"
                     class="theme-hero__title-link"
-                    :title="`Watch ${themeName} in a live terminal session`"
+                    :title="t('themeHero.watchSession', { name: themeName })"
                     @click="goToSession"
                 >
                     <!-- The space between lines keeps the heading's text "Dracula Lost",
@@ -81,7 +82,7 @@
 
         <div class="theme-hero__footer">
             <span class="theme-hero__painting">
-                <span class="theme-hero__painting-label">Painted with</span>
+                <span class="theme-hero__painting-label">{{ t('themeHero.paintedWith') }}</span>
                 <span class="theme-hero__painting-name">{{ themeName }}</span>
             </span>
 
@@ -95,17 +96,17 @@
                     rel="prev"
                     class="theme-hero__key-link theme-hero__key-link--prev"
                     :class="{ 'is-pressed': pressedKey === 'ArrowLeft' }"
-                    :aria-label="`Previous theme: ${previous.name} (Left arrow key)`"
+                    :aria-label="t('themeHero.previousAria', { name: previous.name })"
                 >
                     <span class="theme-hero__key-name" aria-hidden="true">{{ previous.name }}</span>
                     <kbd class="theme-hero__key" aria-hidden="true">
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"><path fill="currentColor" d="M20 11v2H8l5.5 5.5l-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5L8 11z"/></svg>
                     </kbd>
-                    <span class="theme-hero__key-label" aria-hidden="true">Prev</span>
+                    <span class="theme-hero__key-label" aria-hidden="true">{{ t('themeHero.prev') }}</span>
                 </NuxtLink>
 
                 <div class="theme-hero__scroll" aria-hidden="true">
-                    <span>Scroll</span>
+                    <span>{{ t('common.scroll') }}</span>
                     <span class="theme-hero__scroll-line"></span>
                 </div>
 
@@ -115,10 +116,10 @@
                     rel="next"
                     class="theme-hero__key-link theme-hero__key-link--next"
                     :class="{ 'is-pressed': pressedKey === 'ArrowRight' }"
-                    :aria-label="`Next theme: ${next.name} (Right arrow key)`"
+                    :aria-label="t('themeHero.nextAria', { name: next.name })"
                 >
                     <span class="theme-hero__key-name" aria-hidden="true">{{ next.name }}</span>
-                    <span class="theme-hero__key-label" aria-hidden="true">Next</span>
+                    <span class="theme-hero__key-label" aria-hidden="true">{{ t('themeHero.next') }}</span>
                     <kbd class="theme-hero__key" aria-hidden="true">
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"><path fill="currentColor" d="M4 11v2h12l-5.5 5.5l1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5L16 11z"/></svg>
                     </kbd>
@@ -138,6 +139,9 @@ import StarryCanvas from '@/components/Home/StarryCanvas.vue';
 import CodeReveal from '@/components/Home/CodeReveal.vue';
 import InstallCommand from '@/components/Home/InstallCommand.vue';
 import ThemeShareButtons from '@/components/Terminal/ThemeShareButtons.vue';
+import I18nT from '@/components/I18nT';
+
+const { t } = useI18n();
 
 const props = defineProps({
     theme: {
@@ -560,7 +564,7 @@ onBeforeUnmount(() => {
     display: flex;
     justify-content: center;
     width: 100%;
-    text-align: left;
+    text-align: start;
     opacity: 0;
     animation: fade-up 1.1s $ease_out_expo 1.7s forwards;
 

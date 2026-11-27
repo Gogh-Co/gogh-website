@@ -21,9 +21,9 @@
             selector outranks this component's scoped classes.
         -->
         <div class="persistence-banner__copy">
-            <div class="persistence-banner__title">Favorites save in this browser</div>
+            <div class="persistence-banner__title">{{ t('persistence.title') }}</div>
             <div class="persistence-banner__text">
-                Sign in to sync them across devices.
+                {{ t('persistence.text') }}
                 <button
                     type="button"
                     class="persistence-banner__help"
@@ -31,7 +31,7 @@
                     :aria-expanded="helpOpen"
                     @click.stop="helpOpen = true"
                 >
-                    How it works
+                    {{ t('persistence.howItWorks') }}
                 </button>
             </div>
         </div>
@@ -39,8 +39,8 @@
         <button
             type="button"
             class="persistence-banner__signin"
-            aria-label="Sign in with GitHub"
-            title="Sign in with GitHub"
+            :aria-label="t('auth.signIn')"
+            :title="t('auth.signIn')"
             :disabled="pending"
             @click.stop="onSignIn"
         >
@@ -49,7 +49,7 @@
             </svg>
         </button>
 
-        <button type="button" class="persistence-banner__dismiss" aria-label="Dismiss notification" @click.stop="dismiss">
+        <button type="button" class="persistence-banner__dismiss" :aria-label="t('common.dismiss')" @click.stop="dismiss">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12z"/></svg>
         </button>
     </div>
@@ -67,22 +67,27 @@
                 <button
                     type="button"
                     class="persistence-banner__lightbox-close"
-                    aria-label="Close"
+                    :aria-label="t('common.close')"
                     @click="helpOpen = false"
                 >
                     ×
                 </button>
 
-                <h3 id="persistence-help-title">How favorites are saved</h3>
-                <p>Clicking the star on a theme saves it in this browser only, right away - no account needed.</p>
-                <p>Signing in with GitHub additionally creates a small public Gist in your account named <code>gogh.yaml</code>, so your favorites follow you to any other device you sign in on.</p>
-                <p>Signing out never deletes anything - your local favorites stay, and your Gist is untouched until you sign back in.</p>
+                <h3 id="persistence-help-title">{{ t('persistence.helpTitle') }}</h3>
+                <p>{{ t('persistence.helpLocal') }}</p>
+                <I18nT keypath="persistence.helpGist" tag="p">
+                    <template #file><code>gogh.yaml</code></template>
+                </I18nT>
+                <p>{{ t('persistence.helpSignOut') }}</p>
             </div>
         </div>
     </Teleport>
 </template>
 
 <script setup>
+import I18nT from '@/components/I18nT';
+
+const { t } = useI18n();
 const DISMISSED_STORAGE_KEY = 'gogh-persistence-banner-dismissed';
 
 const { user, login } = useAuth();

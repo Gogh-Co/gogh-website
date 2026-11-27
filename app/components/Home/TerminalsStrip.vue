@@ -1,8 +1,8 @@
 <template>
     <section ref="root" class="terms">
         <div class="terms__header">
-            <p class="section-eyebrow"><span>04</span> Supported terminals</p>
-            <h2 class="section-title">Fits the terminal<br><em>you already use.</em></h2>
+            <p class="section-eyebrow"><span>04</span> {{ t('terminalsStrip.eyebrow') }}</p>
+            <h2 class="section-title">{{ t('terminalsStrip.title') }}<br><em>{{ t('terminalsStrip.titleAccent') }}</em></h2>
         </div>
 
         <div class="terms__viewport">
@@ -14,7 +14,7 @@
                     class="terms__card"
                 >
                     <span class="terms__shot">
-                        <img :src="`/terminals/${terminal.image}`" :alt="`${terminal.name} screenshot`" loading="lazy" width="640" height="400">
+                        <img :src="`/terminals/${terminal.image}`" :alt="t('terminalsStrip.screenshotAlt', { name: terminal.name })" loading="lazy" width="640" height="400">
                     </span>
                     <span class="terms__name">{{ terminal.name }}</span>
                 </NuxtLink>
@@ -23,7 +23,7 @@
 
         <div class="terms__footer">
             <NuxtLink to="/terminals" class="terms__all">
-                See every supported terminal
+                {{ t('terminalsStrip.seeAll') }}
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.175 13H4v-2h12.175l-5.6-5.6L12 4l8 8l-8 8l-1.425-1.4z"/></svg>
             </NuxtLink>
         </div>
@@ -31,6 +31,8 @@
 </template>
 
 <script setup>
+const { t } = useI18n();
+
 const TERMINALS = [
     { name: 'Ghostty', image: 'ghostty.jpg' },
     { name: 'Alacritty', image: 'alacritty.jpg' },

@@ -2,13 +2,9 @@
     <section ref="root" class="previews" aria-labelledby="theme-previews-title">
         <div class="previews__inner">
             <header class="previews__header">
-                <p class="section-eyebrow previews__eyebrow"><span>04</span> In the wild</p>
-                <h2 id="theme-previews-title" class="section-title previews__title">See it <em>at work.</em></h2>
-                <p class="previews__lede">
-                    A palette view, a Linux home and a JavaScript file, then a blog, an Omarchy desktop and a
-                    Quickshell desktop, so you can judge {{ themeName }} on everyday output instead of swatches. Each
-                    one lists the colors it uses and what they paint.
-                </p>
+                <p class="section-eyebrow previews__eyebrow"><span>04</span> {{ t('previews.eyebrow') }}</p>
+                <h2 id="theme-previews-title" class="section-title previews__title">{{ t('previews.title') }} <em>{{ t('previews.titleAccent') }}</em></h2>
+                <p class="previews__lede">{{ t('previews.lede', { name: themeName }) }}</p>
             </header>
 
             <article
@@ -67,6 +63,7 @@ const props = defineProps({
     },
 });
 
+const { t } = useI18n();
 const root = ref(null);
 let gsapContext = null;
 
@@ -74,22 +71,23 @@ function pad(value) {
     return String(value).padStart(2, '0');
 }
 
+// `what` is a message key under previews.*.
 function legendItem(key, what) {
-    const hex = safeHex(props.theme[key]) || 'n/a';
+    const hex = safeHex(props.theme[key]) || t('common.notAvailable');
     const ratio = contrastRatio(hex, props.theme.background);
-    return { key, label: slotLabel(key), hex, ratio: ratio === null ? '' : `${ratio.toFixed(1)}:1`, what };
+    return { key, label: slotLabel(key, t), hex, ratio: ratio === null ? '' : `${ratio.toFixed(1)}:1`, what: t(`previews.${what}`) };
 }
 
 function codeLegend() {
     return [
-        legendItem('color_06', 'Keywords (import, const, async, def, return...), in bold.'),
-        legendItem('color_03', 'Strings and template literals.'),
-        legendItem('color_04', 'Numbers, types and class names, decorators.'),
-        legendItem('color_05', 'Function and method calls.'),
-        legendItem('color_07', 'Object properties and keyword arguments.'),
-        legendItem('color_02', 'Constants (MAX_RETRIES, true, None...).'),
-        legendItem('color_09', 'Comments (in italics) and line numbers.'),
-        legendItem('foreground', 'Variables, operators and punctuation.'),
+        legendItem('color_06', 'code.keywords'),
+        legendItem('color_03', 'code.strings'),
+        legendItem('color_04', 'code.numbers'),
+        legendItem('color_05', 'code.functions'),
+        legendItem('color_07', 'code.properties'),
+        legendItem('color_02', 'code.constants'),
+        legendItem('color_09', 'code.comments'),
+        legendItem('foreground', 'code.variables'),
     ];
 }
 
@@ -98,98 +96,98 @@ function codeLegend() {
 const previews = computed(() => [
     {
         id: 'palette',
-        title: 'Palette view',
-        description: 'The gallery card: the top bar shows the eight normal ANSI colors (black, red, green, yellow, blue, magenta, cyan, white) and the bottom bar their bright variants, over the theme\'s own background, followed by every color as text.',
+        title: t('previews.palette.title'),
+        description: t('previews.palette.description'),
         component: markRaw(PreviewTerminal),
         props: {},
         legend: [],
     },
     {
         id: 'home',
-        title: 'Linux home',
-        description: 'A stock Ubuntu bash session in $HOME running ls, ls -la and git status, colored the way dircolors, the default prompt and git do it out of the box.',
+        title: t('previews.home.title'),
+        description: t('previews.home.description'),
         component: markRaw(HomePreviewTerminal),
         props: {},
         legend: [
-            legendItem('color_03', 'Bold user@linux in the prompt, the deploy.sh executable and the staged new file in git status.'),
-            legendItem('color_05', 'Bold directories (Desktop, Documents, .config...) and the working path in the prompt.'),
-            legendItem('color_02', 'The backup.tar.gz archive and the modified and untracked files in git status.'),
-            legendItem('color_07', 'The projects symbolic link.'),
-            legendItem('foreground', 'Permissions, sizes, dates, plain files like notes.txt and git messages.'),
-            legendItem('cursor', 'The blinking cursor after the last prompt.'),
+            legendItem('color_03', 'home.green'),
+            legendItem('color_05', 'home.blue'),
+            legendItem('color_02', 'home.red'),
+            legendItem('color_07', 'home.cyan'),
+            legendItem('foreground', 'home.foreground'),
+            legendItem('cursor', 'home.cursor'),
         ],
     },
     {
         id: 'javascript',
-        title: 'JavaScript',
-        description: 'loadTheme.js as a terminal editor such as vim, nano or micro would paint it with the 16 ANSI colors: each kind of token maps to one palette slot.',
+        title: t('previews.javascript.title'),
+        description: t('previews.javascript.description'),
         component: markRaw(CodePreviewTerminal),
         props: { language: 'javascript' },
         legend: codeLegend(),
     },
     {
         id: 'python',
-        title: 'Python',
-        description: 'load_theme.py with the same token mapping, adding a decorator, type hints and Python built-in types.',
+        title: t('previews.python.title'),
+        description: t('previews.python.description'),
         component: markRaw(CodePreviewTerminal),
         props: { language: 'python' },
         legend: codeLegend(),
     },
     {
         id: 'blog',
-        title: 'Blog',
-        description: 'A simple blog built only from this scheme, the way terminal-inspired themes for static site generators do it: background and foreground for the page, ANSI colors for links, tags and code.',
-        note: 'Cards and the code block use the background with a little of the foreground mixed in.',
+        title: t('previews.blog.title'),
+        description: t('previews.blog.description'),
+        note: t('previews.blog.note'),
         component: markRaw(BlogPreview),
         props: {},
         wide: true,
         legend: [
-            legendItem('foreground', 'Body text and post titles.'),
-            legendItem('color_05', 'The ~/notes logo, the active menu item, links, "Read more" and the Subscribe button.'),
-            legendItem('color_09', 'Dates, reading time, the RSS link, tag counts and the footer.'),
-            legendItem('color_03', 'Sidebar headings, the #colors tag and strings in the code block.'),
-            legendItem('color_06', 'The #terminal tag and keywords in the code block.'),
-            legendItem('color_04', 'The #dotfiles tag, the quote border and numbers in code.'),
-            legendItem('color_02', 'Inline code and constants.'),
-            legendItem('color_08', 'The pull quote.'),
+            legendItem('foreground', 'blog.foreground'),
+            legendItem('color_05', 'blog.blue'),
+            legendItem('color_09', 'blog.brightBlack'),
+            legendItem('color_03', 'blog.green'),
+            legendItem('color_06', 'blog.magenta'),
+            legendItem('color_04', 'blog.yellow'),
+            legendItem('color_02', 'blog.red'),
+            legendItem('color_08', 'blog.white'),
         ],
     },
     {
         id: 'omarchy',
-        title: 'Omarchy desktop',
-        description: `An Omarchy desktop: Arch Linux with the Hyprland tiling window manager and Waybar on top, running Neovim with neo-tree, a terminal, btop and Files. An Omarchy theme recolors all of them at once; here they all take their colors from ${props.themeName}.`,
-        note: 'A mockup of how the palette would look across the desktop. Gogh itself installs the terminal colors.',
+        title: t('previews.omarchy.title'),
+        description: t('previews.omarchy.description', { name: props.themeName }),
+        note: t('previews.omarchy.note'),
         component: markRaw(OmarchyPreview),
         props: {},
         wide: true,
         legend: [
-            legendItem('background', 'Window backgrounds; the wallpaper blends it with blue and magenta.'),
-            legendItem('color_05', 'The focused window border, the active workspace, NORMAL mode, commands, directories, dates in ls and the folders in Files.'),
-            legendItem('color_06', 'Shell keywords (if, local, case...), the git branch in the prompt and the network graph.'),
-            legendItem('color_07', 'Variables like $devices and the prompt directory.'),
-            legendItem('color_03', 'Strings, executables and file sizes, the CPU box and low CPU load.'),
-            legendItem('color_04', 'Options and numbers, the user and read bits in ls, the memory box and medium load.'),
-            legendItem('color_02', 'Write bits in ls, used memory, the process box and high load.'),
-            legendItem('color_09', 'Line numbers, comments, tree guides, inactive tabs and workspaces, btop labels.'),
+            legendItem('background', 'omarchy.background'),
+            legendItem('color_05', 'omarchy.blue'),
+            legendItem('color_06', 'omarchy.magenta'),
+            legendItem('color_07', 'omarchy.cyan'),
+            legendItem('color_03', 'omarchy.green'),
+            legendItem('color_04', 'omarchy.yellow'),
+            legendItem('color_02', 'omarchy.red'),
+            legendItem('color_09', 'omarchy.brightBlack'),
         ],
     },
     {
         id: 'quickshell',
-        title: 'Quickshell',
-        description: 'A desktop shell built with Quickshell, the QtQuick toolkit behind configs such as Caelestia and end-4\'s dots-hyprland: a floating bar, an app launcher, notifications, a volume OSD and a dashboard with quick toggles, sliders, media and a calendar.',
-        note: 'A mockup: Quickshell configs read colors from their own theme files. Gogh itself installs the terminal colors.',
+        title: t('previews.quickshell.title'),
+        description: t('previews.quickshell.description'),
+        note: t('previews.quickshell.note'),
         component: markRaw(QuickshellPreview),
         props: {},
         wide: true,
         legend: [
-            legendItem('background', 'The wallpaper base and, with a little foreground mixed in, every panel.'),
-            legendItem('color_05', 'The active workspace, launcher button, selected app, active toggles, volume, play button and today\'s date.'),
-            legendItem('color_06', 'The playing track in the bar, the avatar and the album art gradient.'),
-            legendItem('color_03', 'The battery level, the screenshot notification and media progress.'),
-            legendItem('color_04', 'The brightness slider and the updates notification.'),
-            legendItem('color_02', 'Power buttons, the browser icon and the album art.'),
-            legendItem('color_09', 'Secondary text: window title, descriptions, times and weekdays.'),
-            legendItem('foreground', 'Primary text: names, clock and labels.'),
+            legendItem('background', 'quickshell.background'),
+            legendItem('color_05', 'quickshell.blue'),
+            legendItem('color_06', 'quickshell.magenta'),
+            legendItem('color_03', 'quickshell.green'),
+            legendItem('color_04', 'quickshell.yellow'),
+            legendItem('color_02', 'quickshell.red'),
+            legendItem('color_09', 'quickshell.brightBlack'),
+            legendItem('foreground', 'quickshell.foreground'),
         ],
     },
 ]);

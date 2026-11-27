@@ -1,6 +1,6 @@
 <template>
     <div class="install-cmd" :class="`install-cmd--${tone}`">
-        <div class="install-cmd__tabs" role="tablist" aria-label="Operating system">
+        <div class="install-cmd__tabs" role="tablist" :aria-label="t('install.osAria')">
             <button
                 v-for="option in OPTIONS"
                 :key="option.id"
@@ -27,12 +27,12 @@
                 type="button"
                 class="install-cmd__copy"
                 :class="{ 'is-copied': copied }"
-                :aria-label="copied ? 'Copied' : 'Copy install command'"
+                :aria-label="copied ? t('common.copied') : t('install.copyAria')"
                 @click="copy"
             >
                 <svg v-if="!copied" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 18q-.825 0-1.412-.587T7 16V4q0-.825.588-1.412T9 2h9q.825 0 1.413.588T20 4v12q0 .825-.587 1.413T18 18zm0-2h9V4H9zm-4 6q-.825 0-1.412-.587T3 20V6h2v14h11v2zm4-6V4z"/></svg>
                 <svg v-else xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="m9.55 18l-5.7-5.7l1.425-1.425L9.55 15.15l9.175-9.175L20.15 7.4z"/></svg>
-                <span class="install-cmd__copy-label">{{ copied ? 'Copied' : 'Copy' }}</span>
+                <span class="install-cmd__copy-label">{{ copied ? t('common.copied') : t('common.copy') }}</span>
             </button>
         </div>
     </div>
@@ -56,6 +56,8 @@ const props = defineProps({
         default: '',
     },
 });
+
+const { t } = useI18n();
 
 const OPTIONS = [
     { id: 'linux', label: 'Linux · wget', command: 'bash -c "$(wget -qO- https://gogh.website/gogh)"' },

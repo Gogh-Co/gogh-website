@@ -2,14 +2,11 @@
     <section ref="root" class="palette" aria-labelledby="theme-palette-title" :style="themeVars">
         <div class="palette__inner">
             <header class="palette__header">
-                <p class="section-eyebrow palette__eyebrow"><span>01</span> The palette</p>
+                <p class="section-eyebrow palette__eyebrow"><span>01</span> {{ t('palette.eyebrow') }}</p>
                 <h2 id="theme-palette-title" class="section-title palette__title">
-                    Sixteen colors.<br><em>One mood.</em>
+                    {{ t('palette.title') }}<br><em>{{ t('palette.titleAccent') }}</em>
                 </h2>
-                <p class="palette__lede">
-                    Every slot of {{ themeName }}, with its contrast against the background and what it paints in a
-                    terminal. Click any color to copy its hex.
-                </p>
+                <p class="palette__lede">{{ t('palette.lede', { name: themeName }) }}</p>
             </header>
 
             <!-- Type specimen: foreground over background, with the real cursor. -->
@@ -23,27 +20,27 @@
 
                 <dl class="specimen__stats">
                     <div class="specimen__stat">
-                        <dt>Text contrast</dt>
+                        <dt>{{ t('palette.textContrast') }}</dt>
                         <dd>
                             <span class="specimen__number" :data-count="summary.foregroundContrast ?? 0" data-decimals="1">{{ formatRatio(summary.foregroundContrast) }}</span><span class="specimen__unit">:1</span>
-                            <span v-if="summary.foregroundLevel" class="level" :class="`level--${levelClass(summary.foregroundLevel)}`">{{ summary.foregroundLevel }}</span>
+                            <span v-if="summary.foregroundLevel" class="level" :class="`level--${levelClass(summary.foregroundLevel)}`">{{ t(contrastLevelKey(summary.foregroundLevel)) }}</span>
                         </dd>
                     </div>
                     <div class="specimen__stat">
-                        <dt>Readable accents</dt>
+                        <dt>{{ t('palette.readableAccents') }}</dt>
                         <dd>
                             <span class="specimen__number" :data-count="summary.readableAccents">{{ summary.readableAccents }}</span><span class="specimen__unit">/{{ summary.totalAccents }}</span>
                         </dd>
                     </div>
                     <div v-if="summary.strongest" class="specimen__stat">
-                        <dt>Loudest</dt>
+                        <dt>{{ t('palette.loudest') }}</dt>
                         <dd class="specimen__pick">
                             <i :style="{ backgroundColor: hexOf(summary.strongest.key) }"></i>
                             {{ summary.strongest.label }} <small>{{ summary.strongest.ratio.toFixed(1) }}:1</small>
                         </dd>
                     </div>
                     <div v-if="summary.weakest && summary.weakest.key !== summary.strongest?.key" class="specimen__stat">
-                        <dt>Subtlest</dt>
+                        <dt>{{ t('palette.subtlest') }}</dt>
                         <dd class="specimen__pick">
                             <i :style="{ backgroundColor: hexOf(summary.weakest.key) }"></i>
                             {{ summary.weakest.label }} <small>{{ summary.weakest.ratio.toFixed(1) }}:1</small>
@@ -65,19 +62,19 @@
                             class="chip"
                             :class="{ 'is-copied': copiedKey === color.key }"
                             :style="{ '--chip': color.hex, '--chip-ink': color.ink }"
-                            :aria-label="`${color.label} ${color.hex}. Copy hex`"
+                            :aria-label="t('palette.copyHexAria', { label: color.label, hex: color.hex })"
                             @click="copy(color)"
                         >
                             <span class="chip__swatch">
                                 <span class="chip__hex">{{ color.hex }}</span>
-                                <span class="chip__copied" aria-hidden="true">Copied</span>
+                                <span class="chip__copied" aria-hidden="true">{{ t('common.copied') }}</span>
                             </span>
                             <span class="chip__meta">
                                 <span class="chip__name">
                                     {{ color.label }}
                                     <code class="chip__key">{{ color.key }}</code>
                                 </span>
-                                <span v-if="color.ratio" class="level" :class="`level--${color.levelClass}`">{{ color.ratio }} · {{ color.level }}</span>
+                                <span v-if="color.ratio" class="level" :class="`level--${color.levelClass}`">{{ color.ratio }} · {{ t(contrastLevelKey(color.level)) }}</span>
                                 <span class="chip__role">{{ color.role }}</span>
                             </span>
                         </button>
@@ -85,7 +82,7 @@
                 </ul>
             </div>
 
-            <span class="visually-hidden" role="status" aria-live="polite">{{ copiedKey ? 'Hex copied' : '' }}</span>
+            <span class="visually-hidden" role="status" aria-live="polite">{{ copiedKey ? t('palette.hexCopied') : '' }}</span>
         </div>
     </section>
 </template>
@@ -106,6 +103,7 @@ const props = defineProps({
     },
 });
 
+const { t } = useI18n();
 const root = ref(null);
 const copiedKey = ref('');
 let copiedTimer = null;
@@ -118,7 +116,7 @@ function hexOf(key) {
 }
 
 function formatRatio(ratio) {
-    return typeof ratio === 'number' ? ratio.toFixed(1) : 'n/a';
+    return typeof ratio === 'number' ? ratio.toFixed(1) : t('common.notAvailable');
 }
 
 function levelClass(level) {
@@ -131,7 +129,7 @@ function describeSlot(slot) {
     const level = contrastLevel(ratio);
     return {
         ...slot,
-        hex: hex || 'n/a',
+        hex: hex || t('common.notAvailable'),
         ink: inkFor(hex),
         ratio: ratio === null ? '' : `${ratio.toFixed(1)}:1`,
         level,
@@ -142,26 +140,26 @@ function describeSlot(slot) {
 const groups = computed(() => [
     {
         id: 'base',
-        title: 'Base',
-        intro: 'The canvas, the ink and the cursor.',
-        colors: BASE_COLOR_SLOTS.map(describeSlot),
+        title: t('palette.baseTitle'),
+        intro: t('palette.baseIntro'),
+        colors: baseColorSlots(t).map(describeSlot),
     },
     {
         id: 'normal',
-        title: 'Normal',
-        intro: 'ANSI colors 0–7: what programs use for regular colored output.',
-        colors: NORMAL_COLOR_SLOTS.map(describeSlot),
+        title: t('palette.normalTitle'),
+        intro: t('palette.normalIntro'),
+        colors: normalColorSlots(t).map(describeSlot),
     },
     {
         id: 'bright',
-        title: 'Bright',
-        intro: 'ANSI colors 8–15: bold or emphasised text, and picked directly by many tools.',
-        colors: BRIGHT_COLOR_SLOTS.map(describeSlot),
+        title: t('palette.brightTitle'),
+        intro: t('palette.brightIntro'),
+        colors: brightColorSlots(t).map(describeSlot),
     },
 ]);
 
 async function copy(color) {
-    if (!color.hex || color.hex === 'n/a') {
+    if (!safeHex(color.hex)) {
         return;
     }
     try {
@@ -508,7 +506,7 @@ onBeforeUnmount(() => {
     border: 0;
     background: none;
     color: inherit;
-    text-align: left;
+    text-align: start;
     cursor: pointer;
 
     &:focus-visible {

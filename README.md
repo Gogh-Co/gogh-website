@@ -81,6 +81,23 @@ Themes are pulled from:
 
 The server endpoint decodes the Base64 payload and returns normalized JSON to the frontend.
 
+## Languages
+
+The site is translated into English (the source and fallback), Spanish, Simplified Chinese, Arabic (right to left), Portuguese, Indonesian, French, Japanese, Russian and German. URLs never change with the language; it is picked, most specific first, from:
+
+1. `?lang=xx` on any URL (e.g. `/dracula/?lang=es`): opens that page in a language without changing the saved choice.
+2. The `gogh_lang` cookie, written when the visitor picks a language in the header or footer switcher.
+3. The browser's languages (`navigator.languages`).
+4. English.
+
+Pages are prerendered in English; an inline script in `<head>` applies `<html lang/dir>` and hides the page until the translation loads right after hydration, so nothing flashes.
+
+- `app/i18n/config.ts`: the language list and the selection rules.
+- `app/i18n/messages/*.ts`: one file per language (`en.ts` is the source). Placeholders are `{name}`; `{ one, other, … }` objects are plurals chosen by `{count}`.
+- `useI18n()` gives `t()`, `locale` and `setLocale()`; `<I18nT>` renders a message with markup (links, `<strong>`) inside.
+
+To add a language, add it to `LOCALES`, create its message file with the same keys as `en.ts` and register it in `composables/useI18n.ts`; `test/i18n/messages.test.ts` checks every file has all the keys and placeholders. Terminal output and the desktop mockups in the theme previews stay in English on purpose.
+
 ## Notes
 
 - If dev server selects a different port, open the URL printed by Nuxt.

@@ -1,9 +1,9 @@
 <template>
     <transition name="favorites-sign-in-banner">
         <div v-if="visible" class="favorites-sign-in-banner" role="status">
-            <p class="favorites-sign-in-banner__text">
-                <strong>Sign in with GitHub</strong> to keep your favorites — they'll be saved to your account instead of just this browser.
-            </p>
+            <I18nT keypath="favoritesBanner.text" tag="p" class="favorites-sign-in-banner__text">
+                <template #signIn><strong>{{ t('auth.signIn') }}</strong></template>
+            </I18nT>
 
             <div class="favorites-sign-in-banner__actions">
                 <button
@@ -12,12 +12,12 @@
                     :disabled="pending"
                     @click="onSignIn"
                 >
-                    Sign in with GitHub
+                    {{ t('auth.signIn') }}
                 </button>
                 <button
                     type="button"
                     class="favorites-sign-in-banner__close"
-                    aria-label="Dismiss notification"
+                    :aria-label="t('common.dismiss')"
                     @click="emit('close')"
                 >
                     ×
@@ -28,6 +28,8 @@
 </template>
 
 <script setup>
+import I18nT from '@/components/I18nT';
+
 defineProps({
     visible: {
         type: Boolean,
@@ -36,6 +38,7 @@ defineProps({
 });
 
 const emit = defineEmits(['close']);
+const { t } = useI18n();
 
 const { user, login } = useAuth();
 const { mergeAfterLogin } = useFavorites();

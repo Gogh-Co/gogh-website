@@ -19,7 +19,7 @@
         </div>
 
         <div class="gallery-loader__status">
-            {{ done ? `All ${total} themes decoded` : loading ? 'Decoding the next palettes…' : 'Scroll to decode more' }}
+            {{ done ? t('gallery.loaderDone', { count: total }) : loading ? t('gallery.loaderLoading') : t('gallery.loaderIdle') }}
         </div>
     </div>
 </template>
@@ -43,6 +43,8 @@ const props = defineProps({
         default: false,
     },
 });
+
+const { t } = useI18n();
 
 const PALETTE = [
     '#243342', '#C54133', '#27AE60', '#EDB20A', '#2479D0', '#7D3EA0', '#1D8579', '#C9CCCD',

@@ -2,12 +2,9 @@
     <section ref="root" class="session" :style="themeVars" aria-labelledby="theme-session-title">
         <div class="session__inner">
             <header class="session__header">
-                <p class="section-eyebrow session__eyebrow"><span>03</span> Live session</p>
-                <h2 id="theme-session-title" class="section-title session__title">A day in <em>the shell.</em></h2>
-                <p class="session__lede">
-                    A made-up session that plays in a loop: git, vim, a commit and a push, then ssh into a server,
-                    fastfetch and htop. Nothing runs for real, and every character takes its color from {{ themeName }}.
-                </p>
+                <p class="section-eyebrow session__eyebrow"><span>03</span> {{ t('session.eyebrow') }}</p>
+                <h2 id="theme-session-title" class="section-title session__title">{{ t('session.title') }} <em>{{ t('session.titleAccent') }}</em></h2>
+                <p class="session__lede">{{ t('session.lede', { name: themeName }) }}</p>
             </header>
 
             <!-- #live-session: the hero's theme name links here, and the page
@@ -33,7 +30,7 @@
                     <button
                         type="button"
                         class="session__toggle"
-                        :aria-label="playing ? 'Pause the session' : 'Play the session'"
+                        :aria-label="playing ? t('session.pause') : t('session.play')"
                         @click="toggle"
                     >
                         <svg v-if="playing" viewBox="0 0 16 16" aria-hidden="true"><rect x="3.5" y="3" width="3" height="10" /><rect x="9.5" y="3" width="3" height="10" /></svg>
@@ -52,7 +49,7 @@
                                 class="session__jump"
                                 :class="{ 'is-active': index === activeChapter }"
                                 :aria-current="index === activeChapter ? 'step' : undefined"
-                                :aria-label="`Jump to ${chapter.label}`"
+                                :aria-label="t('session.jumpTo', { chapter: chapter.label })"
                                 @click="jumpTo(chapter)"
                             >
                                 <span class="session__track"><span ref="fills" class="session__fill"></span></span>
@@ -64,7 +61,7 @@
                     <span ref="timeEl" class="session__time" aria-hidden="true">{{ formatClock(posterTime) }} / {{ formatClock(session.total) }}</span>
 
                     <!-- Download the loop as a file; a running export can be cancelled. -->
-                    <div class="session__downloads" role="group" aria-label="Save the session">
+                    <div class="session__downloads" role="group" :aria-label="t('session.saveAria')">
                         <!-- Same favorites as the gallery's star (this browser, or the
                              GitHub account when signed in). -->
                         <button
@@ -72,8 +69,8 @@
                             class="session__download session__favorite"
                             :class="{ 'is-active': favorite }"
                             :aria-pressed="favorite"
-                            :title="favorite ? `Remove ${themeName} from favorites` : `Add ${themeName} to favorites`"
-                            :aria-label="favorite ? `Remove ${themeName} from favorites` : `Add ${themeName} to favorites`"
+                            :title="favorite ? t('common.removeFavorite', { name: themeName }) : t('common.addFavorite', { name: themeName })"
+                            :aria-label="favorite ? t('common.removeFavorite', { name: themeName }) : t('common.addFavorite', { name: themeName })"
                             @click="onToggleFavorite"
                         >
                             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -94,8 +91,8 @@
                             class="session__download"
                             :class="{ 'is-busy': exporting === format.id }"
                             :disabled="!!exporting && exporting !== format.id"
-                            :title="exporting === format.id ? 'Cancel' : format.title"
-                            :aria-label="exporting === format.id ? `Cancel the ${format.label} export` : format.title"
+                            :title="exporting === format.id ? t('common.cancel') : format.title"
+                            :aria-label="exporting === format.id ? t('session.cancelExport', { format: format.label }) : format.title"
                             @click="download(format.id)"
                         >
                             <span class="session__download-bar" :style="exporting === format.id ? { transform: `scaleX(${exportProgress})` } : null"></span>
@@ -124,6 +121,7 @@ const props = defineProps({
     },
 });
 
+const { t } = useI18n();
 const root = ref(null);
 const fills = ref([]);
 const timeEl = ref(null);
@@ -140,8 +138,7 @@ const rows = computed(() => renderTerminalSession(state.value));
 const activeChapter = ref(chapterAt(posterTime.value));
 const playing = ref(false);
 
-const screenLabel = computed(() => `An animated, made-up terminal session in ${props.themeName}: git status, editing `
-    + `${session.value.file} in vim, a commit and a push, ssh into a server, fastfetch and htop.`);
+const screenLabel = computed(() => t('session.screenLabel', { name: props.themeName, file: session.value.file }));
 
 let stepIndex = session.value.posterIndex;
 let clock = posterTime.value;
@@ -252,8 +249,8 @@ let exportAbort = null;
 let statusTimer = 0;
 
 const downloadFormats = computed(() => [
-    { id: 'gif', label: 'GIF', title: `Download the session as a GIF in ${props.themeName}` },
-    ...(videoSupported.value ? [{ id: 'video', label: 'MP4', title: `Download the session as an MP4 video in ${props.themeName}` }] : []),
+    { id: 'gif', label: 'GIF', title: t('session.downloadGif', { name: props.themeName }) },
+    ...(videoSupported.value ? [{ id: 'video', label: 'MP4', title: t('session.downloadVideo', { name: props.themeName }) }] : []),
 ]);
 
 const { user } = useAuth();
@@ -267,11 +264,11 @@ function onToggleFavorite() {
     const added = favorite.value;
     trackEvent('Favorite', { action: added ? 'add' : 'remove', theme: props.themeName, place: 'session' });
     if (!added) {
-        announce(`Removed ${props.themeName} from favorites.`);
+        announce(t('session.removed', { name: props.themeName }));
     } else if (user.value) {
-        announce(`Added ${props.themeName} to your favorites.`);
+        announce(t('session.addedAccount', { name: props.themeName }));
     } else {
-        announce(`Added ${props.themeName} to favorites in this browser. Sign in with GitHub to keep them.`);
+        announce(t('session.addedLocal', { name: props.themeName }));
     }
 }
 
@@ -291,7 +288,7 @@ async function download(format) {
     exporting.value = format;
     exportProgress.value = 0;
     exportAbort = new AbortController();
-    announce(`Rendering the ${format === 'gif' ? 'GIF' : 'video'}…`);
+    announce(t(format === 'gif' ? 'session.renderingGif' : 'session.renderingVideo'));
     trackEvent('Session', { action: 'export-start', format: formatName(format) });
     try {
         const exporter = format === 'gif' ? exportSessionGif : exportSessionVideo;
@@ -303,9 +300,9 @@ async function download(format) {
         });
         saveBlob(result);
         trackEvent('Download', { kind: format === 'gif' ? 'session-gif' : 'session-mp4', theme: props.themeName });
-        announce(`Saved ${result.filename} (${(result.blob.size / 1048576).toFixed(1)} MB).`);
+        announce(t('session.saved', { file: result.filename, size: Math.round(result.blob.size / 104857.6) / 10 }));
     } catch (error) {
-        announce(error?.name === 'AbortError' ? 'Export cancelled.' : 'This browser could not create the file.');
+        announce(t(error?.name === 'AbortError' ? 'session.cancelled' : 'session.failed'));
         trackEvent('Session', { action: error?.name === 'AbortError' ? 'export-cancel' : 'export-error', format: formatName(format) });
         if (error?.name !== 'AbortError') console.error(error);
     } finally {
@@ -625,7 +622,7 @@ $slots: '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', 
     border: 0;
     background: none;
     color: var(--muted);
-    text-align: left;
+    text-align: start;
     cursor: pointer;
 
     &:hover,
@@ -772,6 +769,6 @@ $slots: '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', 
     color: var(--muted);
     font-family: $font_mono;
     font-size: 1.1rem;
-    text-align: right;
+    text-align: end;
 }
 </style>

@@ -5,7 +5,7 @@
     <NuxtLink
         class="theme-page-link"
         :to="themePagePath(themeName)"
-        :title="`${themeName} theme page`"
+        :title="t('common.themePage', { name: themeName })"
         tabindex="-1"
         aria-hidden="true"
     >
@@ -17,6 +17,8 @@
 </template>
 
 <script setup>
+const { t } = useI18n();
+
 defineProps({
     themeName: {
         type: String,

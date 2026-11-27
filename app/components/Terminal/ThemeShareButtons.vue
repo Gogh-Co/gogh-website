@@ -1,6 +1,6 @@
 <template>
     <div class="share" :class="{ 'share--start': align === 'start' }">
-        <div class="share-buttons" role="group" :aria-label="`Share ${themeName || 'Gogh'}`">
+        <div class="share-buttons" role="group" :aria-label="t('share.groupAria', { name: themeName || 'Gogh' })">
             <a
                 v-for="network in networks"
                 :key="network.id"
@@ -9,7 +9,7 @@
                 :href="network.href"
                 target="_blank"
                 rel="noopener noreferrer"
-                :aria-label="`Share on ${network.label}`"
+                :aria-label="t('share.on', { network: network.label })"
                 :title="labels ? null : network.label"
             >
                 <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true">
@@ -23,20 +23,20 @@
                 class="share-buttons__btn share-buttons__btn--copy"
                 :class="{ 'is-copied': copied }"
                 :style="copied ? null : { '--brand': copyColor.color, '--brand-ink': copyColor.ink }"
-                :aria-label="copied ? 'Link copied' : 'Copy link'"
-                :title="labels ? null : (copied ? 'Copied' : 'Copy link')"
+                :aria-label="copied ? t('share.linkCopied') : t('share.copyLink')"
+                :title="labels ? null : (copied ? t('common.copied') : t('share.copyLink'))"
                 @click="copyLink"
             >
                 <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true">
                     <path v-for="(d, index) in (copied ? ICONS.check : ICONS.link)" :key="index" fill="currentColor" :d="d" />
                 </svg>
-                <span v-if="labels" class="share-buttons__label" aria-hidden="true">{{ copied ? 'Copied' : 'Copy link' }}</span>
+                <span v-if="labels" class="share-buttons__label" aria-hidden="true">{{ copied ? t('common.copied') : t('share.copyLink') }}</span>
             </button>
-            <span class="share-buttons__status" role="status" aria-live="polite">{{ copied ? 'Link copied' : '' }}</span>
+            <span class="share-buttons__status" role="status" aria-live="polite">{{ copied ? t('share.linkCopied') : '' }}</span>
         </div>
 
-        <nav v-if="previews" class="share-previews" aria-label="Preview the share card">
-            <span class="share-previews__label">Preview card</span>
+        <nav v-if="previews" class="share-previews" :aria-label="t('share.previewsAria')">
+            <span class="share-previews__label">{{ t('share.previewCard') }}</span>
             <template v-for="(tool, index) in previewTools" :key="tool.id">
                 <span v-if="index" class="share-previews__sep" aria-hidden="true">·</span>
                 <a
@@ -57,6 +57,8 @@
 // one). Icons: Bootstrap Icons (MIT), 16x16 viewBox. Colours come from the
 // theme being previewed, so the row matches whatever scheme is open.
 import chroma from 'chroma-js';
+
+const { t } = useI18n();
 
 const props = defineProps({
     themeName: {
@@ -161,10 +163,10 @@ const shareUrl = computed(() => props.url || `${SITE_URL}/`);
 const previewTools = computed(() => {
     const url = encodeURIComponent(shareUrl.value);
     return [
-        { id: 'facebook', label: 'Facebook', title: 'Facebook Sharing Debugger (also WhatsApp)', href: `https://developers.facebook.com/tools/debug/?q=${url}` },
-        { id: 'linkedin', label: 'LinkedIn', title: 'LinkedIn Post Inspector', href: `https://www.linkedin.com/post-inspector/inspect/${url}` },
-        { id: 'opengraph', label: 'OpenGraph.xyz', title: 'Preview on several networks at once', href: `https://www.opengraph.xyz/url/${url}` },
-        { id: 'metatags', label: 'Metatags.io', title: 'Preview on several networks at once', href: `https://metatags.io/?url=${url}` },
+        { id: 'facebook', label: 'Facebook', title: t('share.facebookDebugger'), href: `https://developers.facebook.com/tools/debug/?q=${url}` },
+        { id: 'linkedin', label: 'LinkedIn', title: t('share.linkedinInspector'), href: `https://www.linkedin.com/post-inspector/inspect/${url}` },
+        { id: 'opengraph', label: 'OpenGraph.xyz', title: t('share.multiPreview'), href: `https://www.opengraph.xyz/url/${url}` },
+        { id: 'metatags', label: 'Metatags.io', title: t('share.multiPreview'), href: `https://metatags.io/?url=${url}` },
     ];
 });
 

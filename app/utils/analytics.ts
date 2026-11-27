@@ -18,6 +18,7 @@
 //   Gallery View   view               compact / detailed
 //   Color Copy     slot               a hex copied from a theme's palette
 //   Sign In        source             a completed GitHub sign-in (popup)
+//   Language       lang               a language picked in the switcher
 //
 // Elements can also be tagged without JS: class="plausible-event-name=Share
 // plausible-event-network=x" (spaces as "+"). Only use that where no

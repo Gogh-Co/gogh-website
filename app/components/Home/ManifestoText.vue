@@ -1,13 +1,13 @@
 <template>
     <section ref="root" class="manifesto">
         <div class="manifesto__inner">
-            <p class="section-eyebrow"><span>01</span> Why color matters</p>
+            <p class="section-eyebrow"><span>01</span> {{ t('manifesto.eyebrow') }}</p>
             <p class="manifesto__text">
                 <template v-for="(token, index) in tokens" :key="index">
                     <span
                         class="manifesto__word"
                         :class="token.accent ? `manifesto__word--${token.accent}` : ''"
-                    >{{ token.text }}</span>{{ ' ' }}
+                    >{{ token.text }}</span>{{ localeInfo.spaced ? ' ' : '' }}
                 </template>
             </p>
         </div>
@@ -17,13 +17,13 @@
 <script setup>
 // Words light up one by one as the paragraph scrolls through the viewport.
 // Words wrapped in [brackets] get one of the palette accents.
-const COPY = 'You read your terminal for hours a day. [Sixteen] [colors] decide how every prompt, log and diff looks. Gogh is a [curated] [library] of palettes, and installing any of them takes [one] [command].';
+const { t, locale, localeInfo } = useI18n();
 const ACCENTS = ['yellow', 'blue', 'magenta', 'cyan', 'green', 'red'];
 
-const tokens = (() => {
+const tokens = computed(() => {
     let accentIndex = 0;
     let pairOpen = false;
-    return COPY.split(' ').map((word) => {
+    return t('manifesto.copy').split(/\s+/).filter(Boolean).map((word) => {
         const match = word.match(/^\[(.+)\](.*)$/);
         if (!match) {
             pairOpen = false;
@@ -36,16 +36,13 @@ const tokens = (() => {
         }
         return { text: match[1] + match[2], accent: ACCENTS[(accentIndex - 1) % ACCENTS.length] };
     });
-})();
+});
 
 const root = ref(null);
 let gsapContext = null;
 
-onMounted(() => {
-    if (prefersReducedMotion()) {
-        root.value?.classList.add('is-static');
-        return;
-    }
+function setupWords() {
+    gsapContext?.revert();
     const { gsap } = useGsap();
     gsapContext = gsap.context(() => {
         gsap.fromTo('.manifesto__word', { opacity: 0.14 }, {
@@ -60,6 +57,21 @@ onMounted(() => {
             },
         });
     }, root.value);
+}
+
+onMounted(() => {
+    if (prefersReducedMotion()) {
+        root.value?.classList.add('is-static');
+        return;
+    }
+    setupWords();
+});
+
+// Another language means other words: light them up again.
+watch(locale, () => {
+    if (gsapContext) {
+        nextTick(setupWords);
+    }
 });
 
 onBeforeUnmount(() => gsapContext?.revert());

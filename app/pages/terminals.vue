@@ -5,7 +5,7 @@
         <div class="container-fluid terminals-container">
             <div class="row">
                 <div class="col-12">
-                    <h1 class="page-title">Terminal Support</h1>
+                    <h1 class="page-title">{{ t('terminalsPage.title') }}</h1>
                 </div>
             </div>
 
@@ -16,7 +16,7 @@
                             <img
                                 v-if="terminal.image"
                                 :src="`/terminals/${terminal.image}`"
-                                :alt="`${terminal.name} website screenshot`"
+                                :alt="t('terminalsPage.screenshotAlt', { name: terminal.name })"
                                 loading="lazy"
                                 class="terminal-card__image"
                             >
@@ -33,9 +33,9 @@
                                 :href="terminal.url"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                :aria-label="`Visit ${terminal.name} website`"
+                                :aria-label="t('terminalsPage.visitAria', { name: terminal.name })"
                             >
-                                Visit site
+                                {{ t('terminalsPage.visit') }}
                             </a>
                         </div>
                     </div>
@@ -48,8 +48,9 @@
 <script setup>
 import Header from '@/components/Header/Header.vue';
 
-const title = 'Supported Terminal Emulators - Gogh';
-const description = 'Every terminal emulator Gogh can theme, from GNOME Terminal, Tilix and Konsole to Alacritty, Kitty, WezTerm and iTerm2, with links to each project.';
+const { t } = useI18n();
+const title = () => t('meta.terminalsTitle');
+const description = () => t('meta.terminalsDescription');
 
 useSeoMeta({
     title,

@@ -8,7 +8,7 @@
         inputmode="text"
         maxlength="7"
         spellcheck="false"
-        :aria-label="`Edit ${colorKey}`"
+        :aria-label="t('generator.editColor', { key: colorKey })"
         @input="normalizeDraft"
         @blur="commit"
         @keydown.enter.prevent="commit"
@@ -18,7 +18,7 @@
         v-else
         type="button"
         class="terminal-color-value__button"
-        :aria-label="`Edit ${colorKey}, current value ${value}`"
+        :aria-label="t('generator.editColorValue', { key: colorKey, value })"
         @click="startEditing"
     >
         {{ value }}
@@ -38,6 +38,7 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['update']);
+const { t } = useI18n();
 const editing = ref(false);
 const draft = ref(props.value.toUpperCase());
 const inputElement = ref(null);

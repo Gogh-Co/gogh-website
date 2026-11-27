@@ -2,7 +2,7 @@
     padding: 20px 15px 5px;
     border: 1px solid #cfd6dc;
     border-radius: 0;
-    text-align: left;
+    text-align: start;
     background-color: #f7f7f7;
     margin-bottom: 30px;
 }
@@ -49,7 +49,7 @@ th {
 }
 
 .data-color {
-    text-align: left;
+    text-align: start;
 }
 
 .data-hex {
@@ -70,7 +70,7 @@ th {
 }
 
 .data-ratio {
-    text-align: right;
+    text-align: end;
     color: #595647;
     font-size: 13px;
 }

@@ -252,7 +252,7 @@
                 >
                     <button
                         type="button"
-                        aria-label="Pick background color"
+                        :aria-label="t('generator.pickBackground')"
                         data-tooltip="background"
                         :style="'background-color: ' + theme.background"
                         @click.stop.prevent="show($event)"
@@ -269,7 +269,7 @@
                 >
                     <button
                         type="button"
-                        aria-label="Pick foreground color"
+                        :aria-label="t('generator.pickForeground')"
                         data-tooltip="foreground"
                         :style="'background-color: ' + theme.foreground"
                         @click.stop.prevent="show($event)"
@@ -286,7 +286,7 @@
                 >
                     <button
                         type="button"
-                        aria-label="Pick cursor color"
+                        :aria-label="t('generator.pickCursor')"
                         data-tooltip="cursor"
                         :style="'background-color: ' + theme.cursor"
                         @click.stop.prevent="show($event)"
@@ -336,6 +336,7 @@
 </template>
 
 <script setup>
+const { t } = useI18n();
 import TerminalColorValue from './TerminalColorValue.vue';
 
 const colorKeys = Array.from({ length: 16 }, (_, index) =>

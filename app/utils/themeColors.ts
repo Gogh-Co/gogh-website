@@ -1,52 +1,50 @@
 import chroma from 'chroma-js';
+import { translateEn, type Translator } from '~/i18n/translate';
 
 // What each palette slot is and where the theme page previews paint it. The
-// roles mirror HomePreviewTerminal (dircolors / PS1 / git status) and
-// CodePreviewTerminal (TOKEN_COLOR_KEYS), so the text on a theme page
-// describes exactly what its previews show.
+// roles (messages slotRoles.*) mirror HomePreviewTerminal (dircolors / PS1 /
+// git status) and CodePreviewTerminal (TOKEN_COLOR_KEYS), so the text on a
+// theme page describes exactly what its previews show. Labels and roles
+// default to English; pass the page's translator (useI18n().t) for others.
 export interface ColorSlot {
     key: string;
     label: string;
     role: string;
 }
 
-export const BASE_COLOR_SLOTS: ColorSlot[] = [
-    { key: 'background', label: 'Background', role: 'Behind every line of text in the terminal window.' },
-    { key: 'foreground', label: 'Foreground', role: 'Default text: command output, file names without a type colour, plain code.' },
-    { key: 'cursor', label: 'Cursor', role: 'The block cursor after the prompt.' },
-];
+const BASE_KEYS = ['background', 'foreground', 'cursor'];
+const NORMAL_KEYS = Array.from({ length: 8 }, (_, index) => `color_${String(index + 1).padStart(2, '0')}`);
+const BRIGHT_KEYS = Array.from({ length: 8 }, (_, index) => `color_${String(index + 9).padStart(2, '0')}`);
 
-export const NORMAL_COLOR_SLOTS: ColorSlot[] = [
-    { key: 'color_01', label: 'Black', role: 'Status bars and dark highlights in TUIs such as tmux or htop.' },
-    { key: 'color_02', label: 'Red', role: 'Archives in ls, unstaged and untracked files in git status, constants in code.' },
-    { key: 'color_03', label: 'Green', role: 'The user@host prompt, executables, staged files, strings in code.' },
-    { key: 'color_04', label: 'Yellow', role: 'Numbers, types and decorators in code; warnings in many tools.' },
-    { key: 'color_05', label: 'Blue', role: 'Directories and the working path in the prompt, function names in code.' },
-    { key: 'color_06', label: 'Magenta', role: 'Keywords in code (import, const, def, return...).' },
-    { key: 'color_07', label: 'Cyan', role: 'Symbolic links in ls, object properties in code.' },
-    { key: 'color_08', label: 'White', role: 'Light text and selections in TUIs; secondary text on light themes.' },
-];
+function slotsFor(keys: string[], t: Translator): ColorSlot[] {
+    return keys.map((key) => ({ key, label: t(`colors.${key}`), role: t(`slotRoles.${key}`) }));
+}
 
-export const BRIGHT_COLOR_SLOTS: ColorSlot[] = [
-    { key: 'color_09', label: 'Bright Black', role: 'Comments and line numbers in code, shell autosuggestions.' },
-    { key: 'color_10', label: 'Bright Red', role: 'Bold or emphasised red text, e.g. error headings.' },
-    { key: 'color_11', label: 'Bright Green', role: 'Bold or emphasised green text.' },
-    { key: 'color_12', label: 'Bright Yellow', role: 'Bold or emphasised yellow text, search matches in some tools.' },
-    { key: 'color_13', label: 'Bright Blue', role: 'Bold or emphasised blue text.' },
-    { key: 'color_14', label: 'Bright Magenta', role: 'Bold or emphasised magenta text.' },
-    { key: 'color_15', label: 'Bright Cyan', role: 'Bold or emphasised cyan text.' },
-    { key: 'color_16', label: 'Bright White', role: 'Bold white text, the brightest tone in the palette.' },
-];
+export function baseColorSlots(t: Translator = translateEn): ColorSlot[] {
+    return slotsFor(BASE_KEYS, t);
+}
+
+export function normalColorSlots(t: Translator = translateEn): ColorSlot[] {
+    return slotsFor(NORMAL_KEYS, t);
+}
+
+export function brightColorSlots(t: Translator = translateEn): ColorSlot[] {
+    return slotsFor(BRIGHT_KEYS, t);
+}
+
+export const BASE_COLOR_SLOTS: ColorSlot[] = baseColorSlots();
+export const NORMAL_COLOR_SLOTS: ColorSlot[] = normalColorSlots();
+export const BRIGHT_COLOR_SLOTS: ColorSlot[] = brightColorSlots();
 
 // The coloured slots readers judge a theme by: black/white (01, 08, 09, 16)
 // are left out because on a dark/light theme one of each is meant to blend in.
 const ACCENT_KEYS = ['color_02', 'color_03', 'color_04', 'color_05', 'color_06', 'color_07',
     'color_10', 'color_11', 'color_12', 'color_13', 'color_14', 'color_15'];
 
-const ALL_SLOTS = [...BASE_COLOR_SLOTS, ...NORMAL_COLOR_SLOTS, ...BRIGHT_COLOR_SLOTS];
+const ALL_KEYS = new Set([...BASE_KEYS, ...NORMAL_KEYS, ...BRIGHT_KEYS]);
 
-export function slotLabel(key: string): string {
-    return ALL_SLOTS.find((slot) => slot.key === key)?.label ?? key;
+export function slotLabel(key: string, t: Translator = translateEn): string {
+    return ALL_KEYS.has(key) ? t(`colors.${key}`) : key;
 }
 
 export function safeHex(value: unknown): string | null {
@@ -57,6 +55,17 @@ export function contrastRatio(a: unknown, b: unknown): number | null {
     const hexA = safeHex(a);
     const hexB = safeHex(b);
     return hexA && hexB ? chroma.contrast(hexA, hexB) : null;
+}
+
+// Message key (levels.*) for a contrastLevel() value.
+export function contrastLevelKey(level: string): string {
+    return {
+        AAA: 'levels.aaa',
+        AA: 'levels.aa',
+        'AA Large': 'levels.aaLarge',
+        Low: 'levels.low',
+        Fail: 'levels.fail',
+    }[level] ?? '';
 }
 
 // WCAG 2 levels for normal-size text.
@@ -85,25 +94,28 @@ const HUE_NAMES: Array<[number, string]> = [
     [200, 'teal'], [250, 'blue'], [290, 'indigo'], [320, 'purple'], [345, 'magenta'], [360, 'red'],
 ];
 
-// Plain-words description of a colour ("near-black, blue-tinted").
-export function describeColor(value: unknown): string {
+// Plain-words description of a colour ("near-black blue-tinted"), from the
+// colorWords.* messages.
+export function describeColor(value: unknown, t: Translator = translateEn): string {
     const hex = safeHex(value);
     if (!hex) return '';
 
     const [lightness, chromaValue, hue] = chroma(hex).lch();
-    let tone = 'mid-tone';
-    if (lightness < 12) tone = 'near-black';
+    let tone = 'midTone';
+    if (lightness < 12) tone = 'nearBlack';
     else if (lightness < 35) tone = 'dark';
-    else if (lightness > 92) tone = 'near-white';
+    else if (lightness > 92) tone = 'nearWhite';
     else if (lightness > 70) tone = 'light';
+    const toneWord = t(`colorWords.tone.${tone}`);
 
     if (Number.isNaN(hue) || chromaValue < 6) {
-        return tone === 'mid-tone' ? 'neutral grey' : `${tone} neutral`;
+        return tone === 'midTone' ? t('colorWords.neutralGrey') : t('colorWords.neutral', { tone: toneWord });
     }
 
     const hueName = HUE_NAMES.find(([limit]) => hue < limit)?.[1] ?? 'red';
-    const strength = chromaValue < 22 ? `${hueName}-tinted` : hueName;
-    return `${tone} ${strength}`;
+    return chromaValue < 22
+        ? t('colorWords.tinted', { tone: toneWord, tint: t(`colorWords.tint.${hueName}`) })
+        : t('colorWords.strong', { tone: toneWord, hue: t(`colorWords.hue.${hueName}`) });
 }
 
 export interface ColorSummary {
@@ -134,7 +146,7 @@ export function themeVariant(theme: Record<string, any>): 'light' | 'dark' {
 
 // Everything the theme page says about a palette, computed from its hex
 // values so it stays true for all ~1,200 themes without hand-written copy.
-export function summarizeThemeColors(theme: Record<string, any>): ColorSummary {
+export function summarizeThemeColors(theme: Record<string, any>, t: Translator = translateEn): ColorSummary {
     const name = (theme?.name || 'This theme').toString();
     const variant = themeVariant(theme);
     const background = theme?.background;
@@ -143,7 +155,7 @@ export function summarizeThemeColors(theme: Record<string, any>): ColorSummary {
     const foregroundLevel = contrastLevel(foregroundContrast);
 
     const accents = ACCENT_KEYS
-        .map((key) => ({ key, label: slotLabel(key), ratio: contrastRatio(theme?.[key], background) }))
+        .map((key) => ({ key, label: slotLabel(key, t), ratio: contrastRatio(theme?.[key], background) }))
         .filter((accent): accent is { key: string; label: string; ratio: number } => accent.ratio !== null);
 
     const readableAccents = accents.filter((accent) => accent.ratio >= 4.5).length;
@@ -166,44 +178,54 @@ export function summarizeThemeColors(theme: Record<string, any>): ColorSummary {
     else if (averageShift > 3) brightShift = 'brighter';
     else if (averageShift < -3) brightShift = 'darker';
 
-    const backgroundDescription = describeColor(background);
-    const foregroundDescription = describeColor(theme?.foreground);
+    const backgroundDescription = describeColor(background, t);
+    const foregroundDescription = describeColor(theme?.foreground, t);
     const author = (theme?.author_name || '').toString().trim();
+    const variantKey = variant === 'light' ? 'Light' : 'Dark';
 
     const sentences: string[] = [];
-    sentences.push(
-        `${name} is a ${variant} terminal color scheme${author ? ` by ${author}` : ''}, `
-        + `built on a ${backgroundDescription || variant} background (${safeHex(background) ?? 'n/a'}).`,
-    );
+    sentences.push(t(`summary.intro${variantKey}${author ? 'By' : ''}`, {
+        name,
+        author,
+        description: backgroundDescription || t(`common.${variant}`).toLocaleLowerCase(),
+        hex: safeHex(background) ?? t('common.notAvailable'),
+    }));
 
     if (foregroundContrast !== null) {
-        const verdict = {
-            AAA: 'comfortably above the WCAG AAA target of 7:1',
-            AA: 'above the WCAG AA target of 4.5:1',
-            'AA Large': 'enough for large or bold text, but under the 4.5:1 WCAG AA target for body text',
-            Low: 'under the 3:1 minimum, so long reading sessions may be tiring',
-        }[foregroundLevel as 'AAA' | 'AA' | 'AA Large' | 'Low'];
-        sentences.push(
-            `Default text is ${foregroundDescription || 'the foreground colour'} (${safeHex(theme?.foreground)}), `
-            + `with a contrast ratio of ${formatRatio(foregroundContrast)} against the background: ${verdict}.`,
-        );
+        const verdict = t({
+            AAA: 'summary.verdictAAA',
+            AA: 'summary.verdictAA',
+            'AA Large': 'summary.verdictAALarge',
+            Low: 'summary.verdictLow',
+        }[foregroundLevel as 'AAA' | 'AA' | 'AA Large' | 'Low']);
+        sentences.push(t('summary.foreground', {
+            description: foregroundDescription || t('summary.foregroundFallback'),
+            hex: safeHex(theme?.foreground),
+            ratio: formatRatio(foregroundContrast),
+            verdict,
+        }));
     }
 
     if (accents.length && strongest && weakest) {
-        sentences.push(
-            `${readableAccents} of its ${accents.length} accent colors reach 4.5:1 on the background. `
-            + `${strongest.label} stands out the most (${formatRatio(strongest.ratio)})`
-            + (weakest.key !== strongest.key ? ` and ${weakest.label} is the subtlest (${formatRatio(weakest.ratio)}).` : '.'),
-        );
+        const accentsSentence = t('summary.accents', { readable: readableAccents, total: accents.length });
+        const standout = weakest.key !== strongest.key
+            ? t('summary.strongestAndWeakest', {
+                strongest: strongest.label,
+                strongestRatio: formatRatio(strongest.ratio),
+                weakest: weakest.label,
+                weakestRatio: formatRatio(weakest.ratio),
+            })
+            : t('summary.strongestOnly', { strongest: strongest.label, strongestRatio: formatRatio(strongest.ratio) });
+        sentences.push(accentsSentence, standout);
     }
 
     if (pairs.length) {
-        sentences.push({
-            same: 'The bright row repeats the normal colors, so bold text keeps the same hue and tone.',
-            brighter: 'The bright row is a lighter version of the normal colors, so bold and highlighted text pops out.',
-            darker: 'The bright row is darker than the normal colors, a common choice on light backgrounds.',
-            similar: 'The bright row keeps roughly the same lightness as the normal colors, shifting hue or saturation instead.',
-        }[brightShift]);
+        sentences.push(t({
+            same: 'summary.brightSame',
+            brighter: 'summary.brightBrighter',
+            darker: 'summary.brightDarker',
+            similar: 'summary.brightSimilar',
+        }[brightShift]));
     }
 
     return {

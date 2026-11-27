@@ -22,14 +22,16 @@
                 type="button"
                 class="install-dock__button"
                 :tabindex="visible ? 0 : -1"
-                :aria-label="copied ? 'Install command copied' : `Copy the command that installs ${themeName}`"
+                :aria-label="copied ? t('dock.copiedAria') : t('dock.copyAria', { name: themeName })"
                 @click="copy"
             >
                 <span class="install-dock__prompt" aria-hidden="true">$</span>
                 <span class="install-dock__label">
                     <Transition name="dock-swap" mode="out-in">
-                        <span v-if="copied" key="done">Copied. Paste it in your terminal</span>
-                        <span v-else key="idle">Install <strong>{{ themeName }}</strong></span>
+                        <span v-if="copied" key="done">{{ t('dock.copied') }}</span>
+                        <I18nT v-else key="idle" keypath="dock.install" tag="span">
+                            <template #name><strong>{{ themeName }}</strong></template>
+                        </I18nT>
                     </Transition>
                 </span>
                 <span class="install-dock__icon" aria-hidden="true">
@@ -43,6 +45,9 @@
 
 <script setup>
 import StarryCanvas from '@/components/Home/StarryCanvas.vue';
+import I18nT from '@/components/I18nT';
+
+const { t } = useI18n();
 
 const props = defineProps({
     theme: {
@@ -237,7 +242,7 @@ onBeforeUnmount(() => {
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
-    text-align: left;
+    text-align: start;
 
     strong {
         font-weight: 700;

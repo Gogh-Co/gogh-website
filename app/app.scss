@@ -15,6 +15,14 @@
 @import '@fontsource/roboto/latin-500.css';
 @import '@fontsource/roboto/latin-600.css';
 @import '@fontsource/roboto/latin-800.css';
+// Cyrillic for the Russian translation; unicode-range keeps browsers from
+// downloading these unless a page actually shows Cyrillic text.
+@import '@fontsource/roboto/cyrillic-100.css';
+@import '@fontsource/roboto/cyrillic-300.css';
+@import '@fontsource/roboto/cyrillic-400.css';
+@import '@fontsource/roboto/cyrillic-500.css';
+@import '@fontsource/roboto/cyrillic-700.css';
+@import '@fontsource/roboto/cyrillic-900.css';
 @import '@fontsource/roboto-mono/latin-400.css';
 @import '@fontsource/roboto-mono/latin-500.css';
 // Bold and italic for the terminal mock-ups (prompts, comments); browsers
@@ -91,7 +99,7 @@ html.lenis body {
         line-height: 1.2;
 
         @include m768 {
-            text-align: left;
+            text-align: start;
             font-weight: 300;
             font-size: 3.6rem;
             line-height: 1;
@@ -194,4 +202,43 @@ html.lenis body {
 
 html.gogh-menu-open {
     overflow: hidden;
+}
+
+/**
+* ::::::: Translations
+*/
+// Arabic reads right to left, but terminal output, code, hex values and the
+// desktop mockups stay left to right, like the programs they imitate.
+[dir='rtl'] {
+    pre,
+    code,
+    kbd,
+    input[type='text'],
+    .terminal,
+    .terminal-frame,
+    .terminal-preview,
+    .compact-card,
+    .install-cmd__box,
+    // Its sliding indicator moves by physical offsets.
+    .install-cmd__tabs,
+    // Keeps "Painting with" clear of the fixed share button (bottom left).
+    .hero__footer,
+    .mini-term,
+    .showcase__window,
+    .session__stage,
+    .preview__stage,
+    .gallery-loader,
+    .specimen__canvas,
+    .chip__hex,
+    .legend__hex,
+    .theme-hero__codes {
+        direction: ltr;
+    }
+}
+
+// Negative tracking breaks Arabic letter joining and crowds CJK glyphs.
+:lang(ar) *,
+:lang(zh) *,
+:lang(ja) * {
+    letter-spacing: normal !important;
 }

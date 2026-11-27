@@ -10,7 +10,7 @@
     >
         <span class="theme-swipe__label">
             <svg v-if="direction === 'prev'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M20 11v2H8l5.5 5.5l-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5L8 11z"/></svg>
-            {{ direction === 'prev' ? 'Previous' : 'Next' }}
+            {{ direction === 'prev' ? t('common.previous') : t('common.next') }}
             <svg v-if="direction === 'next'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M4 11v2h12l-5.5 5.5l1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5L16 11z"/></svg>
         </span>
         <span class="theme-swipe__name">{{ target.name }}</span>
@@ -38,6 +38,8 @@ const props = defineProps({
 });
 
 // Elements that own horizontal touch gestures.
+const { t } = useI18n();
+
 const SWIPE_OWNERS = 'input, textarea, select, [contenteditable]:not([contenteditable="false"]), '
     + '[role="slider"], [role="tablist"], [role="dialog"], [data-swipe-ignore]';
 const EDGE = 24;

@@ -8,7 +8,7 @@
         <div class="container generator-page">
             <div class="row">
                 <div class="col-md-12">
-                    <h1 class="page-title">Theme Generator</h1>
+                    <h1 class="page-title">{{ t('generator.title') }}</h1>
                 </div>
             </div>
 
@@ -32,14 +32,14 @@
                         }"
                     >
                         <Button class="btn" type="button" @click="downloadTheme">
-                            Download YML
+                            {{ t('generator.downloadYml') }}
                         </Button>
                         <Button class="btn" type="button" @click="resetTheme">
-                            Reset
+                            {{ t('generator.reset') }}
                         </Button>
                         <div class="site-background-control">
-                            <label for="site-background">Background</label>
-                            <span aria-hidden="true">Dark</span>
+                            <label for="site-background">{{ t('generator.background') }}</label>
+                            <span aria-hidden="true">{{ t('common.dark') }}</span>
                             <input
                                 id="site-background"
                                 v-model.number="siteBackgroundLightness"
@@ -47,13 +47,13 @@
                                 min="0"
                                 max="255"
                                 :aria-valuetext="siteBackgroundDescription"
-                                aria-label="Site background brightness, from dark to light"
+                                :aria-label="t('generator.backgroundAria')"
                                 @input="hasAdjustedSiteBackground = true"
                             >
-                            <span aria-hidden="true">Light</span>
+                            <span aria-hidden="true">{{ t('common.light') }}</span>
                         </div>
                         <div class="theme-source-control" @focusout="onSourceFocusOut">
-                            <label for="theme-source-search">FROM:</label>
+                            <label for="theme-source-search">{{ t('generator.from') }}</label>
                             <div class="theme-source-combobox">
                                 <input
                                     id="theme-source-search"
@@ -65,7 +65,7 @@
                                     :aria-expanded="sourceMenuOpen"
                                     :aria-activedescendant="activeSourceOptionId"
                                     autocomplete="off"
-                                    placeholder="Search themes"
+                                    :placeholder="t('generator.searchThemes')"
                                     @focus="openSourceMenu"
                                     @input="onSourceInput"
                                     @keydown.down.prevent="moveSourceOption(1)"
@@ -76,7 +76,7 @@
                                 <button
                                     type="button"
                                     class="theme-source-toggle"
-                                    aria-label="Toggle theme list"
+                                    :aria-label="t('generator.toggleList')"
                                     :aria-expanded="sourceMenuOpen"
                                     @click="toggleSourceMenu"
                                 >
@@ -106,14 +106,14 @@
                                         {{ theme.name }}
                                     </button>
                                     <p v-if="!filteredSourceThemes.length" class="theme-source-empty">
-                                        No themes found
+                                        {{ t('generator.noThemes') }}
                                     </p>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <p v-if="showRequiredError" class="required-note">
-                        * Change Name and Author from the default values to download.
+                        {{ t('generator.requiredNote') }}
                     </p>
                 </div>
             </div>
@@ -121,11 +121,11 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="generator-card">
-                        <h3>Theme data</h3>
+                        <h3>{{ t('generator.themeData') }}</h3>
 
                         <div class="theme-meta-rows">
                             <div class="field-wrap">
-                                <label for="name">Name</label>
+                                <label for="name">{{ t('generator.name') }}</label>
                                 <input
                                     id="name"
                                     v-model="form.name"
@@ -136,7 +136,7 @@
                             </div>
 
                             <div class="field-wrap">
-                                <label for="author">Author</label>
+                                <label for="author">{{ t('generator.author') }}</label>
                                 <input
                                     id="author"
                                     v-model="form.author"
@@ -147,7 +147,7 @@
                             </div>
 
                             <div class="field-wrap">
-                                <label for="variant">Variant</label>
+                                <label for="variant">{{ t('generator.variant') }}</label>
                                 <select id="variant" v-model="form.variant">
                                     <option value="dark">dark</option>
                                     <option value="light">light</option>
@@ -171,7 +171,7 @@
                                                 class="picker-btn"
                                                 type="button"
                                                 :style="`background-color: ${sanitizeHex(form[key])}`"
-                                                :aria-label="`Pick color for ${key}`"
+                                                :aria-label="t('generator.pickColor', { key })"
                                                 @click.stop.prevent="show($event)"
                                             ></button>
                                         </color-picker>
@@ -201,7 +201,7 @@
                                                 class="picker-btn"
                                                 type="button"
                                                 :style="`background-color: ${sanitizeHex(form[key])}`"
-                                                :aria-label="`Pick color for ${key}`"
+                                                :aria-label="t('generator.pickColor', { key })"
                                                 @click.stop.prevent="show($event)"
                                             ></button>
                                         </color-picker>
@@ -232,7 +232,7 @@
                                             class="picker-btn"
                                             type="button"
                                             :style="`background-color: ${sanitizeHex(form.background)}`"
-                                            aria-label="Pick background color"
+                                            :aria-label="t('generator.pickBackground')"
                                             @click.stop.prevent="show($event)"
                                         ></button>
                                     </color-picker>
@@ -260,7 +260,7 @@
                                             class="picker-btn"
                                             type="button"
                                             :style="`background-color: ${sanitizeHex(form.foreground)}`"
-                                            aria-label="Pick foreground color"
+                                            :aria-label="t('generator.pickForeground')"
                                             @click.stop.prevent="show($event)"
                                         ></button>
                                     </color-picker>
@@ -288,7 +288,7 @@
                                             class="picker-btn"
                                             type="button"
                                             :style="`background-color: ${sanitizeHex(form.cursor)}`"
-                                            aria-label="Pick cursor color"
+                                            :aria-label="t('generator.pickCursor')"
                                             @click.stop.prevent="show($event)"
                                         ></button>
                                     </color-picker>
@@ -304,14 +304,14 @@
                         </div>
 
                         <div class="action-row">
-                            <Button class="btn" to="/">< Back to themes</Button>
+                            <Button class="btn" to="/">{{ t('common.backToThemes') }}</Button>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-md-6">
                     <div class="generator-card">
-                        <h3>Generated file preview</h3>
+                        <h3>{{ t('generator.preview') }}</h3>
                         <pre><code>{{ generatedTheme }}</code></pre>
                     </div>
                 </div>
@@ -326,8 +326,9 @@ import GeneratorTerminal from '@/components/Terminal/GeneratorTerminal.vue';
 import themeTemplate from '../../theme-template.yml?raw';
 import Button from '@/components/Buttons/Button.vue';
 
-const title = 'Terminal Theme Generator - Gogh';
-const description = "Design your own terminal color scheme with a live preview, then export it as a ready-to-use Gogh theme file.";
+const { t } = useI18n();
+const title = () => t('meta.generatorTitle');
+const description = () => t('meta.generatorDescription');
 
 useSeoMeta({
     title,
@@ -391,7 +392,7 @@ const actionBackgroundColor = computed(() => usesDarkBackground.value ? '#ffffff
 const actionForegroundColor = computed(() => usesDarkBackground.value ? '#0d1926' : '#ffffff');
 const siteBackgroundDescription = computed(() => {
     const percent = Math.round((siteBackgroundLightness.value / 255) * 100);
-    return `${percent}% light`;
+    return t('generator.backgroundValue', { percent });
 });
 
 const colorKeys = Array.from({ length: 16 }, (_, i) =>

@@ -4,7 +4,7 @@
         class="favorite-button"
         :class="{ 'is-active': active }"
         :aria-pressed="active"
-        :aria-label="active ? `Remove ${themeName} from favorites` : `Add ${themeName} to favorites`"
+        :aria-label="active ? t('common.removeFavorite', { name: themeName }) : t('common.addFavorite', { name: themeName })"
         @click.stop="emit('toggle')"
     >
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
@@ -35,6 +35,7 @@ defineProps({
 });
 
 const emit = defineEmits(['toggle']);
+const { t } = useI18n();
 </script>
 
 <style lang="scss" scoped>

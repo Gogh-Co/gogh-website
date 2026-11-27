@@ -229,9 +229,9 @@ $header_height: 72px;
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-left: 12px;
-    padding-left: 16px;
-    border-left: 1px solid var(--ink-line);
+    margin-inline-start: 12px;
+    padding-inline-start: 16px;
+    border-inline-start: 1px solid var(--ink-line);
 
     @media (max-width: 991.98px) {
         flex-direction: column;

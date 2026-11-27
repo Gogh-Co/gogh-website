@@ -13,6 +13,7 @@ import Footer from '@/components/Footer/Footer.vue';
 import GoToTop from '@/components/Buttons/GoToTop.vue';
 
 const { app } = useRuntimeConfig();
+const { localeInfo } = useI18n();
 
 function withBase(path) {
     const base = (app?.baseURL || '/').replace(/\/?$/, '/');
@@ -21,8 +22,10 @@ function withBase(path) {
 }
 
 useHead({
+    // English in the prerendered HTML; the visitor's language once applied.
     htmlAttrs: {
-        lang: 'en',
+        lang: () => localeInfo.value.htmlLang,
+        dir: () => localeInfo.value.dir,
     },
     link: [
         { rel: 'apple-touch-icon', sizes: '57x57', href: withBase('favicons/apple-icon-57x57.png') },
@@ -93,7 +96,7 @@ useHead({
 useSeoMeta({
     ogSiteName: SITE_NAME,
     ogType: 'website',
-    ogLocale: 'en_US',
+    ogLocale: () => localeInfo.value.ogLocale,
     ogImage: SITE_IMAGE,
     ogImageType: 'image/png',
     ogImageWidth: SITE_IMAGE_WIDTH,

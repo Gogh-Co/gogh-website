@@ -5,17 +5,15 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-8">
-                    <h1 class="page-title">Theme statistics</h1>
-                    <p class="stats-intro">
-                        Aggregated analytics for Gogh themes from the GitHub source.
-                    </p>
+                    <h1 class="page-title">{{ t('stats.title') }}</h1>
+                    <p class="stats-intro">{{ t('stats.intro') }}</p>
                 </div>
                 <div class="col-md-4 stats-page__actions">
                     <Button class="btn" type="button" @click="refreshThemes">
-                        Refresh
+                        {{ t('stats.refresh') }}
                     </Button>
                     <Button class="btn" to="/">
-                        &lt; Back to themes
+                        {{ t('common.backToThemes') }}
                     </Button>
                 </div>
             </div>
@@ -32,45 +30,46 @@
                     <span class="gogh-banner-anim__color gogh-banner-anim__color--08"></span>
                     <span class="gogh-banner-anim__shine"></span>
                 </div>
-                <p class="stats-loading__text">Loading theme statistics...</p>
+                <p class="stats-loading__text">{{ t('stats.loading') }}</p>
             </div>
 
             <div v-else-if="errorMessage" class="stats-status stats-status--error" role="alert">
-                <p>{{ errorMessage }}</p>
-                <Button class="btn" type="button" @click="loadThemes(true)">Try again</Button>
+                <p>{{ t(errorMessage) }}</p>
+                <Button class="btn" type="button" @click="loadThemes(true)">{{ t('stats.tryAgain') }}</Button>
             </div>
 
             <template v-else>
                 <div class="stats-meta-row">
-                    <span v-if="lastUpdatedLabel">Updated: {{ lastUpdatedLabel }}</span>
-                    <span>Total themes: <strong>{{ totalThemes }}</strong></span>
+                    <span v-if="lastUpdatedLabel">{{ t('stats.updated', { date: lastUpdatedLabel }) }}</span>
+                    <I18nT keypath="stats.totalThemesInline" tag="span">
+                        <template #count><strong>{{ n(totalThemes) }}</strong></template>
+                    </I18nT>
                 </div>
 
-                <p class="stats-duplicates-note">
-                    Duplicate groups &mdash;
-                    Name: <strong>{{ duplicateNames.length }}</strong>,
-                    Hash: <strong>{{ duplicateHashes.length }}</strong>,
-                    Background: <strong>{{ duplicateBackgrounds.length }}</strong>
-                </p>
+                <I18nT keypath="stats.duplicates" tag="p" class="stats-duplicates-note">
+                    <template #names><strong>{{ n(duplicateNames.length) }}</strong></template>
+                    <template #hashes><strong>{{ n(duplicateHashes.length) }}</strong></template>
+                    <template #backgrounds><strong>{{ n(duplicateBackgrounds.length) }}</strong></template>
+                </I18nT>
 
                 <div class="row stats-summary-row">
                     <div class="col-md-6">
                         <div class="stats-card summary-card h-100">
-                            <h3>Total themes</h3>
-                            <p class="stats-value">{{ totalThemes }}</p>
+                            <h3>{{ t('stats.totalThemes') }}</h3>
+                            <p class="stats-value">{{ n(totalThemes) }}</p>
                         </div>
                     </div>
 
                     <div class="col-md-6">
                         <div class="stats-card summary-card h-100">
-                            <h3>Author coverage</h3>
+                            <h3>{{ t('stats.authorCoverage') }}</h3>
                             <ul class="summary-list">
                                 <li>
-                                    <span>With author</span>
+                                    <span>{{ t('stats.withAuthor') }}</span>
                                     <strong class="summary-number">{{ authorCounts.present }}</strong>
                                 </li>
                                 <li>
-                                    <span>Missing author</span>
+                                    <span>{{ t('stats.missingAuthor') }}</span>
                                     <strong class="summary-number">{{ authorCounts.missing }}</strong>
                                 </li>
                             </ul>
@@ -81,17 +80,17 @@
                 <div class="row stats-secondary-row">
                     <div class="col-md-6">
                         <div class="stats-card h-100">
-                            <h3>Variant counts</h3>
+                            <h3>{{ t('stats.variantCounts') }}</h3>
                             <table class="stats-table">
                                 <thead>
                                     <tr>
-                                        <th>Variant</th>
-                                        <th>Count</th>
+                                        <th>{{ t('stats.variant') }}</th>
+                                        <th>{{ t('stats.count') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr v-for="entry in variantCounts" :key="entry.value">
-                                        <td>{{ entry.value }}</td>
+                                        <td>{{ variantLabel(entry.value) }}</td>
                                         <td>{{ entry.count }}</td>
                                     </tr>
                                 </tbody>
@@ -101,27 +100,28 @@
 
                     <div class="col-md-6">
                         <div class="stats-card h-100">
-                            <h3>Background classification</h3>
-                            <p class="stats-note">
-                                Rule: a background is considered <strong>light</strong> when relative luminance is
-                                <strong>&gt;= 0.5</strong>, otherwise <strong>dark</strong>.
-                            </p>
+                            <h3>{{ t('stats.backgroundClassification') }}</h3>
+                            <I18nT keypath="stats.rule" tag="p" class="stats-note">
+                                <template #light><strong>{{ t('stats.ruleLight') }}</strong></template>
+                                <template #threshold><strong>&gt;= 0.5</strong></template>
+                                <template #dark><strong>{{ t('stats.ruleDark') }}</strong></template>
+                            </I18nT>
                             <table class="stats-table">
                                 <thead>
                                     <tr>
-                                        <th>Class</th>
-                                        <th>Count</th>
-                                        <th>Percent</th>
+                                        <th>{{ t('stats.class') }}</th>
+                                        <th>{{ t('stats.count') }}</th>
+                                        <th>{{ t('stats.percent') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>Light background</td>
+                                        <td>{{ t('stats.lightBackground') }}</td>
                                         <td>{{ backgroundClassCounts.light }}</td>
                                         <td>{{ formatPercent(backgroundClassCounts.light, totalThemes) }}</td>
                                     </tr>
                                     <tr>
-                                        <td>Dark background</td>
+                                        <td>{{ t('stats.darkBackground') }}</td>
                                         <td>{{ backgroundClassCounts.dark }}</td>
                                         <td>{{ formatPercent(backgroundClassCounts.dark, totalThemes) }}</td>
                                     </tr>
@@ -135,13 +135,13 @@
                 <div class="row">
                     <div class="col-lg-4">
                         <div class="stats-card">
-                            <h3>Top background colors</h3>
+                            <h3>{{ t('stats.topBackgrounds') }}</h3>
                             <table class="stats-table">
                                 <thead>
                                     <tr>
-                                        <th>Color</th>
-                                        <th>Hex</th>
-                                        <th>Count</th>
+                                        <th>{{ t('stats.color') }}</th>
+                                        <th>{{ t('stats.hex') }}</th>
+                                        <th>{{ t('stats.count') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -157,13 +157,13 @@
 
                     <div class="col-lg-4">
                         <div class="stats-card">
-                            <h3>Top foreground colors</h3>
+                            <h3>{{ t('stats.topForegrounds') }}</h3>
                             <table class="stats-table">
                                 <thead>
                                     <tr>
-                                        <th>Color</th>
-                                        <th>Hex</th>
-                                        <th>Count</th>
+                                        <th>{{ t('stats.color') }}</th>
+                                        <th>{{ t('stats.hex') }}</th>
+                                        <th>{{ t('stats.count') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -179,19 +179,19 @@
 
                     <div class="col-lg-4">
                         <div class="stats-card">
-                            <h3>Most common color by slot</h3>
+                            <h3>{{ t('stats.topBySlot') }}</h3>
                             <table class="stats-table">
                                 <thead>
                                     <tr>
-                                        <th>Slot</th>
-                                        <th>Color</th>
-                                        <th>Hex</th>
-                                        <th>Count</th>
+                                        <th>{{ t('stats.slot') }}</th>
+                                        <th>{{ t('stats.color') }}</th>
+                                        <th>{{ t('stats.hex') }}</th>
+                                        <th>{{ t('stats.count') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr v-for="entry in topColorBySlot" :key="entry.key">
-                                        <td>{{ entry.name }}</td>
+                                        <td>{{ t(entry.name) }}</td>
                                         <td><span class="color-swatch" :style="{ backgroundColor: entry.value }"></span></td>
                                         <td>{{ entry.value }}</td>
                                         <td>{{ entry.count }}</td>
@@ -203,81 +203,81 @@
                 </div>
 
                 <div class="stats-card">
-                    <h3>Themes table</h3>
+                    <h3>{{ t('stats.themesTable') }}</h3>
 
                     <div class="table-filters">
                         <div class="table-filter-field table-filter-field--search">
-                            <label for="stats-search">Search name or author</label>
+                            <label for="stats-search">{{ t('stats.searchLabel') }}</label>
                             <input
                                 id="stats-search"
                                 v-model.trim="searchQuery"
                                 type="search"
-                                placeholder="Search by name or author"
+                                :placeholder="t('stats.searchPlaceholder')"
                             >
                         </div>
 
                         <div class="table-filter-field">
-                            <label for="variant-filter">Variant</label>
+                            <label for="variant-filter">{{ t('stats.variant') }}</label>
                             <select id="variant-filter" v-model="variantFilter">
-                                <option value="all">All</option>
+                                <option value="all">{{ t('common.all') }}</option>
                                 <option
                                     v-for="entry in variantCounts"
                                     :key="entry.value"
                                     :value="entry.value"
                                 >
-                                    {{ entry.value }}
+                                    {{ variantLabel(entry.value) }}
                                 </option>
                             </select>
                         </div>
 
                         <div class="table-filter-field">
-                            <label for="author-filter">Author</label>
+                            <label for="author-filter">{{ t('stats.author') }}</label>
                             <select id="author-filter" v-model="authorFilter">
-                                <option value="all">All</option>
-                                <option value="present">Author present</option>
-                                <option value="missing">Author missing</option>
+                                <option value="all">{{ t('common.all') }}</option>
+                                <option value="present">{{ t('stats.authorPresent') }}</option>
+                                <option value="missing">{{ t('stats.authorMissing') }}</option>
                             </select>
                         </div>
 
                         <div class="table-filter-field">
-                            <label for="bg-filter">Background class</label>
+                            <label for="bg-filter">{{ t('stats.backgroundClass') }}</label>
                             <select id="bg-filter" v-model="backgroundFilter">
-                                <option value="all">All</option>
-                                <option value="light">Light</option>
-                                <option value="dark">Dark</option>
+                                <option value="all">{{ t('common.all') }}</option>
+                                <option value="light">{{ t('common.light') }}</option>
+                                <option value="dark">{{ t('common.dark') }}</option>
                             </select>
                         </div>
 
                         <div class="table-filter-field">
-                            <label for="duplicate-filter">Duplicates</label>
+                            <label for="duplicate-filter">{{ t('stats.duplicatesLabel') }}</label>
                             <select id="duplicate-filter" v-model="duplicatesFilter">
-                                <option value="all">All themes</option>
-                                <option value="duplicates">Duplicates only</option>
+                                <option value="all">{{ t('stats.allThemes') }}</option>
+                                <option value="duplicates">{{ t('stats.duplicatesOnly') }}</option>
                             </select>
                         </div>
 
                         <div class="table-filter-field">
-                            <label for="sort-filter">Sort</label>
+                            <label for="sort-filter">{{ t('stats.sort') }}</label>
                             <select id="sort-filter" v-model="sortBy">
-                                <option value="name-asc">Name (A-Z)</option>
-                                <option value="author-asc">Author (A-Z)</option>
-                                <option value="variant-asc">Variant (A-Z)</option>
-                                <option value="luminance-asc">Background luminance (light-dark)</option>
-                                <option value="luminance-desc">Background luminance (dark-light)</option>
+                                <option value="name-asc">{{ t('stats.sortName') }}</option>
+                                <option value="author-asc">{{ t('stats.sortAuthor') }}</option>
+                                <option value="variant-asc">{{ t('stats.sortVariant') }}</option>
+                                <option value="luminance-asc">{{ t('stats.sortLuminanceAsc') }}</option>
+                                <option value="luminance-desc">{{ t('stats.sortLuminanceDesc') }}</option>
                             </select>
                         </div>
                     </div>
 
-                    <div class="table-wrap" role="region" aria-label="Themes data table" tabindex="0">
+                    <div class="table-wrap" role="region" :aria-label="t('stats.tableAria')" tabindex="0">
                         <table class="stats-table stats-table--themes">
                             <thead>
                                 <tr>
-                                    <th>Name</th>
-                                    <th>Author</th>
-                                    <th>Variant</th>
-                                    <th>Background</th>
-                                    <th>Foreground</th>
-                                    <th>Palette</th>
+                                    <th>{{ t('stats.name') }}</th>
+                                    <th>{{ t('stats.author') }}</th>
+                                    <th>{{ t('stats.variant') }}</th>
+                                    <th>{{ t('stats.background') }}</th>
+                                    <th>{{ t('stats.foreground') }}</th>
+                                    <th>{{ t('stats.palette') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -292,7 +292,7 @@
                                 >
                                     <td>{{ theme.name || '—' }}</td>
                                     <td>{{ theme.author || '—' }}</td>
-                                    <td>{{ theme.variant || 'unspecified' }}</td>
+                                    <td>{{ variantLabel(theme.variant || 'unspecified') }}</td>
                                     <td>
                                         <span class="inline-color"><span class="color-swatch" :style="{ backgroundColor: theme.background }"></span>{{ theme.background || '—' }}</span>
                                     </td>
@@ -316,44 +316,42 @@
 
                     <div class="table-footer">
                         <div class="table-footer__count">
-                            Showing {{ paginatedThemes.length }} of {{ filteredThemes.length }} themes
+                            {{ t('stats.showing', { shown: paginatedThemes.length, total: filteredThemes.length }) }}
                         </div>
 
                         <div class="table-footer__controls">
-                            <label for="page-size">Rows</label>
+                            <label for="page-size">{{ t('stats.rows') }}</label>
                             <select id="page-size" v-model.number="pageSize">
                                 <option :value="10">10</option>
                                 <option :value="25">25</option>
                                 <option :value="50">50</option>
-                                <option :value="-1">All</option>
+                                <option :value="-1">{{ t('common.all') }}</option>
                             </select>
 
                             <Button class="btn" type="button" :disabled="currentPage === 1" @click="currentPage -= 1">
-                                Previous
+                                {{ t('common.previous') }}
                             </Button>
-                            <span>Page {{ currentPage }} / {{ totalPages }}</span>
+                            <span>{{ t('stats.page', { page: currentPage, pages: totalPages }) }}</span>
                             <Button class="btn" type="button" :disabled="currentPage >= totalPages" @click="currentPage += 1">
-                                Next
+                                {{ t('common.next') }}
                             </Button>
                         </div>
                     </div>
                 </div>
 
                 <div class="stats-card">
-                    <h3>All colors usage</h3>
-                    <p class="stats-note">
-                        Includes all color fields: color_01..color_16, background, foreground and cursor.
-                    </p>
+                    <h3>{{ t('stats.allColors') }}</h3>
+                    <p class="stats-note">{{ t('stats.allColorsNote') }}</p>
 
-                    <div class="table-wrap" role="region" aria-label="All colors usage table" tabindex="0">
+                    <div class="table-wrap" role="region" :aria-label="t('stats.allColorsAria')" tabindex="0">
                         <table class="stats-table stats-table--all-colors">
                             <thead>
                                 <tr>
-                                    <th>Color</th>
-                                    <th>Hex</th>
-                                    <th>Total uses</th>
-                                    <th>Themes count</th>
-                                    <th>Themes</th>
+                                    <th>{{ t('stats.color') }}</th>
+                                    <th>{{ t('stats.hex') }}</th>
+                                    <th>{{ t('stats.totalUses') }}</th>
+                                    <th>{{ t('stats.themesCount') }}</th>
+                                    <th>{{ t('stats.themes') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -364,7 +362,7 @@
                                     <td>{{ entry.value }}</td>
                                     <td>{{ entry.count }}</td>
                                     <td>{{ entry.themes.length }}</td>
-                                    <td class="themes-list-cell">{{ entry.themes.join(', ') }}</td>
+                                    <td class="themes-list-cell">{{ entry.themes.map((name) => name || t('stats.unnamed')).join(', ') }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -385,47 +383,47 @@
                 <button
                     type="button"
                     class="stats-lightbox__close"
-                    aria-label="Close details"
+                    :aria-label="t('stats.closeDetails')"
                     @click="closeDetail"
                 >
                     ×
                 </button>
 
-                <h3 id="stats-detail-title">{{ selectedTheme.name || 'Theme details' }}</h3>
-                <p class="stats-note">Author: {{ selectedTheme.author || '—' }}</p>
+                <h3 id="stats-detail-title">{{ selectedTheme.name || t('stats.themeDetails') }}</h3>
+                <p class="stats-note">{{ t('stats.authorValue', { author: selectedTheme.author || '—' }) }}</p>
 
                 <div class="stats-lightbox__actions">
                     <Button class="btn" type="button" @click="copyThemeName">
-                        Copy theme name
+                        {{ t('stats.copyName') }}
                     </Button>
                     <Button class="btn" type="button" @click="copyThemeJson">
-                        Copy JSON
+                        {{ t('stats.copyJson') }}
                     </Button>
-                    <span v-if="copyMessage" class="copy-message" role="status" aria-live="polite">{{ copyMessage }}</span>
+                    <span v-if="copyMessage" class="copy-message" role="status" aria-live="polite">{{ t(copyMessage) }}</span>
                 </div>
 
                 <table class="stats-table stats-table--detail">
                     <tbody>
                         <tr>
-                            <th>Name</th>
+                            <th>{{ t('stats.name') }}</th>
                             <td>{{ selectedTheme.name || '—' }}</td>
                         </tr>
                         <tr>
-                            <th>Author</th>
+                            <th>{{ t('stats.author') }}</th>
                             <td>{{ selectedTheme.author || '—' }}</td>
                         </tr>
                         <tr>
-                            <th>Variant</th>
-                            <td>{{ selectedTheme.variant || 'unspecified' }}</td>
+                            <th>{{ t('stats.variant') }}</th>
+                            <td>{{ variantLabel(selectedTheme.variant || 'unspecified') }}</td>
                         </tr>
                         <tr>
-                            <th>Hash</th>
+                            <th>{{ t('stats.hash') }}</th>
                             <td>{{ selectedTheme.hash || '—' }}</td>
                         </tr>
                     </tbody>
                 </table>
 
-                <div class="table-wrap" role="region" aria-label="Theme base colors" tabindex="0">
+                <div class="table-wrap" role="region" :aria-label="t('stats.baseColorsAria')" tabindex="0">
                     <table class="stats-table stats-table--detail-meta-colors">
                         <thead>
                             <tr>
@@ -463,8 +461,8 @@
                     <table class="stats-table stats-table--detail-colors">
                         <thead>
                             <tr>
-                                <th>Color</th>
-                                <th>Value</th>
+                                <th>{{ t('stats.color') }}</th>
+                                <th>{{ t('stats.value') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -483,8 +481,8 @@
                     <table class="stats-table stats-table--detail-colors">
                         <thead>
                             <tr>
-                                <th>Color</th>
-                                <th>Value</th>
+                                <th>{{ t('stats.color') }}</th>
+                                <th>{{ t('stats.value') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -508,9 +506,20 @@
 <script setup>
 import Header from '@/components/Header/Header.vue';
 import Button from '@/components/Buttons/Button.vue';
+import I18nT from '@/components/I18nT';
 
-const title = 'Terminal Theme Statistics - Gogh';
-const description = 'Browse statistics across every Gogh terminal theme, including author coverage, and name and color-hash duplicates.';
+const { t, n, localeInfo } = useI18n();
+
+// Variant values come from the theme files ("dark", "light", or missing).
+function variantLabel(value) {
+    if (value === 'dark' || value === 'light') {
+        return t(`common.${value}`).toLocaleLowerCase();
+    }
+    return value === 'unspecified' ? t('stats.unspecified') : value;
+}
+
+const title = () => t('meta.statsTitle');
+const description = () => t('meta.statsDescription');
 
 useSeoMeta({
     title,
@@ -659,7 +668,7 @@ async function loadThemes(forceRefresh = false) {
         cachedThemes.value = normalized;
         cachedUpdatedAt.value = Date.now();
     } catch {
-        errorMessage.value = 'Could not fetch theme data from GitHub.';
+        errorMessage.value = 'common.fetchThemesError';
 
         if (Array.isArray(cachedThemes.value) && cachedThemes.value.length) {
             themes.value = cachedThemes.value;
@@ -747,31 +756,13 @@ const duplicateBackgroundValues = computed(() => new Set(duplicateBackgrounds.va
 const topBackgroundColors = computed(() => topColorsBy(themes.value, ['background']));
 const topForegroundColors = computed(() => topColorsBy(themes.value, ['foreground']));
 
-const ANSI_COLOR_NAMES = {
-    color_01: 'Black',
-    color_02: 'Red',
-    color_03: 'Green',
-    color_04: 'Yellow',
-    color_05: 'Blue',
-    color_06: 'Magenta',
-    color_07: 'Cyan',
-    color_08: 'White',
-    color_09: 'Bright Black',
-    color_10: 'Bright Red',
-    color_11: 'Bright Green',
-    color_12: 'Bright Yellow',
-    color_13: 'Bright Blue',
-    color_14: 'Bright Magenta',
-    color_15: 'Bright Cyan',
-    color_16: 'Bright White',
-};
-
 const topColorBySlot = computed(() => COLOR_KEYS.map((key) => {
     const top = topColorsBy(themes.value, [key], 1)[0];
 
     return {
         key,
-        name: ANSI_COLOR_NAMES[key],
+        // Message key for the slot name.
+        name: `colors.${key}`,
         value: top?.value || '',
         count: top?.count || 0,
     };
@@ -780,7 +771,8 @@ const allColorUsage = computed(() => {
     const usageMap = new Map();
 
     themes.value.forEach((theme) => {
-        const themeName = theme.name || '(unnamed theme)';
+        // Empty names show as "(unnamed theme)" in the table.
+        const themeName = theme.name || '';
 
         ALL_COLOR_FIELDS.forEach((key) => {
             const hex = normalizeHexColor(theme[key]);
@@ -907,15 +899,16 @@ const lastUpdatedLabel = computed(() => {
         return '';
     }
 
-    return new Date(cachedUpdatedAt.value).toLocaleString();
+    return new Date(cachedUpdatedAt.value).toLocaleString(localeInfo.value.htmlLang);
 });
 
 function formatPercent(count, total) {
-    if (!total) {
-        return '0.0%';
-    }
-
-    return `${((count / total) * 100).toFixed(1)}%`;
+    const ratio = total ? count / total : 0;
+    return new Intl.NumberFormat(localeInfo.value.htmlLang === 'ar' ? 'ar-u-nu-latn' : localeInfo.value.htmlLang, {
+        style: 'percent',
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1,
+    }).format(ratio);
 }
 
 watch(
@@ -983,12 +976,12 @@ async function copyText(text) {
 
 async function copyThemeName() {
     const didCopy = await copyText(selectedTheme.value?.name || '');
-    copyMessage.value = didCopy ? 'Theme name copied.' : 'Copy failed.';
+    copyMessage.value = didCopy ? 'stats.nameCopied' : 'stats.copyFailed';
 }
 
 async function copyThemeJson() {
     const didCopy = await copyText(JSON.stringify(selectedTheme.value, null, 2));
-    copyMessage.value = didCopy ? 'Theme JSON copied.' : 'Copy failed.';
+    copyMessage.value = didCopy ? 'stats.jsonCopied' : 'stats.copyFailed';
 }
 
 onMounted(() => {

@@ -201,7 +201,7 @@
     .summary-number {
         display: inline-block;
         min-width: 42px;
-        text-align: right;
+        text-align: end;
         font-size: 3.6rem;
         line-height: 0.95;
         font-weight: 900;
@@ -500,7 +500,7 @@
 
     th,
     td {
-        text-align: left;
+        text-align: start;
     }
 }
 

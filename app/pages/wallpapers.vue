@@ -5,7 +5,7 @@
         <div class="container-fluid wallpapers-container">
             <div class="row">
                 <div class="col-12">
-                    <h1 class="page-title">Wallpapers</h1>
+                    <h1 class="page-title">{{ t('wallpapersPage.title') }}</h1>
                 </div>
             </div>
 
@@ -14,12 +14,12 @@
                     <div class="wallpaper-card">
                         <img
                             :src="`/wallpapers/thumbs/${wallpaper.thumb}`"
-                            :alt="`${wallpaper.name} wallpaper preview`"
+                            :alt="t('wallpapersPage.previewAlt', { name: wallpaper.name })"
                             loading="lazy"
                             class="wallpaper-card__image"
                             role="button"
                             tabindex="0"
-                            :aria-label="`View ${wallpaper.name} wallpaper fullscreen`"
+                            :aria-label="t('wallpapersPage.viewFull', { name: wallpaper.name })"
                             @click="openWallpaperLightbox(index)"
                             @keydown.enter.prevent="openWallpaperLightbox(index)"
                             @keydown.space.prevent="openWallpaperLightbox(index)"
@@ -35,10 +35,10 @@
                                 class="btn wallpaper-card__download"
                                 :href="`/wallpapers/${wallpaper.file}`"
                                 :download="wallpaper.file"
-                                :aria-label="`Download ${wallpaper.name} wallpaper`"
+                                :aria-label="t('wallpapersPage.downloadAria', { name: wallpaper.name })"
                                 @click.stop="trackWallpaperDownload(wallpaper)"
                             >
-                                Download
+                                {{ t('common.download') }}
                             </a>
                         </div>
                     </div>
@@ -54,7 +54,7 @@
             <button
                 type="button"
                 class="wallpaper-lightbox__close"
-                aria-label="Close wallpaper preview"
+                :aria-label="t('wallpapersPage.close')"
                 @click="closeWallpaperLightbox"
             >
                 &times;
@@ -63,7 +63,7 @@
             <button
                 type="button"
                 class="wallpaper-lightbox__arrow wallpaper-lightbox__arrow--prev"
-                aria-label="Previous wallpaper"
+                :aria-label="t('wallpapersPage.previous')"
                 @click="showPrevWallpaper"
             >
                 &#8249;
@@ -72,7 +72,7 @@
             <button
                 type="button"
                 class="wallpaper-lightbox__arrow wallpaper-lightbox__arrow--next"
-                aria-label="Next wallpaper"
+                :aria-label="t('wallpapersPage.next')"
                 @click="showNextWallpaper"
             >
                 &#8250;
@@ -81,7 +81,7 @@
             <div class="wallpaper-lightbox__content" :key="lightboxWallpaper.file">
                 <img
                     :src="`/wallpapers/${lightboxWallpaper.file}`"
-                    :alt="`${lightboxWallpaper.name} wallpaper`"
+                    :alt="t('wallpapersPage.alt', { name: lightboxWallpaper.name })"
                     class="wallpaper-lightbox__image"
                 >
 
@@ -95,10 +95,10 @@
                         class="btn wallpaper-card__download"
                         :href="`/wallpapers/${lightboxWallpaper.file}`"
                         :download="lightboxWallpaper.file"
-                        :aria-label="`Download ${lightboxWallpaper.name} wallpaper`"
+                        :aria-label="t('wallpapersPage.downloadAria', { name: lightboxWallpaper.name })"
                         @click="trackWallpaperDownload(lightboxWallpaper)"
                     >
-                        Download
+                        {{ t('common.download') }}
                     </a>
                 </div>
             </div>
@@ -109,8 +109,9 @@
 <script setup>
 import Header from '@/components/Header/Header.vue';
 
-const title = 'Terminal Color Wallpapers - Gogh';
-const description = "Free desktop wallpapers in Gogh's terminal color palette. Preview each one full screen and download the full-size image.";
+const { t } = useI18n();
+const title = () => t('meta.wallpapersTitle');
+const description = () => t('meta.wallpapersDescription');
 
 useSeoMeta({
     title,
