@@ -111,6 +111,7 @@ const NAV_LINKS = [
     { to: '/stats', label: 'header.nav.stats' },
     { to: '/wallpapers', label: 'header.nav.wallpapers' },
     { to: '/terminals', label: 'header.nav.terminals' },
+    { to: '/history', label: 'header.nav.history' },
 ];
 
 const { t } = useI18n();

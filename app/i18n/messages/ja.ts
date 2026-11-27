@@ -52,6 +52,8 @@ export default {
         wcsgDescription: 'Gogh のすべてのターミナル配色スキームの WCAG コントラスト比とアクセシビリティデータを、ライト／ダークで絞り込んで確認できます。',
         statsTitle: 'ターミナルテーマの統計 - Gogh',
         statsDescription: 'Gogh のすべてのターミナルテーマの統計。作者情報の有無や、名前・カラーハッシュによる重複を確認できます。',
+        historyTitle: 'ターミナルの色の歴史 - Gogh',
+        historyDescription: 'ターミナルの色の仕組みとその変遷。テレプリンターと ANSI エスケープコードから 256 色、トゥルーカラー、現代のテーマまで、仕様へのリンク付きで解説します。',
     },
 
     header: {
@@ -64,6 +66,7 @@ export default {
             stats: '統計',
             wallpapers: '壁紙',
             terminals: 'ターミナル',
+            history: '歴史',
         },
         randomAria: 'ランダムなテーマを開く',
         randomTitle: 'ランダムテーマ (R)',

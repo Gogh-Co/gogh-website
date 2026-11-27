@@ -52,6 +52,8 @@ export default {
         wcsgDescription: '查看每个 Gogh 终端配色方案的 WCAG 对比度和无障碍数据，可按浅色和深色主题筛选。',
         statsTitle: '终端主题统计 - Gogh',
         statsDescription: '浏览所有 Gogh 终端主题的统计数据，包括作者信息覆盖率，以及按名称和颜色哈希识别的重复项。',
+        historyTitle: '终端色彩简史 - Gogh',
+        historyDescription: '终端颜色如何工作，又如何演变：从电传打字机和 ANSI 转义码，到 256 色、真彩色和现代主题，并附有规范链接。',
     },
 
     header: {
@@ -64,6 +66,7 @@ export default {
             stats: '统计',
             wallpapers: '壁纸',
             terminals: '终端',
+            history: '历史',
         },
         randomAria: '打开一个随机主题',
         randomTitle: '随机主题 (R)',

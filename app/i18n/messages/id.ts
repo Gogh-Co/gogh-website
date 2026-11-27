@@ -52,6 +52,8 @@ export default {
         wcsgDescription: 'Jelajahi rasio kontras WCAG dan data aksesibilitas untuk setiap skema warna terminal Gogh, dapat difilter berdasarkan tema terang dan gelap.',
         statsTitle: 'Statistik tema terminal - Gogh',
         statsDescription: 'Lihat statistik seluruh tema terminal Gogh, termasuk cakupan pembuat serta duplikat berdasarkan nama dan hash warna.',
+        historyTitle: 'Sejarah Warna di Terminal - Gogh',
+        historyDescription: 'Cara kerja warna terminal dan perkembangannya: dari teleprinter dan kode escape ANSI hingga 256 warna, truecolor, dan tema modern, lengkap dengan tautan ke spesifikasinya.',
     },
 
     header: {
@@ -64,6 +66,7 @@ export default {
             stats: 'Statistik',
             wallpapers: 'Wallpaper',
             terminals: 'Terminal',
+            history: 'Sejarah',
         },
         randomAria: 'Buka tema acak',
         randomTitle: 'Tema acak (R)',

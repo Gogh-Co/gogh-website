@@ -57,6 +57,8 @@ export default {
         wcsgDescription: 'Explore WCAG contrast ratios and accessibility data for every Gogh terminal color scheme, filterable by light and dark themes.',
         statsTitle: 'Terminal Theme Statistics - Gogh',
         statsDescription: 'Browse statistics across every Gogh terminal theme, including author coverage, and name and color-hash duplicates.',
+        historyTitle: 'A History of Color in the Terminal - Gogh',
+        historyDescription: 'How terminal colors work and how they evolved: from teleprinters and ANSI escape codes to 256 colors, truecolor and modern themes, with links to the specifications.',
     },
 
     header: {
@@ -69,6 +71,7 @@ export default {
             stats: 'Stats',
             wallpapers: 'Wallpapers',
             terminals: 'Terminals',
+            history: 'History',
         },
         randomAria: 'Open a random theme',
         randomTitle: 'Random theme (R)',

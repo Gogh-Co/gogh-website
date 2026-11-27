@@ -53,6 +53,8 @@ export default {
         wcsgDescription: 'Explora las relaciones de contraste WCAG y los datos de accesibilidad de cada esquema de color de Gogh, filtrables por temas claros y oscuros.',
         statsTitle: 'Estadísticas de temas para terminal - Gogh',
         statsDescription: 'Consulta estadísticas de todos los temas de Gogh: cobertura de autores y duplicados por nombre y por hash de colores.',
+        historyTitle: 'Historia del color en la terminal - Gogh',
+        historyDescription: 'Cómo funcionan los colores de la terminal y cómo evolucionaron: de los teletipos y los códigos de escape ANSI a los 256 colores, el truecolor y los temas modernos, con enlaces a las especificaciones.',
     },
 
     header: {
@@ -65,6 +67,7 @@ export default {
             stats: 'Estadísticas',
             wallpapers: 'Fondos',
             terminals: 'Terminales',
+            history: 'Historia',
         },
         randomAria: 'Abrir un tema al azar',
         randomTitle: 'Tema al azar (R)',

@@ -25,6 +25,7 @@
                     <NuxtLink to="/stats">{{ t('header.nav.stats') }}</NuxtLink>
                     <NuxtLink to="/wallpapers">{{ t('header.nav.wallpapers') }}</NuxtLink>
                     <NuxtLink to="/terminals">{{ t('header.nav.terminals') }}</NuxtLink>
+                    <NuxtLink to="/history">{{ t('header.nav.history') }}</NuxtLink>
                 </nav>
 
                 <nav class="gogh-footer__col" :aria-label="t('footer.project')">

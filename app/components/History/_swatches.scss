@@ -1,0 +1,50 @@
+@use '@/assets/sass/base' as *;
+
+// Square color buttons used by the history figures (SGR builder, contrast).
+.hswatch {
+    position: relative;
+    display: inline-flex;
+    align-items: flex-end;
+    justify-content: flex-start;
+    width: 38px;
+    height: 38px;
+    padding: 3px 4px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 0;
+    color: rgba(255, 255, 255, 0.85);
+    font-family: $font_mono;
+    font-size: 0.95rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: transform 0.35s $ease_out_expo, box-shadow 0.25s ease;
+
+    @media (pointer: coarse) {
+        width: $tap_target_min;
+        height: $tap_target_min;
+    }
+
+    span {
+        mix-blend-mode: difference;
+    }
+
+    &:hover {
+        transform: translateY(-2px);
+    }
+
+    &.is-on {
+        box-shadow: 0 0 0 2px var(--ink-2), 0 0 0 4px var(--cream);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--gogh-yellow);
+        outline-offset: 3px;
+    }
+
+    &--none {
+        align-items: center;
+        justify-content: center;
+        background: var(--ink);
+        color: var(--muted);
+        font-size: 1.6rem;
+    }
+}

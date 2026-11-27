@@ -1,0 +1,46 @@
+@use '@/assets/sass/base' as *;
+
+// Toggle chips used by the history figures' controls.
+.hchip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 34px;
+    padding: 6px 12px;
+    border: 1px solid var(--ink-line);
+    border-radius: 0;
+    background: transparent;
+    color: var(--muted);
+    font-family: $font_default;
+    font-size: 1.2rem;
+    font-weight: 500;
+    line-height: 1;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+
+    @media (pointer: coarse) {
+        min-height: $tap_target_min;
+    }
+
+    i {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+    }
+
+    &:hover {
+        border-color: rgba(255, 255, 255, 0.3);
+        color: var(--cream);
+    }
+
+    &.is-on {
+        border-color: var(--cream);
+        background: var(--cream);
+        color: var(--ink);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--gogh-yellow);
+        outline-offset: 2px;
+    }
+}
