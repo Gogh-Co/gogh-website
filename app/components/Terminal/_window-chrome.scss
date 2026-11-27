@@ -1,0 +1,66 @@
+// Window chrome shared by every window mock-up (gallery detailed terminal,
+// theme page previews, browser frame). Same look as the home ThemeShowcase:
+// a bar tinted from the theme, square buttons on the left in the theme's
+// red / yellow / green, and a centered title.
+//
+// The window root sets these custom properties from the theme:
+//   --win-bg, --win-fg, --win-red, --win-yellow, --win-green
+
+@mixin window-root {
+    border: 1px solid color-mix(in srgb, var(--win-fg) 16%, transparent);
+    border-radius: 0;
+}
+
+@mixin window-bar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0 16px;
+    border-bottom: 1px solid color-mix(in srgb, var(--win-fg) 10%, transparent);
+    border-radius: 0;
+    background: color-mix(in srgb, var(--win-bg) 88%, var(--win-fg));
+    color: var(--win-fg);
+}
+
+@mixin window-btns {
+    position: absolute;
+    top: 50%;
+    left: 16px;
+    display: inline-flex;
+    gap: 7px;
+    transform: translateY(-50%);
+    font-size: 0;
+}
+
+@mixin window-btn {
+    display: inline-block;
+    width: 11px;
+    height: 11px;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    background: var(--win-red);
+
+    &:nth-child(2) {
+        background: var(--win-yellow);
+    }
+
+    &:nth-child(3) {
+        background: var(--win-green);
+    }
+}
+
+@mixin window-title {
+    overflow: hidden;
+    max-width: 100%;
+    padding: 0 60px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 400;
+    line-height: 1.2;
+    opacity: 0.7;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}

@@ -1,5 +1,14 @@
 <template>
-    <div class="browser-frame">
+    <div
+        class="browser-frame"
+        :style="{
+            '--win-bg': theme.background,
+            '--win-fg': theme.foreground,
+            '--win-red': theme.color_02,
+            '--win-yellow': theme.color_04,
+            '--win-green': theme.color_03,
+        }"
+    >
         <div class="browser-frame__bar">
             <span class="browser-frame__dots" aria-hidden="true"><span></span><span></span><span></span></span>
             <span class="browser-frame__address">notes.example.dev/blog</span>
@@ -104,42 +113,43 @@ const vars = computed(() => {
 </script>
 
 <style lang="scss" scoped>
+@use './window-chrome' as chrome;
+
 .browser-frame {
+    @include chrome.window-root;
     margin: 0 0 30px;
     box-shadow: 2px 4px 20px rgba(27, 27, 27, 0.6);
 }
 
+// Same bar as the terminal windows, but the address field takes the
+// centre, so the buttons stay in the flow instead of floating.
 .browser-frame__bar {
-    display: flex;
-    align-items: center;
+    @include chrome.window-bar;
+    justify-content: flex-start;
     gap: 14px;
-    height: 34px;
-    padding: 0 12px;
-    border-radius: 6px 6px 0 0;
-    background: #d9d9d9;
 }
 
 .browser-frame__dots {
     display: inline-flex;
-    gap: 6px;
+    flex-shrink: 0;
+    gap: 7px;
+    font-size: 0;
 
     span {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: #868686;
+        @include chrome.window-btn;
     }
 }
 
 .browser-frame__address {
     flex: 1;
     overflow: hidden;
-    padding: 3px 12px;
-    border-radius: 12px;
-    background: #f2f2f2;
-    color: #424242;
-    font-family: Arial, sans-serif;
-    font-size: 12px;
+    padding: 4px 12px;
+    border: 1px solid color-mix(in srgb, var(--win-fg) 12%, transparent);
+    border-radius: 0;
+    background: var(--win-bg);
+    color: color-mix(in srgb, var(--win-fg) 75%, transparent);
+    font-family: 'Roboto', sans-serif;
+    font-size: 1.2rem;
     white-space: nowrap;
     text-overflow: ellipsis;
 }
@@ -147,9 +157,6 @@ const vars = computed(() => {
 .blog {
     container-type: inline-size;
     padding: 20px 24px 14px;
-    border: 1px solid #d9d9d9;
-    border-top: 0;
-    border-radius: 0 0 6px 6px;
     background: var(--bg);
     color: var(--fg);
     font-family: 'Roboto Mono', 'DejaVu Sans Mono', 'Ubuntu Mono', monospace;

@@ -5,16 +5,23 @@
             'terminal--picker': enableColorPicker,
             'terminal--flat': flat,
         }"
-        :style="{ '--terminal-picker-border': getContrastingBorderColor(theme.background) }"
+        :style="{
+            '--terminal-picker-border': getContrastingBorderColor(theme.background),
+            '--win-bg': theme.background,
+            '--win-fg': theme.foreground,
+            '--win-red': theme.color_02,
+            '--win-yellow': theme.color_04,
+            '--win-green': theme.color_03,
+        }"
     >
         <div class="bar">
-            <div class="bar__title">
-                {{ theme.name }}
+            <div class="bar__btns" aria-hidden="true">
+                <span class="btn--terminal"></span>
+                <span class="btn--terminal"></span>
+                <span class="btn--terminal"></span>
             </div>
-            <div class="bar__btns">
-                <span class="btn--terminal btn--min"></span>
-                <span class="btn--terminal btn--max"></span>
-                <span class="btn--terminal btn--close"></span>
+            <div class="bar__title">
+                {{ theme.name }} — zsh
             </div>
         </div>
         <div
