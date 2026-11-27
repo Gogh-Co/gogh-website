@@ -45,7 +45,7 @@ useHead({
         { name: 'msapplication-TileColor', content: '#121f2a' },
         { name: 'msapplication-TileImage', content: withBase('favicons/ms-icon-144x144.png') },
         // Matches the header so mobile browser chrome blends into it.
-        { name: 'theme-color', content: '#121f2a' },
+        { name: 'theme-color', content: '#121f2a', key: 'theme-color' },
     ],
     script: [
         {
