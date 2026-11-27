@@ -203,6 +203,8 @@ export default {
         detailed: 'Détaillé',
         sortLabel: 'Trier',
         sortAria: 'Trier les thèmes',
+        backgroundLabel: 'Fond',
+        backgroundAria: 'Fond de la page',
         shuffle: 'Mélanger',
         closeColorFilter: 'Fermer le filtre de couleur',
         colorFilterAria: 'Filtrer par couleur',

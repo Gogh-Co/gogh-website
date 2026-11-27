@@ -207,6 +207,8 @@ export default {
         detailed: 'Подробный',
         sortLabel: 'Сортировка',
         sortAria: 'Сортировка тем',
+        backgroundLabel: 'Фон',
+        backgroundAria: 'Фон страницы',
         shuffle: 'Перемешать',
         closeColorFilter: 'Закрыть фильтр по цвету',
         colorFilterAria: 'Фильтр по цвету',

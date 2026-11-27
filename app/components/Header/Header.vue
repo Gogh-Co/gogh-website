@@ -37,30 +37,38 @@
                     <button
                         type="button"
                         class="gogh-header__theme-toggle gogh-header__random"
-                        :class="{ 'is-loading': randomLoading }"
+                        :class="{ 'is-loading': randomLoading, 'is-pressed': randomKeyPressed }"
                         :aria-label="t('header.randomAria')"
                         aria-keyshortcuts="r"
-                        :title="t('header.randomTitle')"
                         :aria-busy="randomLoading"
                         :disabled="randomLoading"
                         @pointerenter="prefetchThemePaths"
                         @focus="prefetchThemePaths"
                         @click="openRandomTheme('button')"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2m2.5 3a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3m9 0a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3M12 10.5a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3M7.5 15a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3m9 0a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3"/></svg>
+                        <!-- Flat at rest; on hover it turns into a small 3D die
+                             that tumbles (front face = the flat icon's five). -->
+                        <span class="gogh-header__dice" aria-hidden="true">
+                            <svg class="gogh-header__dice-flat" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2m2.5 3a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3m9 0a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3M12 10.5a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3M7.5 15a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3m9 0a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3"/></svg>
+                            <span class="gogh-header__dice-stage">
+                                <span class="gogh-header__dice-cube">
+                                    <span v-for="face in 6" :key="face" class="gogh-header__dice-face" :class="`gogh-header__dice-face--${face}`"></span>
+                                </span>
+                            </span>
+                        </span>
                         <span class="gogh-header__theme-toggle-label">{{ t('header.random') }}</span>
-                    </button>
 
-                    <button
-                        type="button"
-                        class="gogh-header__theme-toggle"
-                        :aria-label="pageTheme === 'dark' ? t('header.toLight') : t('header.toDark')"
-                        :aria-pressed="pageTheme === 'dark'"
-                        @click="togglePageTheme"
-                    >
-                        <svg v-if="pageTheme === 'dark'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M12 7a5 5 0 1 0 0 10a5 5 0 0 0 0-10m0-5a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1m0 18a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1M3 11a1 1 0 0 1 0 2H2a1 1 0 1 1 0-2zm19 0a1 1 0 0 1 0 2h-1a1 1 0 1 1 0-2zM4.929 4.929a1 1 0 0 1 1.414 0l.707.707A1 1 0 1 1 5.636 7.05l-.707-.707a1 1 0 0 1 0-1.414m12.02 12.02a1 1 0 0 1 1.415 0l.707.707a1 1 0 1 1-1.414 1.414l-.707-.707a1 1 0 0 1 0-1.414M19.071 4.929a1 1 0 0 1 0 1.414l-.707.707a1 1 0 1 1-1.414-1.414l.707-.707a1 1 0 0 1 1.414 0M7.05 16.95a1 1 0 0 1 0 1.414l-.707.707a1 1 0 0 1-1.414-1.414l.707-.707a1 1 0 0 1 1.414 0"/></svg>
-                        <svg v-else xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M9.822 2.238a.75.75 0 0 1 .174.808a7.5 7.5 0 0 0 9.958 9.958a.75.75 0 0 1 .982.982A9.001 9.001 0 0 1 12 21a9 9 0 0 1-2.834-17.539a.75.75 0 0 1 .656.777"/></svg>
-                        <span class="gogh-header__theme-toggle-label">{{ pageTheme === 'dark' ? t('header.lightBackground') : t('header.darkBackground') }}</span>
+                        <!-- Keyboard hint hanging under the button, like the
+                             hero's scroll cue: a long hairline arrow from the
+                             R keycap up to the die, with a light running up
+                             it. The keycap presses in with R. -->
+                        <span class="gogh-header__random-hint" aria-hidden="true">
+                            <span class="gogh-header__random-arrow">
+                                <svg class="gogh-header__random-arrowhead" xmlns="http://www.w3.org/2000/svg" width="9" height="5" viewBox="0 0 9 5"><path fill="none" stroke="currentColor" stroke-width="1" d="M.5 4.5l4-4l4 4"/></svg>
+                                <span class="gogh-header__random-line"></span>
+                            </span>
+                            <kbd class="gogh-header__random-key">R</kbd>
+                        </span>
                     </button>
 
                     <LanguageSwitcher />
@@ -117,7 +125,9 @@ const { t } = useI18n();
 const mobileNavOpen = ref(false);
 const scrolled = ref(false);
 const hidden = ref(false);
-const { pageTheme, togglePageTheme, initPageTheme } = usePageTheme();
+// The light/dark toggle lives in the gallery's filters now; the header still
+// applies the saved choice on every page.
+const { initPageTheme } = usePageTheme();
 const { user, checkAuth } = useAuth();
 const { initFavorites, mergeAfterLogin, mergedThisSession } = useFavorites();
 
@@ -125,6 +135,8 @@ const logoBarColors = GOGH_LOGO_COLORS;
 
 const route = useRoute();
 const randomLoading = ref(false);
+const randomKeyPressed = ref(false);
+let randomKeyTimer = 0;
 
 // Already on the home page the link would be a no-op, so it scrolls back to
 // the top instead (after the mobile menu has released the page scroll).
@@ -177,6 +189,12 @@ function onRandomKeydown(event) {
         return;
     }
     event.preventDefault();
+    // Press the R keycap in the hint for a beat.
+    randomKeyPressed.value = true;
+    clearTimeout(randomKeyTimer);
+    randomKeyTimer = setTimeout(() => {
+        randomKeyPressed.value = false;
+    }, 220);
     openRandomTheme('key');
 }
 
@@ -281,6 +299,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
     window.removeEventListener('scroll', onScroll);
     window.removeEventListener('keydown', onRandomKeydown);
+    clearTimeout(randomKeyTimer);
     document.documentElement.classList.remove('gogh-menu-open');
 });
 </script>

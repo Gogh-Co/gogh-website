@@ -211,6 +211,8 @@ export default {
         detailed: 'Detailed',
         sortLabel: 'Sort',
         sortAria: 'Sort themes',
+        backgroundLabel: 'Background',
+        backgroundAria: 'Page background',
         shuffle: 'Shuffle',
         closeColorFilter: 'Close color filter',
         colorFilterAria: 'Filter by color',

@@ -1,3 +1,4 @@
+@use 'sass:list';
 @use '@/assets/sass/base' as *;
 
 $header_height: 72px;
@@ -303,30 +304,298 @@ $header_height: 72px;
     }
 }
 
-// The dice tumbles while the theme list loads.
+// Random theme: a flat die at rest that turns into a small 3D die on hover
+// and tumbles (faster while the theme list loads).
+$dice_size: 14px;
+$dice_pip: 1.15px;
+
+// One radial-gradient layer per pip, positions in % of the face.
+@function dice-pips($positions...) {
+    $layers: ();
+    @each $x, $y in $positions {
+        $layers: list.append($layers, radial-gradient(circle at $x $y, currentColor 0 $dice_pip, transparent $dice_pip + 0.4px), comma);
+    }
+    @return $layers;
+}
+
 .gogh-header__random {
+    position: relative;
+
     &:hover {
-        transform: rotate(90deg);
+        transform: none;
     }
 
     &:disabled {
         cursor: progress;
     }
+}
 
-    &.is-loading svg {
-        animation: gogh-header-dice-roll 0.6s $ease_out_expo infinite;
+.gogh-header__dice {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto;
+}
+
+.gogh-header__dice-flat {
+    display: block;
+    transition: opacity 0.2s ease, transform 0.35s $ease_out_expo;
+}
+
+// Perspective + fade live on this wrapper: opacity on the cube itself would
+// flatten its preserve-3d faces.
+.gogh-header__dice-stage {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    opacity: 0;
+    perspective: 90px;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.gogh-header__dice-cube {
+    position: relative;
+    width: $dice_size;
+    height: $dice_size;
+    transform-style: preserve-3d;
+}
+
+.gogh-header__dice-face {
+    position: absolute;
+    inset: 0;
+    border: 1.25px solid currentColor;
+    border-radius: 3px;
+    background-color: #0a0f14;
+    backface-visibility: hidden;
+
+    // Opposite faces add up to 7; the front one is the flat icon's five so
+    // the swap from flat to 3D is seamless.
+    &--5 {
+        background-image: dice-pips(25% 25%, 75% 25%, 50% 50%, 25% 75%, 75% 75%);
+        transform: translateZ($dice_size * 0.5);
     }
 
-    @media (max-width: 991.98px) {
-        &:hover {
-            transform: none;
+    &--2 {
+        background-image: dice-pips(25% 25%, 75% 75%);
+        transform: rotateY(180deg) translateZ($dice_size * 0.5);
+    }
+
+    &--3 {
+        background-image: dice-pips(25% 25%, 50% 50%, 75% 75%);
+        transform: rotateY(90deg) translateZ($dice_size * 0.5);
+    }
+
+    &--4 {
+        background-image: dice-pips(25% 25%, 75% 25%, 25% 75%, 75% 75%);
+        transform: rotateY(-90deg) translateZ($dice_size * 0.5);
+    }
+
+    &--1 {
+        background-image: dice-pips(50% 50%);
+        transform: rotateX(90deg) translateZ($dice_size * 0.5);
+    }
+
+    &--6 {
+        background-image: dice-pips(25% 25%, 75% 25%, 25% 50%, 75% 50%, 25% 75%, 75% 75%);
+        transform: rotateX(-90deg) translateZ($dice_size * 0.5);
+    }
+}
+
+// Keyboard hint hanging under the button, like the hero's scroll cue: a
+// hairline arrow from the R keycap up to the die, a light running up it. Shown over
+// the hero at the top of the page; once the bar turns to glass (scrolled, or
+// pages without a hero) it waits for hover so it doesn't sit over content.
+.gogh-header__random-hint {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 50%;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: var(--cream);
+    opacity: 0.7;
+    pointer-events: none;
+    transform: translateX(-50%);
+    transition: opacity 0.3s ease;
+
+    .gogh-header.is-scrolled & {
+        opacity: 0;
+    }
+}
+
+// Arrow from the keycap up to the die: a chevron tip on the hairline.
+.gogh-header__random-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.gogh-header__random-arrowhead {
+    display: block;
+    opacity: 0.45;
+    animation: gogh-header-hint-tip 2s $ease_in_out infinite;
+}
+
+.gogh-header__random-line {
+    position: relative;
+    width: 1px;
+    height: 44px;
+    // Meets the chevron's tip.
+    margin-top: -4.5px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.18);
+
+    // The light runs up, from the key to the die.
+    &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 40%;
+        background: currentColor;
+        animation: gogh-header-hint-line 2s $ease_in_out infinite;
+    }
+}
+
+@keyframes gogh-header-hint-line {
+    0% {
+        transform: translateY(250%);
+    }
+
+    100% {
+        transform: translateY(-100%);
+    }
+}
+
+// The tip lights up as the light reaches it.
+@keyframes gogh-header-hint-tip {
+    0%,
+    65% {
+        opacity: 0.45;
+    }
+
+    90% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.45;
+    }
+}
+
+// The hero's keycap: hairline border with a lip underneath, frosted.
+.gogh-header__random-key {
+    display: inline-grid;
+    place-items: center;
+    width: 26px;
+    height: 23px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    background: rgba(10, 15, 20, 0.55);
+    box-shadow: 0 2px 0 0 rgba(255, 255, 255, 0.22);
+    color: inherit;
+    font: 500 1.15rem/1 $font_mono;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    transition:
+        transform 0.18s $ease_out_expo,
+        box-shadow 0.18s $ease_out_expo,
+        border-color 0.3s ease,
+        color 0.3s ease;
+}
+
+// Desktop with a real pointer only: 3D on hover, the hint under the button.
+@media (min-width: 992px) and (hover: hover) and (pointer: fine) {
+    .gogh-header__random-hint {
+        display: inline-flex;
+    }
+
+    .gogh-header__random:hover,
+    .gogh-header__random.is-loading {
+        .gogh-header__dice-flat {
+            opacity: 0;
+            transform: scale(0.7);
         }
+
+        .gogh-header__dice-stage {
+            opacity: 1;
+        }
+
+        .gogh-header__dice-cube {
+            animation: gogh-header-dice-tumble 2.6s linear infinite;
+        }
+    }
+
+    .gogh-header__random.is-loading .gogh-header__dice-cube {
+        animation-duration: 0.7s;
+    }
+
+    .gogh-header__random:hover,
+    .gogh-header__random:focus-visible,
+    .gogh-header__random.is-pressed {
+        .gogh-header__random-hint {
+            opacity: 1;
+        }
+
+        .gogh-header__random-key {
+            border-color: rgba(255, 255, 255, 0.55);
+            box-shadow: 0 2px 0 0 color-mix(in srgb, var(--gogh-yellow) 70%, transparent);
+        }
+    }
+
+    .gogh-header__random:active,
+    .gogh-header__random.is-pressed {
+        .gogh-header__random-key {
+            transform: translateY(2px);
+            box-shadow: 0 0 0 0 transparent;
+            border-color: var(--gogh-yellow);
+            color: var(--gogh-yellow);
+        }
+    }
+}
+
+// Starts square-on (the five facing you) so it picks up right where the
+// flat icon left off, then rolls over two axes.
+@keyframes gogh-header-dice-tumble {
+    from {
+        transform: rotateX(0deg) rotateY(0deg);
+    }
+
+    to {
+        transform: rotateX(360deg) rotateY(720deg);
+    }
+}
+
+// Mobile: the flat icon spins while the theme list loads.
+@media (max-width: 991.98px) {
+    .gogh-header__random.is-loading .gogh-header__dice-flat {
+        animation: gogh-header-dice-roll 0.6s $ease_out_expo infinite;
     }
 }
 
 @keyframes gogh-header-dice-roll {
     to {
         transform: rotate(360deg);
+    }
+}
+
+// No tumbling: hovering just shows the die at rest, tilted to read as 3D.
+@media (prefers-reduced-motion: reduce) {
+    .gogh-header__random .gogh-header__dice-cube {
+        animation: none !important;
+        transform: rotateX(-24deg) rotateY(32deg);
+    }
+
+    .gogh-header__random-line::after,
+    .gogh-header__random-arrowhead {
+        animation: none;
     }
 }
 

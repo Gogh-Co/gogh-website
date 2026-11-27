@@ -178,6 +178,19 @@
             margin: 0;
         }
     }
+
+    // Sun / moon chips of the Background group: just the icon, centred on
+    // the text chips' line.
+    .filter-btn--icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        svg {
+            display: block;
+            flex: 0 0 auto;
+        }
+    }
 }
 
 .theme-search {

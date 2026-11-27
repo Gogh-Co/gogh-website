@@ -212,6 +212,8 @@ export default {
         detailed: 'مفصّل',
         sortLabel: 'ترتيب',
         sortAria: 'ترتيب السمات',
+        backgroundLabel: 'الخلفية',
+        backgroundAria: 'خلفية الصفحة',
         shuffle: 'خلط عشوائي',
         closeColorFilter: 'إغلاق مرشّح الألوان',
         colorFilterAria: 'تصفية حسب اللون',

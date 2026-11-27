@@ -201,6 +201,8 @@ export default {
         detailed: '詳細',
         sortLabel: '並べ替え',
         sortAria: 'テーマを並べ替える',
+        backgroundLabel: '背景',
+        backgroundAria: 'ページの背景',
         shuffle: 'シャッフル',
         closeColorFilter: '色フィルターを閉じる',
         colorFilterAria: '色で絞り込む',

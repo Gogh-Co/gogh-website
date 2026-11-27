@@ -201,6 +201,8 @@ export default {
         detailed: 'Detail',
         sortLabel: 'Urutkan',
         sortAria: 'Urutkan tema',
+        backgroundLabel: 'Latar',
+        backgroundAria: 'Latar halaman',
         shuffle: 'Acak',
         closeColorFilter: 'Tutup filter warna',
         colorFilterAria: 'Filter berdasarkan warna',

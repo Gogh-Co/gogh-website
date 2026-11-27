@@ -203,6 +203,8 @@ export default {
         detailed: 'Detallada',
         sortLabel: 'Ordenar',
         sortAria: 'Ordenar temas',
+        backgroundLabel: 'Fondo',
+        backgroundAria: 'Fondo de la página',
         shuffle: 'Mezclar',
         closeColorFilter: 'Cerrar el filtro de color',
         colorFilterAria: 'Filtrar por color',

@@ -201,6 +201,8 @@ export default {
         detailed: '详细',
         sortLabel: '排序',
         sortAria: '主题排序',
+        backgroundLabel: '背景',
+        backgroundAria: '页面背景',
         shuffle: '随机打乱',
         closeColorFilter: '关闭颜色筛选',
         colorFilterAria: '按颜色筛选',

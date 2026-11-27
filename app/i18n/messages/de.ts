@@ -203,6 +203,8 @@ export default {
         detailed: 'Detailliert',
         sortLabel: 'Sortieren',
         sortAria: 'Themes sortieren',
+        backgroundLabel: 'Hintergrund',
+        backgroundAria: 'Seitenhintergrund',
         shuffle: 'Mischen',
         closeColorFilter: 'Farbfilter schließen',
         colorFilterAria: 'Nach Farbe filtern',

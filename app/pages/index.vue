@@ -104,6 +104,35 @@
                                 </div>
                             </div>
 
+                            <!-- Page background behind the cards (was the header's sun/moon toggle). -->
+                            <div class="filters__group background-toggle" role="group" :aria-label="t('gallery.backgroundAria')">
+                                <span class="filters__group-label">{{ t('gallery.backgroundLabel') }}</span>
+
+                                <div class="filters__group-scroll">
+                                    <ButtonFilter
+                                        extra-class="filter-btn--icon"
+                                        :active="pageTheme === 'light'"
+                                        :aria-pressed="pageTheme === 'light'"
+                                        :aria-label="t('header.lightBackground')"
+                                        :title="t('header.lightBackground')"
+                                        @click="setPageTheme('light')"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 7a5 5 0 1 0 0 10a5 5 0 0 0 0-10m0-5a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1m0 18a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1M3 11a1 1 0 0 1 0 2H2a1 1 0 1 1 0-2zm19 0a1 1 0 0 1 0 2h-1a1 1 0 1 1 0-2zM4.929 4.929a1 1 0 0 1 1.414 0l.707.707A1 1 0 1 1 5.636 7.05l-.707-.707a1 1 0 0 1 0-1.414m12.02 12.02a1 1 0 0 1 1.415 0l.707.707a1 1 0 1 1-1.414 1.414l-.707-.707a1 1 0 0 1 0-1.414M19.071 4.929a1 1 0 0 1 0 1.414l-.707.707a1 1 0 1 1-1.414-1.414l.707-.707a1 1 0 0 1 1.414 0M7.05 16.95a1 1 0 0 1 0 1.414l-.707.707a1 1 0 0 1-1.414-1.414l.707-.707a1 1 0 0 1 1.414 0"/></svg>
+                                    </ButtonFilter>
+
+                                    <ButtonFilter
+                                        extra-class="filter-btn--icon"
+                                        :active="pageTheme === 'dark'"
+                                        :aria-pressed="pageTheme === 'dark'"
+                                        :aria-label="t('header.darkBackground')"
+                                        :title="t('header.darkBackground')"
+                                        @click="setPageTheme('dark')"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9.822 2.238a.75.75 0 0 1 .174.808a7.5 7.5 0 0 0 9.958 9.958a.75.75 0 0 1 .982.982A9.001 9.001 0 0 1 12 21a9 9 0 0 1-2.834-17.539a.75.75 0 0 1 .656.777"/></svg>
+                                    </ButtonFilter>
+                                </div>
+                            </div>
+
                             <div class="theme-search" role="search">
                                 <button
                                     v-if="searchQuery"
@@ -605,7 +634,7 @@ const viewMode = ref('compact');
 const sortMode = ref('alphabetical');
 const sortDirection = ref('asc');
 const shuffleOrder = ref(new Map());
-const { pageTheme } = usePageTheme();
+const { pageTheme, setPageTheme } = usePageTheme();
 const colorFilterField = ref('');
 const colorFilterValue = ref('');
 const colorFilterFieldMenuOpen = ref(false);
