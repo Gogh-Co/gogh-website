@@ -1,5 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
-import { themeSlug } from './app/utils/themeSlug'
+import { themePagePath } from './app/utils/themeSlug'
+import { getThemeDisplayName, normalizeThemes } from './app/utils/themeData'
 import { LOCALE_PENDING_STYLE, localeBootScript } from './app/i18n/config'
 
 const devPort = Number(
@@ -23,14 +24,11 @@ async function themePageRoutes(): Promise<string[]> {
       throw new Error(`HTTP ${response.status}`)
     }
 
-    const body = await response.json()
-    const themes: Array<Record<string, unknown>> = Array.isArray(body) ? body : (body?.data ?? [])
-
     return [...new Set(
-      themes
-        .map((theme) => String(theme?.name || theme?.theme || ''))
+      normalizeThemes(await response.json())
+        .map(getThemeDisplayName)
         .filter(Boolean)
-        .map((name) => `/${themeSlug(name)}/`),
+        .map(themePagePath),
     )]
   } catch (error) {
     console.warn(`[gogh] Could not list themes for prerendering: ${(error as Error).message}`)

@@ -1,4 +1,5 @@
-import { themeSlug } from '../../app/utils/themeSlug';
+import { getThemeDisplayName } from '../../app/utils/themeData';
+import { themePagePath } from '../../app/utils/themeSlug';
 
 // Prerendered at generate time (see nuxt.config.ts): the hand-maintained
 // static pages plus one entry per theme page, so search engines find all
@@ -39,9 +40,9 @@ export default defineEventHandler(async (event) => {
 
     const themePaths = [...new Set(
         themes
-            .map((theme) => (theme?.name || theme?.theme || '').toString())
+            .map(getThemeDisplayName)
             .filter(Boolean)
-            .map((name) => `/${themeSlug(name)}/`),
+            .map(themePagePath),
     )].sort();
 
     const entries = [

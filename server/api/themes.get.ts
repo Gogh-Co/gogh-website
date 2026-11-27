@@ -3,24 +3,9 @@ const githubThemeApiUrl =
 const githubThemeRawUrl =
     'https://raw.githubusercontent.com/Gogh-Co/Gogh/master/data/themes-min.json';
 
+import { normalizeThemes } from '../../app/utils/themeData';
+
 let cachedThemes: unknown[] = [];
-
-function normalizeThemes(remoteThemes: unknown) {
-    if (Array.isArray(remoteThemes)) {
-        return remoteThemes;
-    }
-
-    if (
-        remoteThemes &&
-        typeof remoteThemes === 'object' &&
-        'data' in remoteThemes &&
-        Array.isArray((remoteThemes as { data?: unknown }).data)
-    ) {
-        return (remoteThemes as { data: unknown[] }).data;
-    }
-
-    return [];
-}
 
 export default defineEventHandler(async () => {
     if (cachedThemes.length > 0) {
