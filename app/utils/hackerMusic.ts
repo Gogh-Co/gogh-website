@@ -77,6 +77,15 @@ export const HACKER_TRACKS: HackerTrack[] = [
         source: 'Keygen Music',
         url: 'https://keygenmusic.tk/#track=ROGUE/ROGUE%20-%20Jyotish%20Tools%201.8.4.0%20kg.xm',
     },
+    {
+        // Elation's take on Kenët & Rez's demoscene classic, from the
+        // Internet Archive's GDPS Editor 2.2 song archive.
+        src: '/music/elation-unreal-superhero-3.mp3',
+        title: 'Unreal Superhero 3 (Kenët & Rez)',
+        artist: 'Elation',
+        source: 'Internet Archive',
+        url: 'https://archive.org/details/gdps-2.2-song-891009',
+    },
 ];
 
 // A random track index, never the same as `previous` when there is a choice.

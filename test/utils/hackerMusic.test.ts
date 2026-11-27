@@ -5,7 +5,7 @@ import { HACKER_TRACKS, pickHackerTrack } from '@/utils/hackerMusic';
 
 describe('hackerMusic', () => {
     it('serves every track from the site itself', () => {
-        expect(HACKER_TRACKS).toHaveLength(8);
+        expect(HACKER_TRACKS).toHaveLength(9);
         for (const track of HACKER_TRACKS) {
             expect(track.src.startsWith('/music/')).toBe(true);
             expect(existsSync(join(process.cwd(), 'public', track.src)), track.src).toBe(true);
