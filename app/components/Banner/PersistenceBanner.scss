@@ -1,73 +1,186 @@
+@use '@/assets/sass/base' as *;
+
+// The banner uses the redesign's dark "ink" surface: cream type, a Gogh
+// yellow accent, square corners, and the shared expo-out motion curve.
 .persistence-banner {
     position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
     z-index: 900;
-    display: flex;
+    display: grid;
+    grid-template-columns: auto minmax(0, auto) auto auto;
+    grid-template-areas: 'icon copy signin dismiss';
     align-items: center;
-    gap: 10px;
-    max-width: 640px;
-    margin: 0 auto 12px;
-    padding: 8px 12px;
-    border-top: 2px solid color-mix(in srgb, var(--color-warning, #fd971f) 55%, transparent);
-    background-color: color-mix(in srgb, var(--site-background, #e7e7e7) 92%, var(--color-warning, #fd971f) 8%);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    column-gap: 12px;
+    // Shrink-wraps its content (no empty gap before the logo), centered
+    // between the fixed left/right insets.
+    width: fit-content;
+    max-width: 580px;
+    margin: 0 auto;
+    padding: 10px 8px 10px 14px;
+    border: 1px solid var(--ink-line);
+    border-left: 3px solid var(--gogh-yellow);
+    background-color: color-mix(in srgb, var(--ink-2) 94%, transparent);
+    backdrop-filter: blur(10px);
+    color: var(--cream);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.35);
+    cursor: pointer;
+    animation: persistence-banner-in 0.8s $ease_out_expo both;
 
-    // A bare `bottom: 0; margin: 0 auto 12px` doesn't actually center a
-    // fixed element horizontally on its own - pin both edges to the
-    // viewport and let max-width + inline padding constrain the visible bar.
-    @media (min-width: 680px) {
-        left: 50%;
-        right: auto;
-        transform: translateX(-50%);
-        border-radius: 0;
+    // Phones: same single row, just tighter to the screen edges.
+    @media (max-width: 599px) {
+        right: 8px;
+        bottom: 8px;
+        left: 8px;
+        padding: 12px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        animation: none;
     }
 }
 
-.persistence-banner__text {
-    flex: 1 1 auto;
+.persistence-banner__icon {
+    grid-area: icon;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background-color: color-mix(in srgb, var(--gogh-yellow) 14%, transparent);
+    color: var(--gogh-yellow);
+}
+
+.persistence-banner__copy {
+    grid-area: copy;
+    min-width: 0;
+}
+
+.persistence-banner__title {
     margin: 0;
-    font-size: 1.15rem;
+    color: var(--cream);
+    font-size: 1.35rem;
+    font-weight: 600;
+    line-height: 1.35;
+    letter-spacing: 0.1px;
+}
+
+.persistence-banner__text {
+    margin: 1px 0 0;
+    color: var(--muted);
+    font-size: 1.2rem;
     line-height: 1.4;
 }
 
 .persistence-banner__help {
-    flex: 0 0 auto;
+    display: inline;
+    padding: 0;
+    border: 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--cream) 30%, transparent);
+    background: none;
+    color: color-mix(in srgb, var(--cream) 85%, transparent);
+    font: inherit;
+    cursor: pointer;
+    transition: color 0.3s ease, border-color 0.3s ease;
+
+    &:hover {
+        border-color: var(--gogh-yellow);
+        color: var(--gogh-yellow);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--gogh-yellow);
+        outline-offset: 2px;
+    }
+}
+
+.persistence-banner__signin {
+    grid-area: signin;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 20px;
-    height: 20px;
+    width: 40px;
+    height: 40px;
     padding: 0;
-    border: 1px solid color-mix(in srgb, currentColor 45%, transparent);
+    border: 0;
     border-radius: 0;
-    background: none;
-    color: inherit;
-    font-size: 1.1rem;
-    font-weight: 700;
-    line-height: 1;
+    background-color: transparent;
+    color: #fff;
     cursor: pointer;
+    transition: transform 0.5s $ease_out_expo, background-color 0.3s ease, color 0.3s ease;
 
-    &:hover {
-        border-color: currentColor;
-        background-color: color-mix(in srgb, currentColor 8%, transparent);
+    svg {
+        flex: 0 0 auto;
+    }
+
+    // Lights up when the logo itself or anywhere on the banner is hovered.
+    &:hover:not(:disabled),
+    .persistence-banner:hover:not(.is-pending) & {
+        background-color: rgba(255, 255, 255, 0.06);
+        color: var(--gogh-yellow);
+        transform: translateY(-2px);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--gogh-yellow);
+        outline-offset: 3px;
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: wait;
+    }
+
+    @media (max-width: 599px) {
+        width: $tap_target_min;
+        height: $tap_target_min;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        &:hover:not(:disabled),
+        .persistence-banner:hover:not(.is-pending) & {
+            transform: none;
+        }
     }
 }
 
 .persistence-banner__dismiss {
-    flex: 0 0 auto;
-    padding: 0 2px;
+    grid-area: dismiss;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
     border: 0;
     background: none;
-    color: inherit;
-    font-size: 1.8rem;
-    line-height: 1;
-    opacity: 0.6;
+    color: var(--muted);
     cursor: pointer;
+    transition: color 0.3s ease, background-color 0.3s ease;
 
     &:hover {
+        background-color: rgba(255, 255, 255, 0.06);
+        color: var(--cream);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--gogh-yellow);
+        outline-offset: 2px;
+    }
+
+}
+
+@keyframes persistence-banner-in {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+
+    to {
         opacity: 1;
+        transform: none;
     }
 }
 
