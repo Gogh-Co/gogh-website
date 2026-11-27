@@ -98,7 +98,7 @@
                                         {{ sortMode === 'alphabetical' && sortDirection === 'desc' ? 'Z-A' : 'A-Z' }}
                                     </ButtonFilter>
 
-                                    <ButtonFilter :active="sortMode === 'random'" @click="setSortMode('random')">
+                                    <ButtonFilter :active="sortMode === 'random'" @click="shuffleThemes">
                                         Shuffle
                                     </ButtonFilter>
                                 </div>
@@ -960,6 +960,17 @@ function setSortMode(mode) {
         localStorage.setItem(SORT_DIRECTION_STORAGE_KEY, sortDirection.value);
     } catch {
         // Ignore storage failures (private browsing, disabled storage, etc.).
+    }
+}
+
+// A new shuffle starts the list over, so from the stuck toolbar (scrolled
+// down into the cards) go back up to the top of the gallery to see it.
+function shuffleThemes() {
+    const wasStuck = toolbarStuck.value;
+    setSortMode('random');
+
+    if (wasStuck) {
+        nextTick(scrollToGallery);
     }
 }
 

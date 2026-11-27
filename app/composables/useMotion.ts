@@ -92,21 +92,29 @@ export function scrollToTarget(target: string | HTMLElement | number, offset = -
         return;
     }
 
-    if (lenis) {
-        lenis.scrollTo(target, { offset, duration: 1.4 });
-        return;
-    }
-
+    // Resolve to an absolute offset from the real scroll position. Lenis would
+    // measure an element against its own cached position, which is stale when
+    // the page just got shorter (e.g. Shuffle trims the gallery back to its
+    // first batch and the browser clamps the scroll), and land short.
+    let top: number;
     if (typeof target === 'number') {
-        window.scrollTo({ top: target + offset, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+        top = target + offset;
+    } else {
+        const element = typeof target === 'string' ? document.querySelector(target) : target;
+        if (!element) {
+            return;
+        }
+        top = element.getBoundingClientRect().top + window.scrollY + offset;
+    }
+
+    if (lenis) {
+        // Start the animation from where the page really is.
+        lenis.reset();
+        lenis.scrollTo(top, { duration: 1.4 });
         return;
     }
 
-    const element = typeof target === 'string' ? document.querySelector(target) : target;
-    if (element) {
-        const top = element.getBoundingClientRect().top + window.scrollY + offset;
-        window.scrollTo({ top, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
-    }
+    window.scrollTo({ top, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
 }
 
 // Pauses the page's smooth scroll while an overlay is open (so the wheel
