@@ -5,21 +5,23 @@
         </ClientOnly>
         <div class="hero__veil" aria-hidden="true"></div>
         <ClientOnly>
-            <CodeReveal :theme="activeTheme" :glow-anchor="brand" :glow-colors="GOGH_LOGO_COLORS" />
+            <CodeReveal :theme="activeTheme" :glow-anchor="glowAnchor" :glow-colors="GOGH_LOGO_COLORS" :intro-anchor="title" :intro="reveal === 'ready'" />
         </ClientOnly>
         <div class="hero__grain" aria-hidden="true"></div>
 
         <div ref="content" class="hero__content">
             <h1 ref="title" class="hero__title">
                 <span class="hero__line hero__line--brand">
-                    <!-- The code layer (CodeReveal) hides the logo's color bar
-                         behind this word; the ink uncovers it. -->
-                    <span ref="brand" class="hero__brand">
+                    <span class="hero__brand">
                         <span class="hero__word" style="--i: 0">Gogh</span>
                     </span>
                 </span>
                 <span class="hero__line hero__line--sub">
-                    <em class="hero__word hero__word--accent" style="--i: 1">terminal schemes</em>
+                    <!-- The code layer (CodeReveal) hides the logo's color bar
+                         behind these words; the ink uncovers it. -->
+                    <span ref="glowAnchor" class="hero__glow-anchor">
+                        <em class="hero__word hero__word--accent" style="--i: 1">terminal schemes</em>
+                    </span>
                 </span>
                 <span class="visually-hidden"> Color schemes for GNOME Terminal, Alacritty, Kitty, iTerm2 and more.</span>
             </h1>
@@ -134,8 +136,8 @@ const stickyTop = ref(88);
 let stickyTicking = false;
 let headerObserver = null;
 
-// "Gogh": the code layer paints the logo glow behind it.
-const brand = ref(null);
+// "terminal schemes": the code layer paints the logo glow behind it.
+const glowAnchor = ref(null);
 
 // Visible once the hero button has scrolled up under the header, hidden
 // again as soon as the gallery (#themes) starts entering the screen.
@@ -195,18 +197,22 @@ watch(activeThemeName, () => {
     }
 });
 
-// "Gogh" and "terminal schemes" stay hidden until the page is interactive,
-// then fade in where they stand already written in bits and resolve into
-// text. (Rising the server-rendered words out of a clipping mask showed them
-// cut in pieces; now the motion and the binary effect never overlap.)
+// "Gogh" and "terminal schemes" stay hidden until the page is interactive.
+// Then a soft field of bits surfaces from the code wall around the title
+// (CodeReveal's intro) and, out of it, each word comes up already written in
+// bits: out of focus and faint, it sharpens in place, and once it is clear
+// its letters settle one by one, in no particular order. The install
+// command, the buttons and the footer follow, timed from that same moment.
 // If the page takes too long to become interactive, CSS shows the title as
 // plain text on its own; then there is no decode, so real text is never
 // swapped for bits.
 const title = ref(null);
-// 'waiting' | 'ready' (fade in + decode) | 'shown' (already visible as text)
+// 'waiting' | 'ready' (intro + decode) | 'shown' (already visible as text)
 const reveal = ref('waiting');
-const TITLE_DECODE = { delay: 200, duration: 900 };
-let unlockTimer = null;
+// Each word starts decoding once it is mostly in focus (see .is-ready CSS:
+// word N surfaces at 150ms + N * 180ms).
+const TITLE_DECODE = { delay: 700, stagger: 180, duration: 1100 };
+let releaseWords = null;
 
 function revealTitle() {
     if (title.value && parseFloat(getComputedStyle(title.value).opacity) > 0.01) {
@@ -214,17 +220,8 @@ function revealTitle() {
         return;
     }
     if (!prefersReducedMotion()) {
-        // Bits are wider than most letters: hold every word at its real
-        // width while it decodes so the title never reflows. Each word is
-        // decoded on its own (the heading also holds visually hidden text).
-        const words = [...(title.value?.querySelectorAll('.hero__word') ?? [])];
-        words.forEach((word, index) => {
-            word.style.width = `${word.getBoundingClientRect().width}px`;
-            binaryDecode(word, { delay: TITLE_DECODE.delay + index * 150, duration: TITLE_DECODE.duration });
-        });
-        unlockTimer = setTimeout(() => {
-            words.forEach((word) => word.style.removeProperty('width'));
-        }, TITLE_DECODE.delay + TITLE_DECODE.duration + words.length * 150 + 100);
+        // Word by word (the heading also holds visually hidden text).
+        releaseWords = decodeWords([...(title.value?.querySelectorAll('.hero__word') ?? [])], TITLE_DECODE);
     }
     reveal.value = 'ready';
 }
@@ -272,7 +269,7 @@ onBeforeUnmount(() => {
     window.removeEventListener('resize', onStickyScroll);
     headerObserver?.disconnect();
     clearInterval(rotateTimer);
-    clearTimeout(unlockTimer);
+    releaseWords?.();
     gsapContext?.revert();
 });
 </script>
@@ -347,10 +344,17 @@ onBeforeUnmount(() => {
     animation: title-show 0.6s ease 1.4s forwards;
 }
 
-// Interactive in time (.is-ready): a fade where it stands while the words
-// resolve from bits (see revealTitle). No rise.
+// Interactive in time (.is-ready): the title itself is shown, and each word
+// surfaces from the background on its own: out of focus, faint and a touch
+// large, it sharpens where it stands while still written in bits (see
+// revealTitle). No rise.
 .is-ready .hero__title {
-    animation: title-in 0.8s $ease_out_expo forwards;
+    animation: none;
+    opacity: 1;
+
+    .hero__word {
+        animation: word-surface 1.5s $ease_out_expo calc(150ms + var(--i) * 180ms) both;
+    }
 }
 
 // The safety net already showed it (.is-shown): keep it, no decode.
@@ -403,6 +407,11 @@ onBeforeUnmount(() => {
     }
 }
 
+// Sized to the words alone, so the glow behind them fits them.
+.hero__glow-anchor {
+    display: inline-block;
+}
+
 .hero__word--accent {
     font-style: normal;
     font-weight: 100;
@@ -425,7 +434,11 @@ onBeforeUnmount(() => {
     justify-content: center;
     text-align: left;
     opacity: 0;
-    animation: fade-up 1.1s $ease_out_expo 0.9s forwards;
+    animation: fade-up 1.1s $ease_out_expo 1.6s forwards;
+
+    .is-ready & {
+        animation: hero-rise 1.2s $ease_out_expo 1.05s forwards;
+    }
 
     :deep(.install-cmd) {
         display: flex;
@@ -445,7 +458,11 @@ onBeforeUnmount(() => {
     gap: 12px;
     margin-top: 24px;
     opacity: 0;
-    animation: fade-up 1.1s $ease_out_expo 1.05s forwards;
+    animation: fade-up 1.1s $ease_out_expo 1.7s forwards;
+
+    .is-ready & {
+        animation: hero-rise 1.2s $ease_out_expo 1.2s forwards;
+    }
 }
 
 .hero__cta,
@@ -513,7 +530,11 @@ onBeforeUnmount(() => {
     max-width: 1400px;
     margin: 0 auto;
     opacity: 0;
-    animation: fade-up 1.1s $ease_out_expo 1.3s forwards;
+    animation: fade-up 1.1s $ease_out_expo 1.9s forwards;
+
+    .is-ready & {
+        animation: hero-rise 1.4s $ease_out_expo 1.6s forwards;
+    }
 
     @include m768 {
         right: 48px;
@@ -753,15 +774,41 @@ onBeforeUnmount(() => {
     }
 }
 
-@keyframes title-in {
+@keyframes word-surface {
     from {
         opacity: 0;
-        transform: scale(0.97);
+        filter: blur(0.07em);
+        transform: scale(1.05);
+    }
+
+    35% {
+        opacity: 0.55;
+    }
+
+    to {
+        opacity: 1;
+        filter: blur(0);
+        transform: none;
+    }
+}
+
+// Same as fade-up, under another name so it restarts from the moment the
+// page is interactive instead of carrying on the safety-net timing.
+@keyframes hero-rise {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
     }
 
     to {
         opacity: 1;
         transform: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .is-ready .hero__title .hero__word {
+        animation: title-show 0.6s ease both;
     }
 }
 

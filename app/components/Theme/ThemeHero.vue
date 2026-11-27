@@ -4,6 +4,16 @@
             <StarryCanvas :palette="palette" :background="background" />
         </ClientOnly>
         <div class="theme-hero__veil" aria-hidden="true"></div>
+        <!-- Same intro as the home hero: bits surface from here around the
+             name. No ink under the pointer on theme pages. -->
+        <ClientOnly>
+            <CodeReveal
+                :theme="theme"
+                :interactive="false"
+                :intro-anchor="title"
+                :intro="reveal === 'ready'"
+            />
+        </ClientOnly>
         <div class="theme-hero__grain" aria-hidden="true"></div>
 
         <div ref="content" class="theme-hero__content">
@@ -82,6 +92,7 @@
 
 <script setup>
 import StarryCanvas from '@/components/Home/StarryCanvas.vue';
+import CodeReveal from '@/components/Home/CodeReveal.vue';
 import InstallCommand from '@/components/Home/InstallCommand.vue';
 import ThemeShareButtons from '@/components/Terminal/ThemeShareButtons.vue';
 
@@ -153,16 +164,20 @@ const heroStyle = computed(() => ({
     '--hero-cursor': safeHex(props.theme.cursor) || foreground.value,
 }));
 
-// The name and the meta line stay hidden until the page is interactive, then
-// fade in where they stand already written in bits and resolve into text.
-// (Revealing the server-rendered name first and swapping it for bits later
-// played two animations on top of each other.) If the page takes too long
-// to become interactive, CSS shows them as plain text on their own; then
-// there is no decode, so real text is never swapped for bits.
-const TITLE_DECODE = { delay: 200, duration: 900 };
-// 'waiting' | 'ready' (fade in + decode) | 'shown' (already visible as text)
+// The same reveal as the home hero. Everything stays hidden until the page
+// is interactive. Then a soft field of bits surfaces from the background
+// around the name (CodeReveal's intro) and, out of it, each word comes up
+// already written in bits: out of focus and faint, it sharpens in place and
+// its letters settle one by one. The meta line decodes alongside; the
+// swatches, the install command, the share row and the footer follow, timed
+// from that same moment. If the page takes too long to become interactive,
+// CSS shows it all as plain text on its own; then there is no decode, so
+// real text is never swapped for bits.
+// Word N surfaces at 150ms + N * 180ms (see .is-ready CSS).
+const TITLE_DECODE = { delay: 700, stagger: 180, duration: 1100 };
+// 'waiting' | 'ready' (intro + decode) | 'shown' (already visible as text)
 const reveal = ref('waiting');
-let unlockTimer = null;
+let releaseWords = null;
 
 onMounted(() => {
     const reduced = prefersReducedMotion();
@@ -170,17 +185,8 @@ onMounted(() => {
     if (alreadyShown) {
         reveal.value = 'shown';
     } else if (!reduced) {
-        // Bits are wider than most letters: hold every word at its real
-        // width while it decodes so the title never reflows.
-        const words = [...(title.value?.querySelectorAll('.theme-hero__word') ?? [])];
-        words.forEach((word) => {
-            word.style.width = `${word.getBoundingClientRect().width}px`;
-        });
-        binaryDecode(title.value, TITLE_DECODE);
-        binaryDecode(eyebrow.value, { delay: 120, duration: 700 });
-        unlockTimer = setTimeout(() => {
-            words.forEach((word) => word.style.removeProperty('width'));
-        }, TITLE_DECODE.delay + TITLE_DECODE.duration + 100);
+        releaseWords = decodeWords([...(title.value?.querySelectorAll('.theme-hero__word') ?? [])], TITLE_DECODE);
+        binaryDecode(eyebrow.value, { delay: 450, duration: 900, order: 'random', rate: 70 });
     }
     if (!alreadyShown) {
         reveal.value = 'ready';
@@ -208,7 +214,7 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-    clearTimeout(unlockTimer);
+    releaseWords?.();
     gsapContext?.revert();
 });
 </script>
@@ -284,7 +290,11 @@ onBeforeUnmount(() => {
     letter-spacing: 0.16em;
     text-transform: uppercase;
     opacity: 0;
-    animation: fade-up 1s $ease_out_expo 0.1s forwards;
+    animation: fade-up 1s $ease_out_expo 1.4s forwards;
+
+    .is-ready & {
+        animation: hero-rise 1.1s $ease_out_expo 0.05s forwards;
+    }
 }
 
 .theme-hero__crumb-link {
@@ -354,22 +364,29 @@ onBeforeUnmount(() => {
     opacity: 0;
 }
 
-// Name and meta line: hidden until the page is interactive (.is-ready), then
-// a fade where they stand while the bits resolve (see onMounted). No rise:
-// the motion and the binary effect never overlap.
+// Name and meta line: hidden until the page is interactive (.is-ready).
 .theme-hero__eyebrow,
 .theme-hero__title {
     // Safety net: if the page is not interactive by then, show them as text.
     animation: fade-in 0.6s ease 1.4s forwards;
 }
 
+// Interactive in time: the meta line fades in while it decodes, and each
+// word of the name surfaces from the background on its own: out of focus,
+// faint and a touch large, it sharpens where it stands while still written
+// in bits (see onMounted). No rise.
 .is-ready {
     .theme-hero__eyebrow {
-        animation: fade-in 0.6s ease 0.05s forwards;
+        animation: fade-in 0.9s ease 0.1s forwards;
     }
 
     .theme-hero__title {
-        animation: title-in 0.8s $ease_out_expo forwards;
+        animation: none;
+        opacity: 1;
+    }
+
+    .theme-hero__word {
+        animation: word-surface 1.5s $ease_out_expo calc(150ms + var(--i) * 180ms) both;
     }
 }
 
@@ -422,7 +439,14 @@ onBeforeUnmount(() => {
     outline-offset: -1px;
     transform-origin: bottom;
     animation: swatch-in 0.9s $ease_out_expo backwards;
-    animation-delay: calc(0.7s + var(--i) * 40ms);
+    animation-delay: calc(1.6s + var(--i) * 40ms);
+
+    // Timed from the moment the page is interactive (another keyframes name,
+    // so the animation restarts instead of keeping the safety-net clock).
+    .is-ready & {
+        animation-name: swatch-rise;
+        animation-delay: calc(0.95s + var(--i) * 40ms);
+    }
 
     &:nth-child(n + 9) {
         height: 12px;
@@ -436,7 +460,11 @@ onBeforeUnmount(() => {
     width: 100%;
     text-align: left;
     opacity: 0;
-    animation: fade-up 1.1s $ease_out_expo 1.1s forwards;
+    animation: fade-up 1.1s $ease_out_expo 1.7s forwards;
+
+    .is-ready & {
+        animation: hero-rise 1.2s $ease_out_expo 1.15s forwards;
+    }
 
     :deep(.install-cmd) {
         display: flex;
@@ -478,7 +506,11 @@ onBeforeUnmount(() => {
 .theme-hero__share {
     margin-top: 22px;
     opacity: 0;
-    animation: fade-up 1.1s $ease_out_expo 1.25s forwards;
+    animation: fade-up 1.1s $ease_out_expo 1.8s forwards;
+
+    .is-ready & {
+        animation: hero-rise 1.2s $ease_out_expo 1.3s forwards;
+    }
 
     :deep(.share) {
         margin: 0;
@@ -506,7 +538,11 @@ onBeforeUnmount(() => {
     letter-spacing: 0.08em;
     text-transform: uppercase;
     opacity: 0;
-    animation: fade-up 1.1s $ease_out_expo 1.4s forwards;
+    animation: fade-up 1.1s $ease_out_expo 1.9s forwards;
+
+    .is-ready & {
+        animation: hero-rise 1.4s $ease_out_expo 1.6s forwards;
+    }
 
     @include m768 {
         right: 48px;
@@ -587,10 +623,30 @@ onBeforeUnmount(() => {
     }
 }
 
-@keyframes title-in {
+@keyframes word-surface {
     from {
         opacity: 0;
-        transform: scale(0.97);
+        filter: blur(0.07em);
+        transform: scale(1.05);
+    }
+
+    35% {
+        opacity: 0.55;
+    }
+
+    to {
+        opacity: 1;
+        filter: blur(0);
+        transform: none;
+    }
+}
+
+// fade-up and swatch-in under other names, so they restart from the moment
+// the page is interactive instead of carrying on the safety-net timing.
+@keyframes hero-rise {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
     }
 
     to {
@@ -608,6 +664,24 @@ onBeforeUnmount(() => {
     to {
         opacity: 1;
         transform: scaleY(1);
+    }
+}
+
+@keyframes swatch-rise {
+    from {
+        opacity: 0;
+        transform: scaleY(0);
+    }
+
+    to {
+        opacity: 1;
+        transform: scaleY(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .is-ready .theme-hero__word {
+        animation: fade-in 0.6s ease both;
     }
 }
 

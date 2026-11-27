@@ -14,6 +14,9 @@
 // and letting go lets the paint flow back. Behind the wordmark, the hidden
 // layer also holds the logo's color bar, softly blurred: the ink finds it
 // wherever it passes over "Gogh".
+// On load (the intro), a soft field of bits surfaces from the background
+// around the title and gathers in toward it while the title's own bits come
+// up, then dissolves: the wordmark seems to be written out of the wall.
 
 const props = defineProps({
     // A Gogh theme: name, background, foreground, color_01 .. color_16.
@@ -31,7 +34,28 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    // Play the intro once, on mount, gathered around this element (the
+    // title).
+    intro: {
+        type: Boolean,
+        default: false,
+    },
+    introAnchor: {
+        type: Object,
+        default: null,
+    },
+    // false: no ink under the pointer, only the intro (theme pages).
+    interactive: {
+        type: Boolean,
+        default: true,
+    },
 });
+
+// Intro: how long it lasts, when it peaks and how bright the bits get.
+const INTRO_TIME = 2600;
+const INTRO_IN = 0.32;
+const INTRO_OUT = 0.5;
+const INTRO_ALPHA = 0.45;
 
 const GLOW_ALPHA = 0.6;
 
@@ -115,6 +139,14 @@ let lastTime = 0;
 let lastFlip = 0;
 let lastHot = 0;
 let hotCells = [];
+
+// Intro: its own rows of bits (the wall's rhythm, no code), on a layer of
+// their own so they can be faded through a soft mask.
+let introStart = -1;
+let introRows = [];
+let introLayer = null;
+let introCtx = null;
+let introFlip = 0;
 
 /* ---------------------------------------------------------------- colors */
 
@@ -354,6 +386,8 @@ function buildGrid() {
 
     grid = { cols, rows, charW, lineH, size, cells };
 
+    introRows = Array.from({ length: rows }, (_, r) => Array.from({ length: cols }, (_, c) => ((c + r * 3) % 9 === 8 ? ' ' : bit())));
+
     // A few bits glow in the theme's bright red, like embers.
     hotCells = [];
     const hotCount = Math.max(4, Math.round(cols * rows * 0.003));
@@ -590,6 +624,101 @@ function paintMask(box, now) {
     return { x0, y0, w, h };
 }
 
+/* ----------------------------------------------------------------- intro */
+
+const smooth = (t) => t * t * (3 - 2 * t);
+
+// 0..1 while the intro plays; -1 once it is over (or never started).
+function introProgress(now) {
+    if (introStart < 0) return -1;
+    if (!introStart) introStart = now;
+    const t = (now - introStart) / INTRO_TIME;
+    if (t >= 1) {
+        introStart = -1;
+        return -1;
+    }
+    return t;
+}
+
+// Where the field gathers: around the title.
+function introFocus() {
+    const anchor = props.introAnchor || props.glowAnchor;
+    const rect = anchor?.getBoundingClientRect?.();
+    if (!rect?.width || !canvas.value) return { x: width / 2, y: height * 0.42, rx: width * 0.4, ry: height * 0.3 };
+    const host = canvas.value.getBoundingClientRect();
+    const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+    return {
+        x: rect.left - host.left + rect.width / 2,
+        y: rect.top - host.top + rect.height / 2,
+        rx: clamp(rect.width * 0.55, Math.min(260, width * 0.45), width * 0.48),
+        ry: clamp(rect.height * 0.85, 140, height * 0.4),
+    };
+}
+
+// Drawn under whatever the ink shows (destination-over).
+function paintIntro(t, now) {
+    if (!grid || !introRows.length) return;
+    const { cols, rows, charW, lineH, size } = grid;
+    const fadeIn = smooth(Math.min(1, t / INTRO_IN));
+    const fadeOut = 1 - smooth(Math.max(0, (t - INTRO_OUT) / (1 - INTRO_OUT)));
+    const alpha = INTRO_ALPHA * fadeIn * fadeOut;
+    if (alpha <= 0.002) return;
+
+    const focus = introFocus();
+    // Gathers in: wide and loose at first, tight around the title at the end.
+    const gather = 1.45 - 0.7 * (1 - Math.pow(1 - t, 3));
+    const rx = focus.rx * gather;
+    const ry = focus.ry * gather;
+
+    // The bits keep flipping, a little slower than the wall under the ink.
+    if (now - introFlip > 80) {
+        introFlip = now;
+        const r0 = Math.max(0, Math.floor((focus.y - ry) / lineH));
+        const r1 = Math.min(rows - 1, Math.ceil((focus.y + ry) / lineH));
+        const c0 = Math.max(0, Math.floor((focus.x - rx) / charW));
+        const c1 = Math.min(cols - 1, Math.ceil((focus.x + rx) / charW));
+        for (let n = 0; n < 90; n += 1) {
+            const row = introRows[r0 + Math.floor(Math.random() * (r1 - r0 + 1))];
+            const c = c0 + Math.floor(Math.random() * (c1 - c0 + 1));
+            if (row && row[c] !== ' ') row[c] = bit();
+        }
+    }
+
+    const ic = introCtx;
+    ic.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ic.globalCompositeOperation = 'source-over';
+    ic.clearRect(0, 0, width, height);
+    ic.font = `500 ${size}px ${CODE_FONT}`;
+    ic.textBaseline = 'middle';
+    ic.textAlign = 'left';
+    ic.fillStyle = colors.fg;
+    const top = Math.max(0, Math.floor((focus.y - ry) / lineH));
+    const bottom = Math.min(rows - 1, Math.ceil((focus.y + ry) / lineH));
+    for (let r = top; r <= bottom; r += 1) {
+        ic.fillText(introRows[r].join(''), 0, r * lineH + lineH / 2);
+    }
+
+    // A soft ellipse: no edge anywhere, the bits just thin out.
+    ic.globalCompositeOperation = 'destination-in';
+    ic.translate(focus.x, focus.y);
+    ic.scale(1, ry / rx);
+    const mask = ic.createRadialGradient(0, 0, 0, 0, 0, rx);
+    mask.addColorStop(0, 'rgba(0, 0, 0, 1)');
+    mask.addColorStop(0.45, 'rgba(0, 0, 0, 0.7)');
+    mask.addColorStop(0.75, 'rgba(0, 0, 0, 0.22)');
+    mask.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ic.fillStyle = mask;
+    ic.fillRect(-rx, -rx, rx * 2, rx * 2);
+    ic.setTransform(1, 0, 0, 1, 0, 0);
+    ic.globalCompositeOperation = 'source-over';
+
+    ctx.globalCompositeOperation = 'destination-over';
+    ctx.globalAlpha = alpha;
+    ctx.drawImage(introLayer, 0, 0, width * dpr, height * dpr, 0, 0, width, height);
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+}
+
 /* ------------------------------------------------------------------ loop */
 
 function blobBox() {
@@ -718,8 +847,11 @@ function step(now) {
     }
     head.r = saved;
 
+    const intro = introProgress(now);
+    if (intro >= 0) paintIntro(intro, now);
+
     // Nothing left to show: sleep until the pointer comes back.
-    const idle = target === 0 && hold === 0 && head.r < 0.5 && !pulses.length;
+    const idle = intro < 0 && target === 0 && hold === 0 && head.r < 0.5 && !pulses.length;
     if (idle) {
         head.r = 0;
         trail.forEach((drop) => {
@@ -908,6 +1040,8 @@ function resize() {
     canvas.value.height = Math.round(height * dpr);
     text.width = Math.round(width * dpr);
     text.height = Math.round(height * dpr);
+    introLayer.width = text.width;
+    introLayer.height = text.height;
     radius = Math.max(90, Math.min(220, Math.min(width, height) * 0.2));
     sizeMask();
     rebuild();
@@ -925,7 +1059,11 @@ onMounted(() => {
     inkCtx = ink.getContext('2d');
     rim = document.createElement('canvas');
     rimCtx = rim.getContext('2d');
+    introLayer = document.createElement('canvas');
+    introCtx = introLayer.getContext('2d');
     reduced = prefersReducedMotion();
+    // 0: starts on its first frame.
+    if (props.intro && !reduced) introStart = 0;
     buildNoise();
     shapeLobes(0, 0);
     resize();
@@ -936,11 +1074,12 @@ onMounted(() => {
     resizeObserver.observe(canvas.value);
     visibilityObserver = new IntersectionObserver(([entry]) => {
         onScreen = entry.isIntersecting;
-        if (onScreen && pointer.inside) play();
+        if (onScreen && (pointer.inside || introStart >= 0)) play();
         else if (!onScreen) pause();
     });
     visibilityObserver.observe(canvas.value);
 
+    if (!props.interactive) return;
     host = canvas.value.parentElement;
     host?.addEventListener('pointermove', onPointerMove, { passive: true });
     host?.addEventListener('pointerdown', onPointerDown, { passive: true });
