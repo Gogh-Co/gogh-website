@@ -1,7 +1,8 @@
 // Background music for the live session's hacker mode, served from
 // public/music so the page doesn't depend on a third party. One track is
 // picked at random each time the mode starts, and another follows when it
-// ends. The Pixabay tracks fall under the Pixabay Content License; Fesliyan
+// ends. The keygen tracks are scene modules rendered to MP3, credited to
+// their composers. The Pixabay tracks fall under the Pixabay Content License; Fesliyan
 // Studios asks free users to credit "FesliyanStudios.com Background Music"
 // with a link, which the page shows while their track plays.
 
@@ -48,6 +49,33 @@ export const HACKER_TRACKS: HackerTrack[] = [
         artist: 'Retro-BGM-Chan',
         source: 'Pixabay',
         url: 'https://pixabay.com/music/electro-server-room-%E3%81%95%E3%83%BC%E3%81%B0%E3%83%BC%E3%82%8B%E3%83%BC%E3%82%80-523662/',
+    },
+    {
+        // A Fasttracker II module from a HOODLUM keygen, rendered to MP3
+        // with libopenmpt (the module credits "estrayk ^ paradox").
+        src: '/music/hoodlum-coldfea-intro.mp3',
+        title: 'ColdFea intro',
+        artist: 'estrayk ^ Paradox (HOODLUM)',
+        source: 'Keygen Music',
+        url: 'https://keygenmusic.tk/#track=HOODLUM/HOODLUM%20-%20ColdFea%20intro.xm',
+    },
+    {
+        // The 0BiT Fax Spider 2.1 keygen's module, "Caramel Condition" by
+        // ko0x (2010), rendered to MP3 with libopenmpt.
+        src: '/music/0bit-fax-spider-kg.mp3',
+        title: 'Caramel Condition (Fax Spider 2.1 kg)',
+        artist: 'ko0x (0BiT)',
+        source: 'Keygen Music',
+        url: 'https://keygenmusic.tk/#track=!Others/0BiT%20-%20Fax%20Spider%202.1%20kg.xm',
+    },
+    {
+        // The ROGUE Jyotish Tools 1.8.4.0 keygen's module, "water" by
+        // sP0ts!/dYnAmiTe, rendered to MP3 with libopenmpt.
+        src: '/music/rogue-jyotish-tools-kg.mp3',
+        title: 'water (Jyotish Tools 1.8.4.0 kg)',
+        artist: 'sP0ts! / dYnAmiTe (ROGUE)',
+        source: 'Keygen Music',
+        url: 'https://keygenmusic.tk/#track=ROGUE/ROGUE%20-%20Jyotish%20Tools%201.8.4.0%20kg.xm',
     },
 ];
 
