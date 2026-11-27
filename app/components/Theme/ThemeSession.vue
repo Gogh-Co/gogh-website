@@ -64,7 +64,29 @@
                     <span ref="timeEl" class="session__time" aria-hidden="true">{{ formatClock(posterTime) }} / {{ formatClock(session.total) }}</span>
 
                     <!-- Download the loop as a file; a running export can be cancelled. -->
-                    <div class="session__downloads" role="group" aria-label="Download the session">
+                    <div class="session__downloads" role="group" aria-label="Save the session">
+                        <!-- Same favorites as the gallery's star (this browser, or the
+                             GitHub account when signed in). -->
+                        <button
+                            type="button"
+                            class="session__download session__favorite"
+                            :class="{ 'is-active': favorite }"
+                            :aria-pressed="favorite"
+                            :title="favorite ? `Remove ${themeName} from favorites` : `Add ${themeName} to favorites`"
+                            :aria-label="favorite ? `Remove ${themeName} from favorites` : `Add ${themeName} to favorites`"
+                            @click="onToggleFavorite"
+                        >
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path
+                                    v-if="favorite"
+                                    d="m12 17.27l4.15 2.51c.76.46 1.69-.22 1.49-1.08l-1.1-4.72l3.67-3.18c.67-.58.31-1.68-.57-1.75l-4.83-.41l-1.89-4.46c-.34-.81-1.5-.81-1.84 0L9.19 8.63l-4.83.41c-.88.07-1.24 1.17-.57 1.75l3.67 3.18l-1.1 4.72c-.2.86.73 1.54 1.49 1.08z"
+                                />
+                                <path
+                                    v-else
+                                    d="M12 15.4l-3.76 2.27l1-4.28l-3.32-2.88l4.38-.38L12 6.1l1.71 4.04l4.38.38l-3.32 2.88l1 4.28zm0-12.4L9.19 8.63l-4.83.41c-.88.07-1.24 1.17-.57 1.75l3.67 3.18l-1.1 4.72c-.2.86.73 1.54 1.49 1.08L12 17.27l4.15 2.51c.76.46 1.69-.22 1.49-1.08l-1.1-4.72l3.67-3.18c.67-.58.32-1.68-.56-1.75l-4.83-.41z"
+                                />
+                            </svg>
+                        </button>
                         <button
                             v-for="format in downloadFormats"
                             :key="format.id"
@@ -233,6 +255,25 @@ const downloadFormats = computed(() => [
     { id: 'gif', label: 'GIF', title: `Download the session as a GIF in ${props.themeName}` },
     ...(videoSupported.value ? [{ id: 'video', label: 'MP4', title: `Download the session as an MP4 video in ${props.themeName}` }] : []),
 ]);
+
+const { user } = useAuth();
+const { isFavorite, toggleFavorite } = useFavorites();
+const favorite = computed(() => isFavorite(props.themeName));
+
+// The gallery's sign-in banner would sit under the install dock here, so
+// the hint goes in the session's own status line instead.
+function onToggleFavorite() {
+    toggleFavorite(props.themeName, user.value?.id ?? null);
+    const added = favorite.value;
+    trackEvent('Favorite', { action: added ? 'add' : 'remove', theme: props.themeName, place: 'session' });
+    if (!added) {
+        announce(`Removed ${props.themeName} from favorites.`);
+    } else if (user.value) {
+        announce(`Added ${props.themeName} to your favorites.`);
+    } else {
+        announce(`Added ${props.themeName} to favorites in this browser. Sign in with GitHub to keep them.`);
+    }
+}
 
 function announce(message) {
     exportStatus.value = message;
@@ -695,6 +736,24 @@ $slots: '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', 
     &:focus-visible {
         outline: 2px solid var(--cream);
         outline-offset: 2px;
+    }
+}
+
+// Square, icon only; the star fills and turns amber like the gallery's.
+.session__favorite {
+    justify-content: center;
+    min-width: 30px;
+    width: 30px;
+    padding: 0;
+
+    svg {
+        width: 15px;
+        height: 15px;
+    }
+
+    &.is-active {
+        border-color: color-mix(in srgb, var(--color-warning, #fd971f) 55%, transparent);
+        color: var(--color-warning, #fd971f);
     }
 }
 

@@ -10,7 +10,8 @@
 //   Session        action, format,    live session: play / pause / chapter jump /
 //                  chapter            export-start / export-cancel / export-error
 //   Share          network            a share button (or "copy-link")
-//   Favorite       action, theme      starred / unstarred a theme in the gallery
+//   Favorite       action, theme,     starred / unstarred a theme (gallery card or
+//                  place              the live session's star)
 //   Random Theme   via                dice button or the R key
 //   Search         query, results     gallery search, sent once typing settles
 //   Gallery Filter filter, field      a gallery filter button / colour filter

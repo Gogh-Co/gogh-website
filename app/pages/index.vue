@@ -417,7 +417,7 @@ function dismissFavoritesBanner() {
 function onToggleFavorite(theme) {
     const name = getThemeName(theme);
     toggleFavorite(name, user.value?.id ?? null);
-    trackEvent('Favorite', { action: isFavorite(name) ? 'add' : 'remove', theme: name });
+    trackEvent('Favorite', { action: isFavorite(name) ? 'add' : 'remove', theme: name, place: 'gallery' });
     if (!user.value && !isFavoritesBannerDismissed()) {
         showFavoritesBanner.value = true;
     }
