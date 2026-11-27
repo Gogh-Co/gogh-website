@@ -907,6 +907,17 @@ html:has(.gogh-header.is-hidden) .gallery__toolbar {
         &::-webkit-scrollbar {
             display: none;
         }
+
+        // Centered like the unstuck toolbar. Auto margins instead of
+        // justify-content: center, which would clip the start of the row
+        // (unreachable by scrolling) once it overflows on narrow screens.
+        > :first-child {
+            margin-left: auto;
+        }
+
+        > :last-child {
+            margin-right: auto;
+        }
     }
 
     .filters__group {
