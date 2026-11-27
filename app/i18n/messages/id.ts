@@ -121,7 +121,7 @@ export default {
 
     manifesto: {
         eyebrow: 'Mengapa warna penting',
-        copy: 'Kamu membaca terminal berjam-jam setiap hari. [Enam] [belas] [warna] menentukan tampilan setiap prompt, log, dan diff. Gogh adalah [pustaka] [pilihan] berisi palet, dan memasang salah satunya cukup dengan [satu] [perintah].',
+        copy: 'Kamu membaca terminal berjam-jam setiap hari. [Enam] [belas] [warna] menentukan tampilan setiap prompt, log, dan diff. Gogh adalah [kompilasi] skema warna, dan memasang salah satunya cukup dengan [satu] [perintah].',
     },
 
     showcase: {

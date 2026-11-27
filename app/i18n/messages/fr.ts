@@ -122,7 +122,7 @@ export default {
 
     manifesto: {
         eyebrow: 'Pourquoi la couleur compte',
-        copy: 'Vous lisez votre terminal des heures par jour. [Seize] [couleurs] décident de l’allure de chaque invite, log et diff. Gogh est une [bibliothèque] [choisie] de palettes, et installer n’importe laquelle tient en [une] [commande].',
+        copy: 'Vous lisez votre terminal des heures par jour. [Seize] [couleurs] décident de l’allure de chaque invite, log et diff. Gogh est une [compilation] de thèmes de couleurs, et installer n’importe lequel tient en [une] [commande].',
     },
 
     showcase: {

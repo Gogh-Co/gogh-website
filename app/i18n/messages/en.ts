@@ -129,7 +129,7 @@ export default {
         // Words in [brackets] take a palette accent; consecutive bracketed
         // words share one. Words are separated by spaces even in languages
         // that don't use them (the page drops them there).
-        copy: 'You read your terminal for hours a day. [Sixteen] [colors] decide how every prompt, log and diff looks. Gogh is a [curated] [library] of palettes, and installing any of them takes [one] [command].',
+        copy: 'You read your terminal for hours a day. [Sixteen] [colors] decide how every prompt, log and diff looks. Gogh is a [compilation] of color schemes, and installing any of them takes [one] [command].',
     },
 
     showcase: {

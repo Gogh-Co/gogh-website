@@ -122,7 +122,7 @@ export default {
 
     manifesto: {
         eyebrow: 'Warum Farbe zählt',
-        copy: 'Du liest dein Terminal stundenlang am Tag. [Sechzehn] [Farben] bestimmen, wie jeder Prompt, jedes Log und jeder Diff aussieht. Gogh ist eine [kuratierte] [Bibliothek] von Paletten, und jede davon installierst du mit [einem] [Befehl].',
+        copy: 'Du liest dein Terminal stundenlang am Tag. [Sechzehn] [Farben] bestimmen, wie jeder Prompt, jedes Log und jeder Diff aussieht. Gogh ist eine [Sammlung] von Farbschemata, und jedes davon installierst du mit [einem] [Befehl].',
     },
 
     showcase: {
