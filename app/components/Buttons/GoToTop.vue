@@ -1,45 +1,71 @@
 <template>
-    <button
-        ref="button"
-        type="button"
-        class="go-top"
+    <!-- Floating corner pair, shown once the visitor is a screen down: a
+         random theme (the header's dice) and back to top. -->
+    <div
+        ref="dock"
+        class="float-dock"
         :class="{ 'is-visible': visible }"
         :style="{ '--go-top-lift': `${lift}px` }"
-        :tabindex="visible ? 0 : -1"
         :aria-hidden="!visible"
-        :aria-label="t('goTop')"
-        @click="goTop"
     >
-        <!-- The outline fills up as the page scrolls. -->
-        <svg class="go-top__progress" viewBox="0 0 52 52" aria-hidden="true">
-            <rect x="1" y="1" width="50" height="50" pathLength="100" :style="{ strokeDashoffset: 100 - progress * 100 }" />
-        </svg>
-        <svg class="go-top__arrow" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M11 20V7.825l-5.6 5.6L4 12l8-8l8 8l-1.4 1.425l-5.6-5.6V20z"/></svg>
-    </button>
+        <button
+            type="button"
+            class="float-dock__button float-dock__random random-dice-host"
+            :class="{ 'is-loading': randomLoading }"
+            :tabindex="visible ? 0 : -1"
+            :aria-label="t('header.randomAria')"
+            :title="t('header.randomTitle')"
+            aria-keyshortcuts="r"
+            :aria-busy="randomLoading"
+            :disabled="randomLoading"
+            @pointerenter="prefetchThemePaths"
+            @focus="prefetchThemePaths"
+            @click="openRandomTheme('float')"
+        >
+            <RandomDice />
+        </button>
+
+        <button
+            type="button"
+            class="float-dock__button go-top"
+            :tabindex="visible ? 0 : -1"
+            :aria-label="t('goTop')"
+            @click="goTop"
+        >
+            <!-- The outline fills up as the page scrolls. -->
+            <svg class="go-top__progress" viewBox="0 0 52 52" aria-hidden="true">
+                <rect x="1" y="1" width="50" height="50" pathLength="100" :style="{ strokeDashoffset: 100 - progress * 100 }" />
+            </svg>
+            <svg class="go-top__arrow" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M11 20V7.825l-5.6 5.6L4 12l8-8l8 8l-1.4 1.425l-5.6-5.6V20z"/></svg>
+        </button>
+    </div>
 </template>
 
 <script setup>
+import RandomDice from '@/components/Buttons/RandomDice.vue';
+
 // A floating "back to top" button: shows up once the visitor is more than a
 // screen down, tracks how far they've scrolled, and glides back up with the
-// site's smooth scroll.
+// site's smooth scroll. Next to it, the header's random theme dice.
 
 const { t } = useI18n();
+const { randomLoading, prefetchThemePaths, openRandomTheme } = useRandomTheme();
 const visible = ref(false);
 const progress = ref(0);
 const lift = ref(0);
-const button = ref(null);
+const dock = ref(null);
 let ticking = false;
 
 // Bars pinned to the bottom of the screen that the button must not cover.
 const BOTTOM_BARS = '.persistence-banner, .favorites-sign-in-banner, .install-dock.is-visible';
 const GAP = 12;
 
-// How far to raise the button so it clears any bar sharing its corner.
+// How far to raise the buttons so they clear any bar sharing its corner.
 function measureLift() {
-    const self = button.value?.getBoundingClientRect();
+    const self = dock.value?.getBoundingClientRect();
     if (!self) return 0;
     // From the layout, not the rect: the rect moves with the lift transition.
-    const base = window.innerHeight - (parseFloat(getComputedStyle(button.value).bottom) || 0);
+    const base = window.innerHeight - (parseFloat(getComputedStyle(dock.value).bottom) || 0);
     let raise = 0;
     for (const bar of document.querySelectorAll(BOTTOM_BARS)) {
         const rect = bar.getBoundingClientRect();
@@ -93,11 +119,33 @@ onBeforeUnmount(() => {
 <style lang="scss" scoped>
 @use '@/assets/sass/base' as *;
 
-.go-top {
+.float-dock {
     position: fixed;
     right: 16px;
     bottom: 16px;
     z-index: 890;
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(calc(16px - var(--go-top-lift, 0px)));
+    transition: opacity 0.4s ease, transform 0.5s $ease_out_expo, visibility 0s linear 0.4s;
+
+    @include m768 {
+        right: 28px;
+        bottom: 28px;
+    }
+
+    &.is-visible {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(calc(-1 * var(--go-top-lift, 0px)));
+        transition: opacity 0.4s ease, transform 0.5s $ease_out_expo, visibility 0s;
+    }
+}
+
+.float-dock__button {
+    position: relative;
     display: grid;
     place-items: center;
     width: 52px;
@@ -109,35 +157,24 @@ onBeforeUnmount(() => {
     color: var(--cream);
     box-shadow: inset 0 0 0 1px rgba(244, 239, 230, 0.14), 0 10px 30px rgba(0, 0, 0, 0.25);
     cursor: pointer;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(calc(16px - var(--go-top-lift, 0px)));
-    transition: opacity 0.4s ease, transform 0.5s $ease_out_expo, visibility 0s linear 0.4s, background-color 0.3s ease;
-
-    @include m768 {
-        right: 28px;
-        bottom: 28px;
-    }
-
-    &.is-visible {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(calc(-1 * var(--go-top-lift, 0px)));
-        transition: opacity 0.4s ease, transform 0.5s $ease_out_expo, visibility 0s, background-color 0.3s ease;
-    }
+    transition: background-color 0.3s ease;
 
     &:hover {
         background: var(--ink-3);
-
-        .go-top__arrow {
-            transform: translateY(-3px);
-        }
     }
 
     &:focus-visible {
         outline: 2px solid var(--cream);
         outline-offset: 3px;
     }
+}
+
+.float-dock__random:disabled {
+    cursor: progress;
+}
+
+.go-top:hover .go-top__arrow {
+    transform: translateY(-3px);
 }
 
 .go-top__progress {
@@ -162,8 +199,8 @@ onBeforeUnmount(() => {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .go-top,
-    .go-top.is-visible {
+    .float-dock,
+    .float-dock.is-visible {
         transform: translateY(calc(-1 * var(--go-top-lift, 0px)));
     }
 

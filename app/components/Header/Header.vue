@@ -36,7 +36,7 @@
                 <div class="gogh-header__tools">
                     <button
                         type="button"
-                        class="gogh-header__theme-toggle gogh-header__random"
+                        class="gogh-header__theme-toggle gogh-header__random random-dice-host"
                         :class="{ 'is-loading': randomLoading, 'is-pressed': randomKeyPressed }"
                         :aria-label="t('header.randomAria')"
                         aria-keyshortcuts="r"
@@ -44,18 +44,9 @@
                         :disabled="randomLoading"
                         @pointerenter="prefetchThemePaths"
                         @focus="prefetchThemePaths"
-                        @click="openRandomTheme('button')"
+                        @click="openRandomTheme('button', closeMobileNav)"
                     >
-                        <!-- Flat at rest; on hover it turns into a small 3D die
-                             that tumbles (front face = the flat icon's five). -->
-                        <span class="gogh-header__dice" aria-hidden="true">
-                            <svg class="gogh-header__dice-flat" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2m2.5 3a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3m9 0a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3M12 10.5a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3M7.5 15a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3m9 0a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3"/></svg>
-                            <span class="gogh-header__dice-stage">
-                                <span class="gogh-header__dice-cube">
-                                    <span v-for="face in 6" :key="face" class="gogh-header__dice-face" :class="`gogh-header__dice-face--${face}`"></span>
-                                </span>
-                            </span>
-                        </span>
+                        <RandomDice />
                         <span class="gogh-header__theme-toggle-label">{{ t('header.random') }}</span>
 
                         <!-- Keyboard hint hanging under the button, like the
@@ -100,6 +91,7 @@
 import githubButtonsScript from '@/assets/static/buttons.js?raw';
 import AuthControl from '@/components/Auth/AuthControl.vue';
 import LanguageSwitcher from '@/components/I18n/LanguageSwitcher.vue';
+import RandomDice from '@/components/Buttons/RandomDice.vue';
 
 defineProps({
     // The home page lets its hero run under a transparent bar; everywhere
@@ -134,7 +126,7 @@ const { initFavorites, mergeAfterLogin, mergedThisSession } = useFavorites();
 const logoBarColors = GOGH_LOGO_COLORS;
 
 const route = useRoute();
-const randomLoading = ref(false);
+const { randomLoading, prefetchThemePaths, openRandomTheme } = useRandomTheme();
 const randomKeyPressed = ref(false);
 let randomKeyTimer = 0;
 
@@ -165,11 +157,6 @@ async function onNavClick(event, link) {
     scrollToTarget(`#${hash}`, 0);
 }
 
-// Warm the theme list on hover/focus so the click itself feels instant.
-function prefetchThemePaths() {
-    loadThemePagePaths().catch(() => {});
-}
-
 // The R key does what the dice button does, unless the key belongs to
 // something else: a text field, an open dialog or filter, or a shortcut with
 // modifiers (Ctrl+R / Cmd+R still reload the page).
@@ -195,26 +182,11 @@ function onRandomKeydown(event) {
     randomKeyTimer = setTimeout(() => {
         randomKeyPressed.value = false;
     }, 220);
-    openRandomTheme('key');
+    openRandomTheme('key', closeMobileNav);
 }
 
-async function openRandomTheme(via = 'button') {
-    if (randomLoading.value) {
-        return;
-    }
-    randomLoading.value = true;
-    try {
-        const path = await pickRandomThemePagePath(route.path);
-        if (path) {
-            trackEvent('Random Theme', { via });
-            mobileNavOpen.value = false;
-            await navigateTo(path);
-        }
-    } catch {
-        // Theme list unavailable (offline / API rate limit): stay put.
-    } finally {
-        randomLoading.value = false;
-    }
+function closeMobileNav() {
+    mobileNavOpen.value = false;
 }
 
 let lastScrollY = 0;

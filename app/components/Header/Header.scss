@@ -1,4 +1,3 @@
-@use 'sass:list';
 @use '@/assets/sass/base' as *;
 
 $header_height: 72px;
@@ -304,20 +303,8 @@ $header_height: 72px;
     }
 }
 
-// Random theme: a flat die at rest that turns into a small 3D die on hover
-// and tumbles (faster while the theme list loads).
-$dice_size: 14px;
-$dice_pip: 1.15px;
-
-// One radial-gradient layer per pip, positions in % of the face.
-@function dice-pips($positions...) {
-    $layers: ();
-    @each $x, $y in $positions {
-        $layers: list.append($layers, radial-gradient(circle at $x $y, currentColor 0 $dice_pip, transparent $dice_pip + 0.4px), comma);
-    }
-    @return $layers;
-}
-
+// Random theme: the die itself is RandomDice.vue (shared with the floating
+// button next to "back to top").
 .gogh-header__random {
     position: relative;
 
@@ -327,81 +314,6 @@ $dice_pip: 1.15px;
 
     &:disabled {
         cursor: progress;
-    }
-}
-
-.gogh-header__dice {
-    position: relative;
-    display: inline-grid;
-    place-items: center;
-    width: 18px;
-    height: 18px;
-    flex: 0 0 auto;
-}
-
-.gogh-header__dice-flat {
-    display: block;
-    transition: opacity 0.2s ease, transform 0.35s $ease_out_expo;
-}
-
-// Perspective + fade live on this wrapper: opacity on the cube itself would
-// flatten its preserve-3d faces.
-.gogh-header__dice-stage {
-    position: absolute;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    opacity: 0;
-    perspective: 90px;
-    pointer-events: none;
-    transition: opacity 0.2s ease;
-}
-
-.gogh-header__dice-cube {
-    position: relative;
-    width: $dice_size;
-    height: $dice_size;
-    transform-style: preserve-3d;
-}
-
-.gogh-header__dice-face {
-    position: absolute;
-    inset: 0;
-    border: 1.25px solid currentColor;
-    border-radius: 3px;
-    background-color: #0a0f14;
-    backface-visibility: hidden;
-
-    // Opposite faces add up to 7; the front one is the flat icon's five so
-    // the swap from flat to 3D is seamless.
-    &--5 {
-        background-image: dice-pips(25% 25%, 75% 25%, 50% 50%, 25% 75%, 75% 75%);
-        transform: translateZ($dice_size * 0.5);
-    }
-
-    &--2 {
-        background-image: dice-pips(25% 25%, 75% 75%);
-        transform: rotateY(180deg) translateZ($dice_size * 0.5);
-    }
-
-    &--3 {
-        background-image: dice-pips(25% 25%, 50% 50%, 75% 75%);
-        transform: rotateY(90deg) translateZ($dice_size * 0.5);
-    }
-
-    &--4 {
-        background-image: dice-pips(25% 25%, 75% 25%, 25% 75%, 75% 75%);
-        transform: rotateY(-90deg) translateZ($dice_size * 0.5);
-    }
-
-    &--1 {
-        background-image: dice-pips(50% 50%);
-        transform: rotateX(90deg) translateZ($dice_size * 0.5);
-    }
-
-    &--6 {
-        background-image: dice-pips(25% 25%, 75% 25%, 25% 50%, 75% 50%, 25% 75%, 75% 75%);
-        transform: rotateX(-90deg) translateZ($dice_size * 0.5);
     }
 }
 
@@ -511,30 +423,10 @@ $dice_pip: 1.15px;
         color 0.3s ease;
 }
 
-// Desktop with a real pointer only: 3D on hover, the hint under the button.
+// Desktop with a real pointer only: the hint under the button.
 @media (min-width: 992px) and (hover: hover) and (pointer: fine) {
     .gogh-header__random-hint {
         display: inline-flex;
-    }
-
-    .gogh-header__random:hover,
-    .gogh-header__random.is-loading {
-        .gogh-header__dice-flat {
-            opacity: 0;
-            transform: scale(0.7);
-        }
-
-        .gogh-header__dice-stage {
-            opacity: 1;
-        }
-
-        .gogh-header__dice-cube {
-            animation: gogh-header-dice-tumble 2.6s linear infinite;
-        }
-    }
-
-    .gogh-header__random.is-loading .gogh-header__dice-cube {
-        animation-duration: 0.7s;
     }
 
     .gogh-header__random:hover,
@@ -561,38 +453,7 @@ $dice_pip: 1.15px;
     }
 }
 
-// Starts square-on (the five facing you) so it picks up right where the
-// flat icon left off, then rolls over two axes.
-@keyframes gogh-header-dice-tumble {
-    from {
-        transform: rotateX(0deg) rotateY(0deg);
-    }
-
-    to {
-        transform: rotateX(360deg) rotateY(720deg);
-    }
-}
-
-// Mobile: the flat icon spins while the theme list loads.
-@media (max-width: 991.98px) {
-    .gogh-header__random.is-loading .gogh-header__dice-flat {
-        animation: gogh-header-dice-roll 0.6s $ease_out_expo infinite;
-    }
-}
-
-@keyframes gogh-header-dice-roll {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-// No tumbling: hovering just shows the die at rest, tilted to read as 3D.
 @media (prefers-reduced-motion: reduce) {
-    .gogh-header__random .gogh-header__dice-cube {
-        animation: none !important;
-        transform: rotateX(-24deg) rotateY(32deg);
-    }
-
     .gogh-header__random-line::after,
     .gogh-header__random-arrowhead {
         animation: none;
