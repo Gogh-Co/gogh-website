@@ -371,7 +371,7 @@ const DEFAULT_FORM = {
 };
 
 const form = reactive({ ...DEFAULT_FORM });
-const { data: sourceThemesData } = await useFetch('/api/themes', {
+const { data: sourceThemesData } = await useAsyncData('generator-source-themes', () => fetchThemeList().catch(() => []), {
     default: () => [],
 });
 const sourceQuery = ref('Argonaut');

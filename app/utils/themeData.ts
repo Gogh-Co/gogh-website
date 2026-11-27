@@ -1,11 +1,14 @@
-// Theme list loading shared by the gallery and the per-theme pages.
+// Theme list loading shared by the gallery, the stats and the per-theme pages.
 // /api/themes is a Nitro route that only exists at build time (the site is
-// generated and served from GitHub Pages), so at runtime the browser falls
-// back to the GitHub API directly.
+// generated and served as static files), so in the browser it is always a 404.
+// The browser reads the raw file instead: raw.githubusercontent.com sends
+// `Access-Control-Allow-Origin: *` and has no per-IP quota, unlike
+// api.github.com, which answers 403 after 60 unauthenticated requests an hour.
 import { themePagePath } from './themeSlug';
 
 const THEMES_API_PATH = '/api/themes';
-const GITHUB_THEMES_RAW_API = 'https://api.github.com/repos/Gogh-Co/Gogh/contents/data/themes-min.json?ref=master';
+const GITHUB_THEMES_RAW_URL = 'https://raw.githubusercontent.com/Gogh-Co/Gogh/master/data/themes-min.json';
+const GITHUB_THEMES_CONTENTS_API = 'https://api.github.com/repos/Gogh-Co/Gogh/contents/data/themes-min.json?ref=master';
 
 export function normalizeThemes(remoteThemes: unknown): Record<string, any>[] {
     if (Array.isArray(remoteThemes)) {
@@ -20,19 +23,40 @@ export function normalizeThemes(remoteThemes: unknown): Record<string, any>[] {
     return [];
 }
 
-// Throws when neither source answers.
+function fetchRawThemes(): Promise<unknown> {
+    // raw.githubusercontent.com serves the file as text/plain, so parse it here.
+    return $fetch(GITHUB_THEMES_RAW_URL, { timeout: 12000, parseResponse: JSON.parse });
+}
+
+function fetchContentsApiThemes(): Promise<unknown> {
+    return $fetch(GITHUB_THEMES_CONTENTS_API, {
+        timeout: 12000,
+        headers: {
+            Accept: 'application/vnd.github.raw+json',
+            'X-GitHub-Api-Version': '2022-11-28',
+        },
+    });
+}
+
+// Throws when no source answers with a non-empty list.
 export async function fetchThemeList(): Promise<Record<string, any>[]> {
-    try {
-        return normalizeThemes(await $fetch(THEMES_API_PATH, { timeout: 12000 }));
-    } catch {
-        return normalizeThemes(await $fetch(GITHUB_THEMES_RAW_API, {
-            timeout: 12000,
-            headers: {
-                Accept: 'application/vnd.github.raw+json',
-                'X-GitHub-Api-Version': '2022-11-28',
-            },
-        }));
+    const sources = import.meta.server
+        ? [() => $fetch(THEMES_API_PATH, { timeout: 12000 })]
+        : [fetchRawThemes, fetchContentsApiThemes];
+
+    let lastError: unknown = new Error('Theme list is empty');
+    for (const source of sources) {
+        try {
+            const themes = normalizeThemes(await source());
+            if (themes.length > 0) {
+                return themes;
+            }
+        } catch (error) {
+            lastError = error;
+        }
     }
+
+    throw lastError;
 }
 
 export function getThemeDisplayName(theme: Record<string, any> | null | undefined): string {

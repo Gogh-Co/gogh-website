@@ -550,7 +550,6 @@ const copyMessage = ref('');
 
 const detailPaletteKeysLeft = COLOR_KEYS.slice(0, 8);
 const detailPaletteKeysRight = COLOR_KEYS.slice(8);
-const GITHUB_THEMES_RAW_API = 'https://api.github.com/repos/Gogh-Co/Gogh/contents/data/themes-min.json?ref=master';
 
 function normalizeThemes(remoteThemes) {
     if (Array.isArray(remoteThemes)) {
@@ -653,23 +652,7 @@ async function loadThemes(forceRefresh = false) {
     errorMessage.value = '';
 
     try {
-        let remoteThemes;
-
-        try {
-            remoteThemes = await $fetch('/api/themes', {
-                timeout: 12000,
-            });
-        } catch {
-            // Static deploy fallback (e.g. GitHub Pages): fetch directly from GitHub API.
-            remoteThemes = await $fetch(GITHUB_THEMES_RAW_API, {
-                timeout: 12000,
-                headers: {
-                    Accept: 'application/vnd.github.raw+json',
-                    'X-GitHub-Api-Version': '2022-11-28',
-                },
-            });
-        }
-
+        const remoteThemes = await fetchThemeList();
         const normalized = normalizeThemes(remoteThemes).map((theme) => normalizeTheme(theme));
 
         themes.value = normalized;
