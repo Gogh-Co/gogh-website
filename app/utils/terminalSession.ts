@@ -62,11 +62,16 @@ interface VimState {
 
 export interface SessionState {
     title: string;
-    screen: 'shell' | 'vim' | 'htop';
+    screen: 'shell' | 'vim' | 'htop' | 'full';
     lines: SessionLine[];
     input: { prompt: SessionLine; text: string } | null;
     vim: VimState | null;
     htop: HtopFrame | null;
+    // A full-screen app drawn row by row (the hacker session's dashboards).
+    full?: SessionLine[] | null;
+    // Hacker mode effects: bumped for each glitch burst, and the red alert.
+    glitch?: number;
+    alert?: boolean;
     // Bumped on every keystroke, so the cursor restarts its blink.
     keys: number;
 }
@@ -96,11 +101,11 @@ export interface TerminalSession {
     initial: () => SessionState;
 }
 
-const seg = (t: string, c?: SessionSlot, extra: Partial<SessionSegment> = {}): SessionSegment => ({ t, c, ...extra });
-const bold = (t: string, c?: SessionSlot): SessionSegment => seg(t, c, { b: true });
-const plain = (text: string): SessionLine => [seg(text)];
+export const seg = (t: string, c?: SessionSlot, extra: Partial<SessionSegment> = {}): SessionSegment => ({ t, c, ...extra });
+export const bold = (t: string, c?: SessionSlot): SessionSegment => seg(t, c, { b: true });
+export const plain = (text: string): SessionLine => [seg(text)];
 
-function hashString(value: string): number {
+export function hashString(value: string): number {
     let hash = 2166136261;
     for (let index = 0; index < value.length; index++) {
         hash ^= value.charCodeAt(index);
@@ -111,7 +116,7 @@ function hashString(value: string): number {
 
 // Small seeded PRNG: the same theme always gets the same typing rhythm and
 // htop readings, so the server render and the client agree.
-function mulberry32(seed: number): () => number {
+export function mulberry32(seed: number): () => number {
     let a = seed;
     return () => {
         a = (a + 0x6d2b79f5) | 0;
@@ -294,16 +299,10 @@ function htopFrames(rand: () => number, count: number): HtopFrame[] {
     return frames;
 }
 
-export function buildTerminalSession(theme: Record<string, any>, themeName: string): TerminalSession {
-    const name = (themeName || theme?.name || 'Theme').toString();
-    const slug = themeSlug(name) || 'theme';
-    const file = `themes/${slug}.yml`;
-    const rand = mulberry32(hashString(name));
-    const fileLines = themeFileLines(theme, name);
-    const cursorLine = yamlColorLine(theme, 'cursor');
-    const savedLines = fileLines.length + 1;
-    const savedBytes = [...fileLines, cursorLine].join('\n').length + 1;
-
+// The building blocks of a session script: timed steps, chapters, typing
+// with a human rhythm, commands, printed output and progress counters.
+// Both the daily session and the hacker session are written with these.
+export function createSessionScript(rand: () => number) {
     const steps: SessionStep[] = [];
     const marks: Array<{ id: string; label: string; stepIndex: number }> = [];
 
@@ -367,6 +366,40 @@ export function buildTerminalSession(theme: Record<string, any>, themeName: stri
         }
         replaceLast(plain(`${label}: 100% (${total}/${total})${done}`), ms);
     };
+
+    // Turns the steps into a timeline: when each step runs and where each
+    // chapter starts and ends.
+    const finish = (rest: Pick<TerminalSession, 'posterIndex' | 'file' | 'initial'>): TerminalSession => {
+        const times: number[] = [];
+        let total = 0;
+        for (const item of steps) {
+            times.push(total);
+            total += item.ms;
+        }
+        const chapters = marks.map((mark, index) => ({
+            ...mark,
+            start: times[mark.stepIndex],
+            end: index + 1 < marks.length ? times[marks[index + 1].stepIndex] : total,
+        }));
+        return { steps, times, total, chapters, ...rest };
+    };
+
+    return { steps, step, pause, chapter, keyDelay, typeKeys, prompt, command, print, replaceLast, progress, finish };
+}
+
+export function buildTerminalSession(theme: Record<string, any>, themeName: string): TerminalSession {
+    const name = (themeName || theme?.name || 'Theme').toString();
+    const slug = themeSlug(name) || 'theme';
+    const file = `themes/${slug}.yml`;
+    const rand = mulberry32(hashString(name));
+    const fileLines = themeFileLines(theme, name);
+    const cursorLine = yamlColorLine(theme, 'cursor');
+    const savedLines = fileLines.length + 1;
+    const savedBytes = [...fileLines, cursorLine].join('\n').length + 1;
+
+    const script = createSessionScript(rand);
+    const { step, pause, chapter, typeKeys, prompt, command, print, progress } = script;
+    const { steps } = script;
     const vim = (run: (vim: VimState) => void) => (state: SessionState) => {
         if (state.vim) run(state.vim);
     };
@@ -519,19 +552,6 @@ export function buildTerminalSession(theme: Record<string, any>, themeName: stri
         state.input = { prompt: localPrompt(), text: '' };
     });
 
-    const times: number[] = [];
-    let total = 0;
-    for (const item of steps) {
-        times.push(total);
-        total += item.ms;
-    }
-
-    const chapters = marks.map((mark, index) => ({
-        ...mark,
-        start: times[mark.stepIndex],
-        end: index + 1 < marks.length ? times[marks[index + 1].stepIndex] : total,
-    }));
-
     const initial = (): SessionState => ({
         title: LOCAL_TITLE,
         screen: 'shell',
@@ -542,7 +562,7 @@ export function buildTerminalSession(theme: Record<string, any>, themeName: stri
         keys: 0,
     });
 
-    return { steps, times, total, chapters, posterIndex, file, initial };
+    return script.finish({ posterIndex, file, initial });
 }
 
 // The state after the first `stepIndex` steps, built from scratch.
@@ -614,9 +634,9 @@ export function sessionFrames(session: TerminalSession, sampleMs = 20): SessionF
 /* Rendering                                                                 */
 /* ------------------------------------------------------------------------ */
 
-const lineLength = (line: SessionLine) => line.reduce((sum, part) => sum + part.t.length, 0);
+export const lineLength = (line: SessionLine) => line.reduce((sum, part) => sum + part.t.length, 0);
 
-const padLine = (line: SessionLine, width: number, extra: Partial<SessionSegment> = {}): SessionLine => {
+export const padLine = (line: SessionLine, width: number, extra: Partial<SessionSegment> = {}): SessionLine => {
     const length = lineLength(line);
     return length < width ? [...line, seg(' '.repeat(width - length), extra.c, extra)] : line;
 };
@@ -672,7 +692,7 @@ function wrapLine(line: SessionLine, width = SESSION_COLS): SessionLine[] {
 }
 
 // Cuts a full-screen app's row at the screen edge.
-const clipLine = (line: SessionLine): SessionLine => wrapLine(line)[0];
+export const clipLine = (line: SessionLine): SessionLine => wrapLine(line)[0];
 
 function renderShell(state: SessionState): SessionLine[] {
     const lines = [...state.lines];
@@ -847,6 +867,11 @@ function renderHtop(frame: HtopFrame): SessionLine[] {
 
 // The screen for a state: always SESSION_ROWS rows of segments.
 export function renderTerminalSession(state: SessionState): SessionLine[] {
+    if (state.screen === 'full' && state.full) {
+        const rows = state.full.slice(0, SESSION_ROWS).map(clipLine);
+        while (rows.length < SESSION_ROWS) rows.push([]);
+        return rows;
+    }
     if (state.screen === 'vim' && state.vim) return renderVim(state.vim).map(clipLine);
     if (state.screen === 'htop' && state.htop) return renderHtop(state.htop).map(clipLine);
     return renderShell(state);

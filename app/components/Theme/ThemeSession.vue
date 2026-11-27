@@ -4,14 +4,37 @@
             <header class="session__header">
                 <p class="section-eyebrow session__eyebrow"><span>03</span> {{ t('session.eyebrow') }}</p>
                 <h2 id="theme-session-title" class="section-title session__title">{{ t('session.title') }} <em>{{ t('session.titleAccent') }}</em></h2>
-                <p class="session__lede">{{ t('session.lede', { name: themeName }) }}</p>
+                <p class="session__lede">{{ mode === 'hacker' ? t('session.hackerLede', { name: themeName }) : t('session.lede', { name: themeName }) }}</p>
             </header>
 
             <!-- #live-session: the hero's theme name links here, and the page
                  centers the terminal itself rather than the section heading. -->
             <div id="live-session" class="session__stage" data-anchor="center">
-                <div class="session__window">
+                <!-- Two takes on the same window: an everyday session, and a
+                     made-up break-in painted through terminal shaders. -->
+                <div class="session__modes" role="group" :aria-label="t('session.modeAria')">
+                    <button
+                        v-for="item in modes"
+                        :key="item.id"
+                        type="button"
+                        class="session__mode"
+                        :class="[`session__mode--${item.id}`, { 'is-active': mode === item.id }]"
+                        :aria-pressed="mode === item.id"
+                        @click="setMode(item.id)"
+                    >
+                        <span class="session__mode-mark" aria-hidden="true"></span>{{ item.label }}
+                    </button>
+                </div>
+
+                <div class="session__window" :class="{ 'is-hacker': mode === 'hacker', 'has-shader': shaderOn }">
                     <TerminalFrame :theme="theme" :title="state.title">
+                        <canvas
+                            v-if="mode === 'hacker'"
+                            :key="`shader-${themeName}`"
+                            ref="shaderCanvas"
+                            class="session__shader"
+                            aria-hidden="true"
+                        ></canvas>
                         <div class="session__fit">
                             <div class="session__screen" role="img" :aria-label="screenLabel">
                                 <div v-for="(row, rowIndex) in rows" :key="rowIndex" class="session__row" aria-hidden="true">
@@ -52,7 +75,7 @@
                                 :aria-label="t('session.jumpTo', { chapter: chapter.label })"
                                 @click="jumpTo(chapter)"
                             >
-                                <span class="session__track"><span ref="fills" class="session__fill"></span></span>
+                                <span class="session__track"><span class="session__fill"></span></span>
                                 <span class="session__label">{{ chapter.label }}</span>
                             </button>
                         </li>
@@ -62,6 +85,23 @@
 
                     <!-- Download the loop as a file; a running export can be cancelled. -->
                     <div class="session__downloads" role="group" :aria-label="t('session.saveAria')">
+                        <!-- Hacker mode plays music; this mutes it (remembered in this browser). -->
+                        <button
+                            v-if="mode === 'hacker'"
+                            type="button"
+                            class="session__download session__favorite session__sound"
+                            :class="{ 'is-active': !musicMuted }"
+                            :aria-pressed="!musicMuted"
+                            :title="musicMuted ? t('session.musicUnmute') : t('session.musicMute')"
+                            :aria-label="musicMuted ? t('session.musicUnmute') : t('session.musicMute')"
+                            @click="toggleMusic"
+                        >
+                            <svg viewBox="0 0 16 16" aria-hidden="true">
+                                <path d="M2 6h2.5L8 3v10L4.5 10H2z" />
+                                <path v-if="!musicMuted" d="M10.2 5.2a4 4 0 0 1 0 5.6l-.9-.9a2.7 2.7 0 0 0 0-3.8zM12 3.4a6.5 6.5 0 0 1 0 9.2l-.9-.9a5.2 5.2 0 0 0 0-7.4z" />
+                                <path v-else d="M10 5.6l.9-.9 1.6 1.6 1.6-1.6.9.9L13.4 7.2 15 8.8l-.9.9-1.6-1.6-1.6 1.6-.9-.9 1.6-1.6z" />
+                            </svg>
+                        </button>
                         <!-- Same favorites as the gallery's star (this browser, or the
                              GitHub account when signed in). -->
                         <button
@@ -101,6 +141,19 @@
                         </button>
                     </div>
                 </div>
+                <p v-if="mode === 'hacker' && musicTrack && !musicMuted" class="session__music">
+                    <span aria-hidden="true">♪</span> {{ t('session.nowPlaying') }}: {{ musicTrack.title }} · {{ musicTrack.artist }} ·
+                    <a :href="musicTrack.url" target="_blank" rel="noopener">{{ musicTrack.source }}</a>
+                    <button
+                        type="button"
+                        class="session__next"
+                        :title="t('session.nextSong')"
+                        :aria-label="t('session.nextSong')"
+                        @click="nextSong"
+                    >
+                        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3.5 7.5 8 2 12.5zM8.5 3.5 14 8l-5.5 4.5z" /></svg>
+                    </button>
+                </p>
                 <p class="session__status" role="status" aria-live="polite">{{ exportStatus }}</p>
             </div>
         </div>
@@ -109,6 +162,11 @@
 
 <script setup>
 import TerminalFrame from '@/components/Terminal/TerminalFrame.vue';
+import { HACKER_TRACKS, pickHackerTrack } from '@/utils/hackerMusic';
+import { buildHackerSession } from '@/utils/hackerSession';
+import { HackerScreen, canUseHackerShader, sessionEffects } from '@/utils/hackerShader';
+import { SESSION_COLS, SESSION_ROWS, cursorVisible } from '@/utils/terminalSession';
+import { exportHackerVideo } from '@/utils/terminalSessionExport';
 
 const props = defineProps({
     theme: {
@@ -123,12 +181,19 @@ const props = defineProps({
 
 const { t } = useI18n();
 const root = ref(null);
-const fills = ref([]);
 const timeEl = ref(null);
 let gsapContext = null;
 
 const themeVars = computed(() => themeCssVars(props.theme));
-const session = computed(() => buildTerminalSession(props.theme, props.themeName));
+// 'daily' is the main session; 'hacker' swaps in the fictional break-in.
+const mode = ref('daily');
+const modes = computed(() => [
+    { id: 'daily', label: t('session.modeDaily') },
+    { id: 'hacker', label: t('session.modeHacker') },
+]);
+const session = computed(() => (mode.value === 'hacker'
+    ? buildHackerSession(props.theme, props.themeName)
+    : buildTerminalSession(props.theme, props.themeName)));
 const posterTime = computed(() => session.value.times[session.value.posterIndex] ?? 0);
 
 // Until the section scrolls into view (and on the server) the screen shows a
@@ -138,7 +203,9 @@ const rows = computed(() => renderTerminalSession(state.value));
 const activeChapter = ref(chapterAt(posterTime.value));
 const playing = ref(false);
 
-const screenLabel = computed(() => t('session.screenLabel', { name: props.themeName, file: session.value.file }));
+const screenLabel = computed(() => (mode.value === 'hacker'
+    ? t('session.hackerScreenLabel', { name: props.themeName })
+    : t('session.screenLabel', { name: props.themeName, file: session.value.file })));
 
 let stepIndex = session.value.posterIndex;
 let clock = posterTime.value;
@@ -173,8 +240,11 @@ function chapterAt(time) {
 // Progress bars and the clock change every frame, so they skip Vue and are
 // written straight to the DOM.
 function paint() {
+    // Read from the DOM: switching modes swaps the chapter list, and a v-for
+    // ref array can keep the old elements around.
+    const fills = root.value?.querySelectorAll('.session__fill') ?? [];
     session.value.chapters.forEach((chapter, index) => {
-        const fill = fills.value[index];
+        const fill = fills[index];
         if (fill) {
             const amount = Math.min(1, Math.max(0, (clock - chapter.start) / (chapter.end - chapter.start)));
             fill.style.transform = `scaleX(${amount})`;
@@ -197,6 +267,7 @@ function seek(index) {
     clock = session.value.times[index] ?? 0;
     state.value = sessionStateAt(session.value, index);
     paint();
+    drawShader();
     loop();
 }
 
@@ -222,6 +293,7 @@ function frame(now) {
     }
 
     paint();
+    drawShader();
     frameId = requestAnimationFrame(frame);
 }
 
@@ -239,6 +311,161 @@ function halt() {
     }
 }
 
+// Hacker mode's shader: the screen is drawn on a canvas over the DOM grid
+// (which stays for layout, screen readers and the server render) and run
+// through hackerShader.ts. Without WebGL the DOM grid shows with a CSS glow.
+const shaderCanvas = ref(null);
+const shaderOn = ref(false);
+let shader = null;
+let shaderObserver = null;
+let shaderKeys = -1;
+let shaderKeyTime = 0;
+
+function measureShader() {
+    const canvas = shaderCanvas.value;
+    const body = canvas?.parentElement;
+    const screen = body?.querySelector('.session__screen');
+    if (!shader || !body || !screen) return;
+    // Layout sizes, not bounding boxes: the entrance animation scales the window.
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const style = getComputedStyle(screen);
+    const cellW = parseFloat(style.width) / SESSION_COLS;
+    const cellH = parseFloat(style.height) / SESSION_ROWS;
+    let x = 0;
+    let y = 0;
+    for (let node = screen; node && node !== body; node = node.offsetParent) {
+        x += node.offsetLeft;
+        y += node.offsetTop;
+    }
+    shader.setLayout({
+        width: Math.max(1, Math.round(body.clientWidth * dpr)),
+        height: Math.max(1, Math.round(body.clientHeight * dpr)),
+        gridX: x * dpr,
+        gridY: y * dpr,
+        cellW: cellW * dpr,
+        cellH: cellH * dpr,
+        fontPx: parseFloat(style.fontSize) * dpr,
+        dpr,
+    });
+    drawShader();
+}
+
+function drawShader() {
+    if (!shader) return;
+    const current = state.value;
+    if (current.keys !== shaderKeys || clock < shaderKeyTime) {
+        shaderKeys = current.keys;
+        shaderKeyTime = clock;
+    }
+    shader.setRows(rows.value, !playing.value || cursorVisible(clock - shaderKeyTime));
+    shader.render(clock, sessionEffects(current));
+}
+
+function stopShader() {
+    shaderObserver?.disconnect();
+    shaderObserver = null;
+    shader?.destroy();
+    shader = null;
+    shaderOn.value = false;
+}
+
+async function startShader() {
+    stopShader();
+    if (mode.value !== 'hacker') return;
+    await nextTick();
+    const canvas = shaderCanvas.value;
+    if (!canvas || !canUseHackerShader()) return;
+    try {
+        await document.fonts?.ready;
+        if (mode.value !== 'hacker' || canvas !== shaderCanvas.value) return;
+        shader = new HackerScreen(canvas, props.theme);
+        shader.motion = !prefersReducedMotion();
+        shaderOn.value = true;
+        measureShader();
+        shaderObserver = new ResizeObserver(() => measureShader());
+        shaderObserver.observe(canvas.parentElement);
+    } catch (error) {
+        console.error(error);
+        stopShader();
+    }
+}
+
+// Hacker mode music: starts with the click that enters the mode (so the
+// browser allows sound), a random track each time, and plays only while the
+// session plays and is on screen. The mute choice is kept in this browser.
+const MUSIC_MUTED_KEY = 'gogh:session-music-muted';
+const musicMuted = ref(false);
+const musicTrack = ref(null);
+let music = null;
+let musicIndex = -1;
+
+function loadTrack() {
+    musicIndex = pickHackerTrack(musicIndex);
+    musicTrack.value = HACKER_TRACKS[musicIndex];
+    music.src = musicTrack.value.src;
+}
+
+function syncMusic({ fresh = false } = {}) {
+    if (mode.value !== 'hacker' || !playing.value || !visible || musicMuted.value) {
+        music?.pause();
+        return;
+    }
+    if (!music) {
+        music = new Audio();
+        music.preload = 'auto';
+        music.volume = 0.45;
+        music.addEventListener('ended', () => {
+            loadTrack();
+            syncMusic();
+        });
+    }
+    if (fresh || !musicTrack.value) loadTrack();
+    // Blocked without a click (autoplay rules): it starts on the next one.
+    music.play().catch(() => {});
+}
+
+function toggleMusic() {
+    musicMuted.value = !musicMuted.value;
+    try {
+        localStorage.setItem(MUSIC_MUTED_KEY, musicMuted.value ? '1' : '0');
+    } catch {
+        // Storage can be blocked; the choice then lasts for this page only.
+    }
+    trackEvent('Session', { action: musicMuted.value ? 'music-mute' : 'music-unmute' });
+    syncMusic();
+}
+
+// Skips to another random track (never the one playing).
+function nextSong() {
+    if (!music) return;
+    loadTrack();
+    trackEvent('Session', { action: 'music-next', track: musicTrack.value.title });
+    syncMusic();
+}
+
+function stopMusic() {
+    if (!music) return;
+    music.pause();
+    music.removeAttribute('src');
+    music.load();
+    music = null;
+}
+
+function setMode(id) {
+    if (mode.value === id) return;
+    mode.value = id;
+    trackEvent('Session', { action: 'mode', mode: id });
+    // Entering hacker mode is the click that lets the music start, so the
+    // loop plays too (unless the visitor asked for less motion: then the
+    // play button starts both).
+    if (id === 'hacker' && !playing.value && !prefersReducedMotion()) {
+        playing.value = true;
+    }
+    syncMusic({ fresh: true });
+}
+
+watch([mode, () => props.theme], startShader);
+
 // Downloads: the GIF works everywhere; the video needs WebCodecs, so its
 // button appears once the browser says it can encode.
 const videoSupported = ref(false);
@@ -248,10 +475,14 @@ const exportStatus = ref('');
 let exportAbort = null;
 let statusTimer = 0;
 
-const downloadFormats = computed(() => [
-    { id: 'gif', label: 'GIF', title: t('session.downloadGif', { name: props.themeName }) },
-    ...(videoSupported.value ? [{ id: 'video', label: 'MP4', title: t('session.downloadVideo', { name: props.themeName }) }] : []),
-]);
+// Hacker mode moves on every frame, so it only saves as video, and only
+// where the shader runs.
+const downloadFormats = computed(() => (mode.value === 'hacker'
+    ? (videoSupported.value && shaderOn.value ? [{ id: 'video', label: 'MP4', title: t('session.downloadVideo', { name: props.themeName }) }] : [])
+    : [
+        { id: 'gif', label: 'GIF', title: t('session.downloadGif', { name: props.themeName }) },
+        ...(videoSupported.value ? [{ id: 'video', label: 'MP4', title: t('session.downloadVideo', { name: props.themeName }) }] : []),
+    ]));
 
 const { user } = useAuth();
 const { isFavorite, toggleFavorite } = useFavorites();
@@ -291,7 +522,8 @@ async function download(format) {
     announce(t(format === 'gif' ? 'session.renderingGif' : 'session.renderingVideo'));
     trackEvent('Session', { action: 'export-start', format: formatName(format) });
     try {
-        const exporter = format === 'gif' ? exportSessionGif : exportSessionVideo;
+        const hacker = mode.value === 'hacker';
+        const exporter = format === 'gif' ? exportSessionGif : hacker ? exportHackerVideo : exportSessionVideo;
         const result = await exporter(props.theme, props.themeName, {
             signal: exportAbort.signal,
             onProgress: (fraction) => {
@@ -299,7 +531,7 @@ async function download(format) {
             },
         });
         saveBlob(result);
-        trackEvent('Download', { kind: format === 'gif' ? 'session-gif' : 'session-mp4', theme: props.themeName });
+        trackEvent('Download', { kind: format === 'gif' ? 'session-gif' : hacker ? 'session-hacker-mp4' : 'session-mp4', theme: props.themeName });
         announce(t('session.saved', { file: result.filename, size: Math.round(result.blob.size / 104857.6) / 10 }));
     } catch (error) {
         announce(t(error?.name === 'AbortError' ? 'session.cancelled' : 'session.failed'));
@@ -333,6 +565,7 @@ function toggle() {
     } else {
         halt();
     }
+    syncMusic();
 }
 
 watch(session, () => {
@@ -342,7 +575,9 @@ watch(session, () => {
     clock = posterTime.value;
     state.value = sessionStateAt(session.value, stepIndex);
     lastSecond = -1;
-    paint();
+    // After the chapter list re-renders for the new session.
+    nextTick(paint);
+    drawShader();
     if (playing.value && visible) {
         seek(0);
     }
@@ -353,10 +588,17 @@ onMounted(() => {
     // Visitors who ask for less motion get the poster and can press play.
     playing.value = !prefersReducedMotion();
     videoSupported.value = canExportSessionVideo();
+    try {
+        musicMuted.value = localStorage.getItem(MUSIC_MUTED_KEY) === '1';
+    } catch {
+        musicMuted.value = false;
+    }
     paint();
 
     observer = new IntersectionObserver(([entry]) => {
         visible = entry.isIntersecting;
+        // The music follows the window: it stops when it scrolls away.
+        syncMusic();
         if (!visible) {
             halt();
             return;
@@ -404,6 +646,8 @@ onBeforeUnmount(() => {
     window.clearTimeout(statusTimer);
     halt();
     observer?.disconnect();
+    stopShader();
+    stopMusic();
     gsapContext?.revert();
 });
 </script>
@@ -467,6 +711,112 @@ $slots: '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', 
 
     :deep(.terminal-frame__body) {
         overflow: hidden;
+    }
+}
+
+// Daily / Hacker mode, above the window.
+.session__modes {
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+    margin: 0 0 18px;
+}
+
+.session__mode {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    height: 30px;
+    padding: 0 12px;
+    border: 1px solid var(--ink-line);
+    border-radius: 0;
+    background: transparent;
+    color: var(--muted);
+    font-family: $font_mono;
+    font-size: 1.1rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+
+    &:hover {
+        border-color: color-mix(in srgb, var(--cream) 45%, transparent);
+        color: var(--cream);
+    }
+
+    &.is-active {
+        border-color: color-mix(in srgb, var(--cream) 60%, transparent);
+        background: color-mix(in srgb, var(--cream) 8%, transparent);
+        color: var(--cream);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--cream);
+        outline-offset: 2px;
+    }
+}
+
+.session__mode-mark {
+    width: 7px;
+    height: 7px;
+    border: 1px solid currentColor;
+}
+
+.session__mode.is-active .session__mode-mark {
+    border-color: var(--c03);
+    background: var(--c03);
+}
+
+// The hacker mark glows in the theme's bright green and blinks like a cursor.
+.session__mode--hacker.is-active .session__mode-mark {
+    border-color: var(--c11);
+    background: var(--c11);
+    box-shadow: 0 0 8px var(--c11);
+    animation: session-blink-mark 1.06s step-end infinite;
+}
+
+@keyframes session-blink-mark {
+    50% {
+        opacity: 0.2;
+    }
+}
+
+.session__window.is-hacker {
+    filter: drop-shadow(0 40px 60px rgba(0, 0, 0, 0.45)) drop-shadow(0 0 34px color-mix(in srgb, var(--c11) 24%, transparent));
+
+    :deep(.terminal-frame__body) {
+        position: relative;
+    }
+}
+
+.session__shader {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+// With the shader running the DOM grid stays for layout and screen readers.
+.session__window.has-shader .session__fit {
+    opacity: 0;
+}
+
+// No WebGL: a CSS take on the same look, glow and scanlines.
+.session__window.is-hacker:not(.has-shader) .session__fit {
+    position: relative;
+
+    .session__screen {
+        text-shadow: 0 0 6px currentColor;
+    }
+
+    &::after {
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.18) 0 1px, transparent 1px 3px);
+        content: '';
+        pointer-events: none;
     }
 }
 
@@ -751,6 +1101,66 @@ $slots: '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', 
     &.is-active {
         border-color: color-mix(in srgb, var(--color-warning, #fd971f) 55%, transparent);
         color: var(--color-warning, #fd971f);
+    }
+}
+
+// Sound on: lit in the theme's bright green, like the hacker mode mark.
+.session__sound.is-active {
+    border-color: color-mix(in srgb, var(--c11) 55%, transparent);
+    color: var(--c11);
+}
+
+// Now playing, with the credit and a link to where the track comes from.
+.session__music {
+    margin: 14px 0 0;
+    color: var(--muted);
+    font-family: $font_mono;
+    font-size: 1.1rem;
+    text-align: end;
+
+    a {
+        color: var(--cream);
+        text-decoration: underline;
+        text-decoration-color: var(--ink-line);
+        text-underline-offset: 3px;
+
+        &:hover {
+            text-decoration-color: currentColor;
+        }
+    }
+}
+
+// Next song: a small ▸▸ after the credit.
+.session__next {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 20px;
+    margin-inline-start: 8px;
+    padding: 0;
+    border: 1px solid var(--ink-line);
+    border-radius: 0;
+    background: transparent;
+    color: var(--muted);
+    vertical-align: middle;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease;
+
+    svg {
+        width: 10px;
+        height: 10px;
+        fill: currentColor;
+    }
+
+    &:hover {
+        border-color: color-mix(in srgb, var(--c11) 55%, transparent);
+        color: var(--c11);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--cream);
+        outline-offset: 2px;
     }
 }
 

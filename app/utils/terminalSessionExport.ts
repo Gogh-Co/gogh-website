@@ -4,10 +4,14 @@ import {
     SESSION_COLS,
     SESSION_ROWS,
     buildTerminalSession,
+    cursorVisible,
+    renderTerminalSession,
     sessionFrames,
     type SessionFrame,
     type SessionSegment,
 } from './terminalSession';
+import { buildHackerSession } from './hackerSession';
+import { HackerScreen, sessionEffects } from './hackerShader';
 
 // Turns the theme page's live terminal session into a file: each distinct
 // screen of the loop is drawn on a canvas (the same window the page shows,
@@ -289,22 +293,7 @@ export async function exportSessionVideo(theme: Record<string, any>, themeName: 
     throwIfAborted(signal);
 
     const { frames, canvas, ctx, layout, colors, slug } = setup(theme, themeName, 2, 1000 / 30);
-    const size = { width: layout.width, height: layout.height };
-
-    let format: InstanceType<typeof Mp4OutputFormat> | InstanceType<typeof WebMOutputFormat> = new Mp4OutputFormat({ fastStart: 'in-memory' });
-    let extension = 'mp4';
-    let codec = await getFirstEncodableVideoCodec(format.getSupportedVideoCodecs(), size);
-    if (!codec) {
-        format = new WebMOutputFormat();
-        extension = 'webm';
-        codec = await getFirstEncodableVideoCodec(format.getSupportedVideoCodecs(), size);
-    }
-    if (!codec) throw new Error('This browser cannot encode video.');
-
-    const output = new Output({ format, target: new BufferTarget() });
-    const source = new CanvasSource(canvas, { codec, bitrate: QUALITY_HIGH });
-    output.addVideoTrack(source);
-    await output.start();
+    const { output, source, extension } = await openVideo(canvas, { Output, Mp4OutputFormat, WebMOutputFormat, BufferTarget, CanvasSource, QUALITY_HIGH, getFirstEncodableVideoCodec });
 
     try {
         for (let index = 0; index < frames.length; index++) {
@@ -324,12 +313,116 @@ export async function exportSessionVideo(theme: Record<string, any>, themeName: 
     }
 
     onProgress?.(1);
+    return videoResult(output, extension, `gogh-${slug}-session`);
+}
+
+type Mediabunny = typeof import('mediabunny');
+
+// MP4 with H.264 where the browser can encode it, WebM otherwise.
+async function openVideo(canvas: HTMLCanvasElement, mb: Pick<Mediabunny, 'Output' | 'Mp4OutputFormat' | 'WebMOutputFormat' | 'BufferTarget' | 'CanvasSource' | 'QUALITY_HIGH' | 'getFirstEncodableVideoCodec'>) {
+    const size = { width: canvas.width, height: canvas.height };
+    let format: InstanceType<Mediabunny['Mp4OutputFormat']> | InstanceType<Mediabunny['WebMOutputFormat']> = new mb.Mp4OutputFormat({ fastStart: 'in-memory' });
+    let extension = 'mp4';
+    let codec = await mb.getFirstEncodableVideoCodec(format.getSupportedVideoCodecs(), size);
+    if (!codec) {
+        format = new mb.WebMOutputFormat();
+        extension = 'webm';
+        codec = await mb.getFirstEncodableVideoCodec(format.getSupportedVideoCodecs(), size);
+    }
+    if (!codec) throw new Error('This browser cannot encode video.');
+
+    const output = new mb.Output({ format, target: new mb.BufferTarget() });
+    const source = new mb.CanvasSource(canvas, { codec, bitrate: mb.QUALITY_HIGH });
+    output.addVideoTrack(source);
+    await output.start();
+    return { output, source, extension };
+}
+
+function videoResult(output: { target: { buffer: ArrayBuffer | null } }, extension: string, name: string): SessionExportResult {
     const buffer = output.target.buffer;
     if (!buffer) throw new Error('The video came out empty.');
     return {
         blob: new Blob([buffer], { type: extension === 'mp4' ? 'video/mp4' : 'video/webm' }),
-        filename: `gogh-${slug}-session.${extension}`,
+        filename: `${name}.${extension}`,
     };
+}
+
+// Hacker mode: its shaders move on every frame (grain, glitches, the cursor
+// trail), so the loop is rendered at a constant 30 fps through the same
+// WebGL pass the page uses, inside the same window chrome.
+export async function exportHackerVideo(theme: Record<string, any>, themeName: string, options: SessionExportOptions = {}): Promise<SessionExportResult> {
+    const { signal, onProgress } = options;
+    await loadFonts();
+    const mb = await import('mediabunny');
+    throwIfAborted(signal);
+
+    const session = buildHackerSession(theme, themeName);
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Canvas 2D is not available.');
+    const layout = createLayout(ctx, 2);
+    canvas.width = layout.width;
+    canvas.height = layout.height;
+    const colors = themeColors(theme);
+    const slug = themeSlug(themeName) || 'theme';
+
+    const glCanvas = document.createElement('canvas');
+    const screen = new HackerScreen(glCanvas, theme, { preserve: true });
+    screen.setLayout({
+        width: layout.width,
+        height: layout.height - layout.bar,
+        gridX: layout.padX,
+        gridY: layout.padY,
+        cellW: layout.cellW,
+        cellH: layout.cellH,
+        fontPx: layout.fontSize,
+        dpr: layout.scale,
+    });
+
+    const { output, source, extension } = await openVideo(canvas, mb);
+    const fps = 30;
+    const frameMs = 1000 / fps;
+    const count = Math.ceil(session.total / frameMs);
+    const state = session.initial();
+    let stepIndex = 0;
+    let keys = state.keys;
+    let keyTime = 0;
+
+    try {
+        for (let frame = 0; frame < count; frame++) {
+            throwIfAborted(signal);
+            const time = frame * frameMs;
+            while (stepIndex < session.steps.length && session.times[stepIndex] <= time) {
+                session.steps[stepIndex].run?.(state);
+                stepIndex++;
+            }
+            if (state.keys !== keys) {
+                keys = state.keys;
+                keyTime = time;
+            }
+            screen.setRows(renderTerminalSession(state), cursorVisible(time - keyTime));
+            screen.render(time, sessionEffects(state));
+            drawChrome(ctx, layout, colors, state.title);
+            ctx.drawImage(glCanvas, 0, layout.bar);
+            ctx.strokeStyle = colors.border;
+            ctx.lineWidth = layout.scale;
+            ctx.strokeRect(layout.scale / 2, layout.scale / 2, layout.width - layout.scale, layout.height - layout.scale);
+            await source.add(time / 1000, Math.min(frameMs, session.total - time) / 1000);
+            if (frame % 6 === 0) {
+                onProgress?.(frame / count);
+                await nextTick();
+            }
+        }
+        await output.finalize();
+    } catch (error) {
+        await output.cancel().catch(() => {});
+        throw error;
+    } finally {
+        screen.destroy();
+    }
+
+    onProgress?.(1);
+    return videoResult(output, extension, `gogh-${slug}-hacker`);
 }
 
 export function saveBlob({ blob, filename }: SessionExportResult) {
