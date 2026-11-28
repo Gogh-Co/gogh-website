@@ -1,4 +1,9 @@
 @use '@/assets/sass/base' as *;
+@use '@/pages/history-opening';
+@use '@/pages/history-chapters.scss';
+@use '@/pages/history-hover';
+@use '@/pages/history-field';
+@use '@/pages/history-motion';
 
 // The /history page: an editorial long read on the ink surface, one
 // section per chapter, each tinted by its own accent (--accent).
@@ -26,7 +31,7 @@
         inset: 0;
         z-index: 100;
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-        opacity: 0.06;
+        opacity: 0.025;
         pointer-events: none;
     }
 }
@@ -77,318 +82,14 @@
 }
 
 /* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
- * Hero
- * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ */
-.h-hero {
-    position: relative;
-    display: flex;
-    align-items: flex-end;
-    min-height: 100vh;
-    min-height: 100svh;
-    overflow: hidden;
-    isolation: isolate;
-}
-
-.h-hero__media {
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    // The drawing dissolves into the page instead of ending in an edge.
-    mask-image: linear-gradient(180deg, #000 50%, transparent 100%);
-    -webkit-mask-image: linear-gradient(180deg, #000 50%, transparent 100%);
-
-    // Keeps the copy readable over the image.
-    &::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background:
-            linear-gradient(180deg, rgba(10, 15, 20, 0.55) 0%, rgba(10, 15, 20, 0) 30%, rgba(10, 15, 20, 0.35) 60%, var(--ink) 100%),
-            linear-gradient(90deg, rgba(10, 15, 20, 0.7) 0%, rgba(10, 15, 20, 0) 60%);
-    }
-}
-
-.h-hero__image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: 30% 50%;
-}
-
-.h-hero__inner {
-    width: 100%;
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 140px 20px 120px;
-
-    @include m768 {
-        padding: 160px 48px 140px;
-    }
-}
-
-.h-hero__title {
-    display: flex;
-    flex-direction: column;
-    margin: 0 0 28px;
-    color: var(--cream);
-    font-family: $font_display;
-    font-size: clamp(4.8rem, 9vw, 13rem);
-    font-weight: 900;
-    line-height: 0.9;
-    letter-spacing: -0.05em;
-
-    em {
-        font-style: normal;
-        font-weight: 100;
-        letter-spacing: -0.04em;
-        background: linear-gradient(90deg, #e74c3c, #f1c40f 25%, #2ecc71 45%, #2aa198 60%, #3498db 78%, #9b59b6);
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-    }
-}
-
-.h-hero__line {
-    display: block;
-}
-
-.h-hero__lead.h-hero__lead {
-    max-width: 620px;
-    margin: 0 0 40px;
-    color: var(--cream);
-    font-size: 1.8rem;
-    line-height: 1.5;
-    opacity: 0.86;
-
-    @include m768 {
-        font-size: 2.1rem;
-    }
-}
-
-.h-hero__stats {
-    display: grid;
-    gap: 18px;
-    max-width: 860px;
-    margin: 0 0 48px;
-    padding: 0;
-    list-style: none;
-
-    @include m576 {
-        grid-template-columns: repeat(3, 1fr);
-    }
-
-    li {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        margin: 0;
-        padding-top: 14px;
-        border-top: 1px solid rgba(255, 255, 255, 0.22);
-    }
-
-    b {
-        font-size: 2.6rem;
-        font-weight: 300;
-        letter-spacing: -0.02em;
-    }
-
-    span {
-        color: var(--muted);
-        font-size: 1.3rem;
-        line-height: 1.4;
-    }
-}
-
-.h-hero__cue {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    min-height: $tap_target_min;
-    color: var(--cream);
-    font-size: 1.2rem;
-    font-weight: 500;
-    letter-spacing: 0.16em;
-    text-decoration: none;
-    text-transform: uppercase;
-
-    svg {
-        animation: cue 2s $ease_in_out infinite;
-    }
-
-    &:hover {
-        color: var(--gogh-yellow);
-    }
-}
-
-.h-hero__spectrum {
-    position: absolute;
-    inset: auto 0 0;
-    display: grid;
-    grid-template-columns: repeat(16, 1fr);
-    height: 6px;
-
-    i {
-        animation: spectrum-in 1.2s $ease_out_expo backwards;
-        animation-delay: calc(0.6s + var(--i) * 0.04s);
-        transform-origin: bottom;
-    }
-}
-
-/* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
- * Chapter index
- * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ */
-.h-index {
-    padding: 120px 0 100px;
-
-    @include m768 {
-        padding: 160px 0 120px;
-    }
-}
-
-.h-index__header {
-    margin: 0 0 56px;
-}
-
-.h-index__grid {
-    display: grid;
-    gap: 16px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-
-    @include m576 {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    @include m992 {
-        grid-template-columns: repeat(3, 1fr);
-    }
-
-    @include m1400 {
-        grid-template-columns: repeat(4, 1fr);
-
-        // The first card leads, Shopify Editions style.
-        .h-index__item:first-child {
-            grid-column: span 2;
-            grid-row: span 2;
-
-            .h-card__title {
-                font-size: 4.4rem;
-            }
-        }
-    }
-}
-
-.h-index__item {
-    margin: 0;
-}
-
-.h-card {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    height: 100%;
-    padding: 12px 12px 20px;
-    border: 1px solid var(--ink-line);
-    background: color-mix(in srgb, var(--ink-2) 70%, transparent);
-    color: var(--cream);
-    text-decoration: none;
-    // --mx/--my (0–1) come from the pointer; the card leans toward it.
-    transform: perspective(900px) rotateX(calc((var(--my, 0.5) - 0.5) * -10deg)) rotateY(calc((var(--mx, 0.5) - 0.5) * 12deg));
-    transition: border-color 0.4s ease, transform 0.7s $ease_out_expo;
-
-    // Accent glare that follows the pointer.
-    &::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: radial-gradient(380px circle at calc(var(--mx, 0.5) * 100%) calc(var(--my, 0.5) * 100%), color-mix(in srgb, var(--accent) 22%, transparent), transparent 65%);
-        opacity: 0;
-        transition: opacity 0.4s ease;
-        pointer-events: none;
-    }
-
-    &:hover {
-        border-color: color-mix(in srgb, var(--accent) 60%, transparent);
-        color: var(--cream);
-
-        &::after {
-            opacity: 1;
-        }
-
-        img {
-            transform: scale(1.06);
-        }
-    }
-
-    &:focus-visible {
-        outline: 2px solid var(--gogh-yellow);
-        outline-offset: 3px;
-    }
-}
-
-.h-card__media {
-    display: block;
-    flex: 1;
-    min-height: 0;
-    aspect-ratio: 16 / 9;
-    overflow: hidden;
-    margin-bottom: 6px;
-    mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
-    -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
-
-    img {
-        display: block;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 1s $ease_out_expo;
-    }
-}
-
-.h-card__meta {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    padding: 0 6px;
-    color: var(--muted);
-    font-family: $font_mono;
-    font-size: 1.1rem;
-}
-
-.h-card__num {
-    color: var(--accent);
-}
-
-.h-card__title {
-    padding: 0 6px;
-    font-size: 2.4rem;
-    font-weight: 700;
-    line-height: 1.05;
-    letter-spacing: -0.02em;
-
-    em {
-        font-style: normal;
-        font-weight: 200;
-    }
-}
-
-.h-card__kicker {
-    padding: 0 6px;
-    color: var(--muted);
-    font-size: 1.25rem;
-}
-
-/* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
- * Escape-code marquee
+ * Escape-code interlude
  * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ */
 .h-marquee {
     overflow: hidden;
-    padding: 26px 0;
+    padding: 18px 0;
     border-top: 1px solid var(--ink-line);
     font-family: $font_mono;
-    font-size: clamp(1.6rem, 2.4vw, 2.6rem);
+    font-size: clamp(1.3rem, 1.3vw, 1.6rem);
     white-space: nowrap;
     mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
     -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
@@ -397,7 +98,6 @@
 .h-marquee__track {
     display: flex;
     width: max-content;
-    animation: marquee 60s linear infinite;
 
     span {
         display: flex;
@@ -407,7 +107,6 @@
 
     b {
         font-weight: 400;
-        text-shadow: 0 0 18px currentColor;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -514,210 +213,18 @@ html:has(.gogh-header.is-hidden) .h-rail {
     }
 }
 
-// Desktop: a tall track whose child sticks for one screen, so the drawing
-// holds full-bleed while the title plays over it. Phones: a plain stack.
-.h-stage {
-    position: relative;
-
-    @include m768 {
-        height: 170vh;
-        height: 170svh;
-    }
-}
-
-.h-stage__sticky {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-
-    @include m768 {
-        position: sticky;
-        top: 0;
-        justify-content: flex-end;
-        height: 100vh;
-        height: 100svh;
-        overflow: hidden;
-    }
-}
-
-.h-stage__media {
-    position: relative;
-    aspect-ratio: 4 / 3;
-    overflow: hidden;
-    // Soft on every side, so there is never a rectangle on the page.
-    mask-image: linear-gradient(180deg, transparent 0%, #000 14%, #000 60%, transparent 100%), linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
-    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 14%, #000 60%, transparent 100%), linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
-    mask-composite: intersect;
-    -webkit-mask-composite: source-in;
-
-    // Darkens the lower left, where the title sits.
-    &::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(20deg, rgba(10, 15, 20, 0.85) 0%, rgba(10, 15, 20, 0) 55%);
-    }
-
-    @include m768 {
-        position: absolute;
-        inset: 0;
-        aspect-ratio: auto;
-        mask-image: linear-gradient(180deg, transparent 0%, #000 16%, #000 58%, transparent 100%), linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%);
-        -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 16%, #000 58%, transparent 100%), linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%);
-    }
-}
-
-.h-chapter__header {
-    position: relative;
-    z-index: 2;
-    display: grid;
-    gap: 22px;
-    margin: -18% auto 56px;
-
-    @include m768 {
-        margin: 0 auto;
-        padding-bottom: clamp(48px, 9vh, 110px);
-    }
-
-    @include m992 {
-        grid-template-columns: 1.1fr 0.9fr;
-        align-items: end;
-        column-gap: 48px;
-
-        .h-chapter__eyebrow {
-            grid-column: 1 / -1;
-        }
-    }
-}
-
-.h-chapter__eyebrow.h-chapter__eyebrow {
-    flex-wrap: wrap;
-    margin: 0;
-
-    span {
-        border-color: var(--accent);
-        color: var(--accent);
-    }
-}
-
-.h-chapter__years {
-    margin-inline-start: auto;
-    color: var(--cream);
-    font-family: $font_mono;
-    font-size: 1.15rem;
-    font-weight: 500;
-    letter-spacing: 0.06em;
-    text-transform: none;
-}
-
-.h-chapter__lead.h-chapter__lead {
-    max-width: 520px;
-    margin: 0;
-    color: var(--cream);
-    font-size: 1.9rem;
-    font-weight: 300;
-    line-height: 1.45;
-    opacity: 0.9;
-
-    @include m992 {
-        justify-self: end;
-    }
-}
-
-.h-chapter__image {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    will-change: transform;
-}
-
-.h-chapter__bignum {
-    position: absolute;
-    top: 12%;
-    right: 16px;
-    z-index: 1;
-    color: transparent;
-    font-family: $font_display;
-    font-size: clamp(9rem, 26vw, 38rem);
-    font-weight: 900;
-    line-height: 1;
-    letter-spacing: -0.06em;
-    -webkit-text-stroke: 1px color-mix(in srgb, var(--accent) 70%, var(--cream));
-    opacity: 0.18;
-    pointer-events: none;
-
-    @include m768 {
-        right: 4vw;
-    }
-}
-
-// Alternate within the existing editorial grid; image and type keep the same
-// scale and edge treatment throughout the page.
-@include m992 {
-    .h-chapter--alt {
-        .h-chapter__header { grid-template-columns: 0.9fr 1.1fr; }
-
-        .h-chapter__title {
-            grid-column: 2;
-            grid-row: 2;
-            text-align: end;
-        }
-
-        .h-chapter__lead {
-            grid-column: 1;
-            grid-row: 2;
-            justify-self: start;
-        }
-
-        .h-chapter__image { object-position: 35% center; }
-        .h-stage__media::after { background: linear-gradient(340deg, #0a0f14d9, transparent 65%); }
-        .h-chapter__bignum { right: auto; left: 4vw; }
-    }
-}
-
-.h-chapter__body {
-    display: grid;
-    gap: 48px;
-
-    @include m768 {
-        padding-top: 40px;
-    }
-
-    @include m992 {
-        grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-        gap: 64px;
-        align-items: start;
-
-        .h-chapter--alt & {
-            grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-
-            .h-chapter__text {
-                order: 2;
-            }
-        }
-    }
-}
 
 .h-chapter__text {
     :deep(p) {
         margin: 0 0 22px;
         color: color-mix(in srgb, var(--cream) 82%, transparent);
         font-size: 1.7rem;
-        line-height: 1.7;
+        line-height: 1.8;
 
         @include m768 {
             font-size: 1.8rem;
         }
 
-        &:first-child::first-letter {
-            float: left;
-            margin: 6px 10px 0 0;
-            color: var(--accent);
-            font-size: 6.4rem;
-            font-weight: 900;
-            line-height: 0.8;
-        }
     }
 
     :deep(strong) {
@@ -736,7 +243,8 @@ html:has(.gogh-header.is-hidden) .h-rail {
         color: var(--cream);
         font-family: $font_mono;
         font-size: 0.86em;
-        white-space: nowrap;
+        white-space: normal;
+        overflow-wrap: anywhere;
     }
 
     :deep(a) {
@@ -937,17 +445,4 @@ html:has(.gogh-header.is-hidden) .h-rail {
         outline: 2px solid var(--gogh-yellow);
         outline-offset: 3px;
     }
-}
-
-@keyframes marquee {
-    to { transform: translateX(-50%); }
-}
-
-@keyframes cue {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(5px); }
-}
-
-@keyframes spectrum-in {
-    from { transform: scaleY(0); }
 }

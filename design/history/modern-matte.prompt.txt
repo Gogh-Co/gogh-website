@@ -1,0 +1,10 @@
+Mode: built-in image_gen edit. No CLI fallback.
+Edit target: public/history/modern.webp
+Master: design/history/modern-matte.png
+Website renditions: public/history/modern-matte.webp, modern-matte-960.webp, modern-matte-480.webp
+
+Final prompt:
+
+Use case: precise-object-edit.
+Asset type: final wide editorial illustration for the terminal color history chapter 'The palette becomes a theme'.
+Input image 1 is the EDIT TARGET and the exact style reference. Improve this existing illustration, keeping its monitor, three terminal panes with colored syntax strokes, keyboard, mouse, perspective and hand-drawn visual identity. The user dislikes ALL the floating translucent glass-like colored squares around the monitor. Remove all six floating glass tiles completely. Replace that visual idea with one small, tasteful fan of opaque MATTE artist's paper color swatches physically resting on the desk near the monitor base, as if a designer is choosing a terminal palette. These are flat paper swatches with softly textured pigment, not shiny objects. Keep the focus on the terminal screen; simplify the surrounding composition and leave generous dark breathing room. Preserve the original colored pencil and chalk/pastel drawing style, fine loose cross-hatching, warm ochre construction lines, tactile strokes, vivid controlled terminal colors, and dark blue-black background (#0a0f14). Keep the subtle colored desk illumination but make the desk and the swatches matte rather than mirror-glossy. The monitor screen can emit soft light naturally. Feather the drawing into the dark background on every edge for seamless integration with the website. Final image: premium, cohesive, highly detailed wide landscape, approximately 16:9, with all essential objects safely inside the frame. No floating geometric decorations, no glass swatches, no crystal cubes, no translucent squares, no glassmorphism, no photorealistic plastic 3D render, no people, no logos, no added typography or readable labels. Keep the screen's syntax as painterly colored lines.

@@ -1,7 +1,7 @@
 <template>
     <section ref="root" class="tl" aria-labelledby="timeline-title">
         <div class="tl__pin">
-            <header class="tl__header">
+            <header class="tl__header article-heading">
                 <p class="section-eyebrow"><span>—</span> {{ copy.eyebrow }}</p>
                 <h2 id="timeline-title" class="section-title">{{ copy.title }} <em>{{ copy.titleAccent }}</em></h2>
             </header>
@@ -9,7 +9,7 @@
             <div ref="viewport" class="tl__viewport">
                 <ol ref="track" class="tl__track">
                     <li v-for="(event, index) in copy.events" :key="event.year + index" class="tl__event" :style="{ '--c': COLORS[index % COLORS.length] }">
-                        <span class="tl__year">{{ event.year }}</span>
+                        <span class="tl__year">{{ event.year }}{{ ' ' }}</span>
                         <span class="tl__line" aria-hidden="true"></span>
                         <span class="tl__text">{{ event.text }}</span>
                     </li>
@@ -20,7 +20,10 @@
 </template>
 
 <script setup>
-defineProps({ copy: { type: Object, required: true } });
+const props = defineProps({
+    copy: { type: Object, required: true },
+    motionEnabled: { type: Boolean, default: true },
+});
 
 const COLORS = ['#e74c3c', '#f1c40f', '#2ecc71', '#2aa198', '#3498db', '#9b59b6'];
 
@@ -31,10 +34,9 @@ let media = null;
 
 // On wide screens the section pins and the years scroll sideways with the
 // page; elsewhere (and with reduced motion) the track scrolls natively.
-onMounted(() => {
-    if (prefersReducedMotion()) {
-        return;
-    }
+function syncMotion() {
+    media?.revert(); media = null;
+    if (!props.motionEnabled || prefersReducedMotion() || !root.value) return;
     const { gsap } = useGsap();
     media = gsap.matchMedia();
     media.add('(min-width: 992px)', () => {
@@ -52,7 +54,10 @@ onMounted(() => {
             },
         });
     });
-});
+}
+
+onMounted(syncMotion);
+watch(() => props.motionEnabled, syncMotion, { flush: 'post' });
 
 onBeforeUnmount(() => media?.revert());
 </script>

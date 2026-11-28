@@ -1,17 +1,24 @@
 <template>
     <HistoryFigure :label="copy.label" :caption="copy.caption">
         <div class="ascii">
-            <ol class="ascii__grid" :aria-label="copy.label">
+            <ol class="ascii__grid" :aria-label="copy.label" @pointerleave="hover = null">
                 <li
                     v-for="(name, code) in ASCII_CONTROLS"
                     :key="name"
-                    class="ascii__cell"
-                    :class="{ 'is-esc': code === 27, 'is-active': code === active }"
-                    @pointerenter="active = code"
-                    @pointerleave="active = 27"
                 >
-                    <span class="ascii__code">{{ code }}</span>
-                    <span class="ascii__name">{{ name }}</span>
+                    <button
+                        type="button"
+                        class="ascii__cell"
+                        :class="{ 'is-esc': code === 27, 'is-active': code === active }"
+                        :aria-label="`${name} · ${code}`"
+                        :aria-pressed="selected === code"
+                        @pointerenter="hover = code"
+                        @focus="selected = code"
+                        @click="selected = code"
+                    >
+                        <span class="ascii__code">{{ code }}</span>
+                        <span class="ascii__name">{{ name }}</span>
+                    </button>
                 </li>
             </ol>
 
@@ -22,9 +29,10 @@
                     <div><dt>hex</dt><dd>0x{{ active.toString(16).toUpperCase().padStart(2, '0') }}</dd></div>
                     <div><dt>oct</dt><dd>\{{ active.toString(8).padStart(3, '0') }}</dd></div>
                     <div><dt>ctrl</dt><dd>^{{ String.fromCharCode(64 + active) }}</dd></div>
-                    <div v-if="active === 27"><dt>shell</dt><dd>\e</dd></div>
+                    <!-- rows stay mounted so the panel never changes size on hover -->
+                    <div><dt>shell</dt><dd>{{ active === 27 ? '\\e' : '—' }}</dd></div>
                 </dl>
-                <span v-if="active === 27" class="ascii__tag">{{ copy.highlight }}</span>
+                <span class="ascii__tag" :class="{ 'is-hidden': active !== 27 }">{{ copy.highlight }}</span>
             </div>
         </div>
     </HistoryFigure>
@@ -36,7 +44,9 @@ import { ASCII_CONTROLS } from '~/utils/historyData';
 
 defineProps({ copy: { type: Object, required: true } });
 
-const active = ref(27);
+const selected = ref(27);
+const hover = ref(null);
+const active = computed(() => hover.value ?? selected.value);
 </script>
 
 <style lang="scss" scoped>
@@ -47,18 +57,22 @@ const active = ref(27);
     gap: 20px;
 
     @include m576 {
-        grid-template-columns: 1fr auto;
+        grid-template-columns: minmax(0, 1fr) 190px;
         align-items: stretch;
     }
 }
 
 .ascii__grid {
     display: grid;
-    grid-template-columns: repeat(8, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 4px;
     margin: 0;
     padding: 0;
     list-style: none;
+
+    li { min-width: 0; margin: 0; }
+
+    @include m576 { grid-template-columns: repeat(8, minmax(0, 1fr)); }
 }
 
 .ascii__cell {
@@ -66,36 +80,40 @@ const active = ref(27);
     flex-direction: column;
     justify-content: space-between;
     gap: 6px;
+    width: 100%;
+    height: 100%;
     min-height: 52px;
     margin: 0;
     padding: 6px;
     border: 1px solid var(--ink-line);
     background: var(--ink);
     font-family: $font_mono;
-    cursor: default;
-    transition: background-color 0.25s ease, border-color 0.25s ease, transform 0.4s $ease_out_expo;
+    color: var(--cream);
+    text-align: start;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+
+    &.is-esc { color: var(--gogh-yellow); }
 
     &.is-active {
-        border-color: rgba(255, 255, 255, 0.4);
+        border-color: var(--cream);
         background: var(--ink-3);
-        transform: translateY(-2px);
     }
 
-    &.is-esc {
+    &.is-esc.is-active {
         border-color: var(--gogh-yellow);
-        background: color-mix(in srgb, var(--gogh-yellow) 16%, var(--ink));
-        color: var(--gogh-yellow);
-        animation: esc-pulse 2.4s ease-in-out infinite;
+        background: var(--gogh-yellow);
+        color: var(--ink);
     }
+
+    &:focus-visible { outline: 2px solid var(--gogh-yellow); outline-offset: 2px; }
 }
 
 .ascii__code {
     color: var(--muted);
     font-size: 0.95rem;
 
-    .is-esc & {
-        color: inherit;
-    }
+    .is-esc & { color: inherit; opacity: 0.7; }
 }
 
 .ascii__name {
@@ -113,7 +131,6 @@ const active = ref(27);
     flex-direction: column;
     justify-content: center;
     gap: 14px;
-    min-width: 170px;
     padding: 18px;
     border: 1px solid var(--ink-line);
     background: var(--ink);
@@ -162,10 +179,11 @@ const active = ref(27);
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
+
+    &.is-hidden { visibility: hidden; }
 }
 
-@keyframes esc-pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(241, 196, 15, 0); }
-    50% { box-shadow: 0 0 22px 0 rgba(241, 196, 15, 0.35); }
+@media (prefers-reduced-motion: reduce) {
+    .ascii__cell { transition: none; }
 }
 </style>

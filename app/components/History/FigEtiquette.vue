@@ -87,6 +87,7 @@ const STEP_COLORS = ['#3498db', '#e74c3c', '#f1c40f', '#9b59b6'];
 
 .flow__body {
     display: grid;
+    min-width: 0;
     gap: 8px;
     padding-top: 6px;
 }

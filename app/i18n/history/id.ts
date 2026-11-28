@@ -21,6 +21,12 @@ export default {
     },
 
     ui: {
+        motion: {
+            label: 'Mode tenang',
+            enable: 'Kurangi gerakan dan efek visual',
+            disable: 'Pulihkan efek visual',
+            system: 'Sistem Anda mengaktifkan pengurangan gerakan',
+        },
         chapter: 'Bab',
         sources: 'Spesifikasi dan bacaan lanjutan',
         nav: 'Daftar bab',
@@ -106,7 +112,7 @@ export default {
             titleAccent: 'berisi 256 warna',
             lead: 'xterm memadatkan kubus RGB ke dalam indeks 8-bit, dan sebagian besar terminal mengikuti.',
             body: [
-                'Enam belas warna tidak cukup untuk editor dan penyorotan sintaks. Pada 1999, **Todd Larason** menyumbangkan dukungan 256 warna ke [xterm](https://invisible-island.net/xterm/), memakai urutan `ESC[38;5;Nm` untuk latar depan dan `ESC[48;5;Nm` untuk latar belakang, versi bertitik koma dari bentuk dalam format dokumen T.416 milik ITU.',
+                'Enam belas warna tidak cukup untuk editor dan penyorotan sintaks. Pada 1999, **Todd Larason** menyumbangkan dukungan 256 warna ke [xterm](https://invisible-island.net/xterm/), memakai urutan `ESC[38;5;Nm` untuk latar depan dan `ESC[48;5;Nm` untuk latar belakang, versi bertitik koma dari bentuk dalam format dokumen T.416 milik ITU. Sebagai terminal acuan X Window System, xterm menjadi patokan di Linux dan sistem Unix lainnya: rxvt, Konsole, dan GNOME Terminal mengadopsi sekuens yang sama.',
                 'Ke-256 entri terbagi menjadi tiga blok. **0–15** adalah 16 warna sistem yang diatur tema Anda. **16–231** membentuk kubus RGB 6×6×6, dengan entri `16 + 36r + 6g + b` memakai tingkat 0, 95, 135, 175, 215, dan 255. **232–255** adalah 24 warna abu-abu dari `#080808` hingga `#eeeeee`.',
                 'Berbeda dari 16 warna pertama, kubus dan gradasi abu-abu hampir selalu tetap. Arahkan penunjuk ke kisi untuk melihat susunan setiap indeks. (rxvt-unicode menghadirkan varian 88 warna dari gagasan yang sama, dengan kubus 4×4×4.)',
             ],
@@ -119,7 +125,7 @@ export default {
             lead: 'Tiga byte per warna, dikirim langsung ke layar. Perjalanannya dari standar dokumen ke terminal semua orang memakan waktu dua dekade.',
             body: [
                 'Sintaks warna langsung berasal dari [ITU-T T.416](https://www.itu.int/rec/T-REC-T.416-199303-I/en) (1993, juga ISO 8613-6), sebuah format dokumen, bukan standar terminal: `38:2:<color space>:r:g:b`, dengan pemisah titik dua. Kebanyakan terminal mengadopsi bentuk bertitik koma yang lebih sederhana, `ESC[38;2;255;100;0m`; dukungan untuk bentuk asli bertitik dua masih berbeda antar-emulator.',
-                '**Konsole** termasuk emulator pertama yang menampilkannya, pada pertengahan 2000-an. xterm menerima urutan ini pada 2012 dengan mendekatkan setiap nilai ke paletnya, lalu menambahkan warna langsung sesungguhnya pada akhir 2017. Gelombang besarnya datang pada **2016**: iTerm2 3.0, tmux 2.2, `termguicolors` di Vim (bagian dari Vim 8.0), dan konsol Windows 10, mula-mula dalam versi Insider.',
+                '**Konsole** termasuk emulator pertama yang menampilkannya, pada pertengahan 2000-an. xterm menerima urutan ini pada 2012 dengan mendekatkan setiap nilai ke paletnya, lalu menambahkan warna langsung sesungguhnya pada akhir 2017. Gelombang besarnya datang pada **2016**: iTerm2 3.0, tmux 2.2, `termguicolors` di Vim (bagian dari Vim 8.0), dan konsol Windows 10, mula-mula dalam versi Insider. Di macOS, **Terminal.app** milik Apple bertahan di 256 warna hampir satu dekade lagi, salah satu alasan banyak pengguna Mac beralih ke iTerm2; warna 24-bit baru hadir di **macOS 26 Tahoe** (2025).',
                 'Tidak ada cara universal untuk menanyakan apakah terminal mendukung warna 24-bit. Program menggabungkan berbagai petunjuk: variabel lingkungan `COLORTERM=truecolor` (atau `24bit`), kapabilitas terminfo, atau kueri yang mungkin dijawab terminal. Proyek [termstandard/colors](https://github.com/termstandard/colors) mencatat terminal mana mendukung fitur apa.',
             ],
         },
@@ -307,6 +313,7 @@ export default {
             { year: '2017', text: 'NO_COLOR. Alacritty mulai memanfaatkan GPU.' },
             { year: '2019', text: 'Windows Terminal diperkenalkan.' },
             { year: '2024', text: 'Ghostty 1.0 dirilis.' },
+            { year: '2025', text: 'Terminal.app mendapat truecolor di macOS 26 Tahoe.' },
         ],
     },
 

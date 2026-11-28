@@ -1,0 +1,290 @@
+@use '@/assets/sass/base' as *;
+
+// Every chapter uses a bounded copy column. Artwork may extend past the grid;
+// text never uses viewport-sized percentage padding to position itself.
+.h-stage { position: relative; }
+
+.h-stage__sticky {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.h-stage__media {
+    margin: 0;
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    mask-image: linear-gradient(180deg, transparent, #000 14%, #000 70%, transparent), linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    mask-composite: intersect;
+
+    &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(0deg, #0a0f1470, transparent 60%);
+    }
+}
+
+.h-chapter__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.h-chapter__header {
+    order: 1;
+    position: relative;
+    z-index: 2;
+    margin: -16% auto 48px;
+}
+
+.h-chapter__copy {
+    display: grid;
+    gap: 22px;
+    min-width: 0;
+}
+
+.h-chapter__eyebrow.h-chapter__eyebrow {
+    flex-wrap: wrap;
+    margin: 0;
+
+    span { border-color: var(--accent); color: var(--accent); }
+}
+
+.h-chapter__years {
+    margin-inline-start: 12px;
+    color: var(--cream);
+    font: 500 1.15rem $font_mono;
+    letter-spacing: .04em;
+    text-transform: none;
+}
+
+.h-chapter .h-chapter__title {
+    margin: 0;
+    font-size: clamp(4.8rem, 5.6vw, 8rem);
+    line-height: 1;
+    letter-spacing: -.045em;
+    text-wrap: balance;
+}
+
+.h-chapter__lead.h-chapter__lead {
+    width: 100%;
+    max-width: 52ch;
+    margin: 0;
+    color: color-mix(in srgb, var(--cream) 85%, transparent);
+    font-size: clamp(1.8rem, 1.5vw, 2.1rem);
+    font-weight: 300;
+    line-height: 1.6;
+    text-wrap: pretty;
+}
+
+.h-chapter__body {
+    display: grid;
+    gap: 48px;
+    min-width: 0;
+}
+
+.h-chapter__text { min-width: 0; }
+
+.h-chapter {
+    :deep(.hfig) {
+        border-inline: 0;
+        border-color: var(--ink-line);
+        background: color-mix(in srgb, var(--ink-2) 55%, transparent);
+    }
+    :deep(.hfig__label) { gap: 12px; font-size: 1.2rem; letter-spacing: .06em; text-transform: none; }
+    :deep(.hfig__dot) { width: 16px; height: 1px; box-shadow: none; }
+    :deep(.hfig__caption) { font-size: 1.3rem; line-height: 1.7; }
+
+    .h-sources { margin-top: 56px; padding-top: 24px; }
+    .h-sources__list { gap: 0 40px; }
+    .h-source { padding: 18px 28px 18px 0; border: 0; border-bottom: 1px solid var(--ink-line); background: transparent; }
+    .h-source:hover { background: transparent; }
+    .h-source__title { font-size: 1.4rem; line-height: 1.5; }
+    .h-source__kind { color: var(--muted); font-weight: 400; font-size: 1.1rem; letter-spacing: .05em; }
+    .h-source__arrow { right: 0; top: 22px; }
+}
+
+@include m768 {
+    .h-chapter .h-sources__list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .h-stage__media { aspect-ratio: 16 / 9; }
+}
+
+@include m992 {
+    // The same twelve-column grid bounds the typography on a laptop or a 4K
+    // display. A copy block always occupies real columns inside max-width.
+    .h-chapter .h-stage__sticky { min-height: 620px; justify-content: center; }
+
+    .h-chapter .h-chapter__header {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 24px;
+        align-items: center;
+        margin: 0 auto;
+        padding-block: 120px 88px;
+    }
+
+    .h-chapter__copy { grid-column: 1 / 7; gap: 24px; }
+
+    .h-chapter .h-stage__media {
+        position: absolute;
+        inset: 0;
+        aspect-ratio: auto;
+    }
+
+    .h-chapter .h-chapter__body {
+        grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+        gap: 64px;
+        align-items: start;
+    }
+
+    .h-chapter .h-chapter__figure { top: 136px; }
+
+    // Contained artwork gets its own soft mask, including the actual image
+    // bounds, so letterboxing cannot produce a visible rectangle.
+    .h-layout--spread, .h-layout--object, .h-layout--studio,
+    .h-layout--split-left, .h-layout--split-right {
+        .h-stage__media { display: flex; align-items: center; }
+        .h-chapter__image {
+            height: auto;
+            object-fit: contain;
+            mask-image: linear-gradient(180deg, transparent, #000 12%, #000 82%, transparent), linear-gradient(90deg, transparent, #000 7%, #000 80%, transparent);
+            mask-composite: intersect;
+        }
+    }
+
+    // Opening spread: text occupies the right five columns, not the space
+    // left over after padding the viewport by 58%.
+    .h-chapter.h-layout--spread {
+        .h-stage { height: 135svh; }
+        .h-stage__sticky { position: sticky; top: 0; height: 100svh; }
+        .h-chapter__copy { grid-column: 8 / -1; }
+        .h-stage__media {
+            inset-inline: auto;
+            left: max(0px, calc((100vw - 1560px) / 2));
+            width: min(76vw, 1120px);
+        }
+        .h-stage__media::after { background: linear-gradient(90deg, transparent 65%, #0a0f1480); }
+    }
+
+    // Side-by-side exhibits alternate which side holds the illustration.
+    .h-chapter.h-layout--split-left, .h-chapter.h-layout--studio {
+        .h-chapter__copy { grid-column: 1 / 7; }
+        .h-stage__media {
+            left: auto;
+            right: max(0px, calc((100vw - 1500px) / 2));
+            width: min(66vw, 1000px);
+        }
+        .h-stage__media::after { background: linear-gradient(90deg, var(--ink), transparent 58%); }
+    }
+
+    .h-chapter.h-layout--split-right {
+        .h-chapter__copy { grid-column: 7 / -1; }
+        .h-stage__media {
+            right: auto;
+            left: max(0px, calc((100vw - 1500px) / 2));
+            width: min(66vw, 1000px);
+        }
+        .h-stage__media::after { background: linear-gradient(90deg, transparent 45%, var(--ink)); }
+    }
+
+    .h-chapter.h-layout--studio {
+        .h-stage__sticky { min-height: 560px; }
+        .h-stage__media { width: min(50vw, 780px); }
+        .h-chapter__body { display: flex; flex-direction: column; gap: 48px; max-width: 1100px; margin-inline: auto; }
+        .h-chapter__text { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 56px; }
+        .h-chapter__text :deep(p:last-child) { grid-column: 1 / -1; max-width: 760px; margin: 32px auto 0; padding-top: 32px; border-top: 1px solid var(--ink-line); font-size: 2.4rem; line-height: 1.6; font-weight: 300; }
+        .h-chapter__figure { position: relative; top: auto; width: 100%; }
+    }
+
+    // The eight-color era gets a panoramic plate beneath a centered heading,
+    // followed by an uncropped comparison table that uses the full page width.
+    .h-chapter.h-layout--panorama {
+        .h-stage__sticky { min-height: 0; }
+        .h-chapter__header { order: 1; padding-block: 104px 20px; }
+        .h-chapter__copy { grid-column: 2 / 12; justify-items: center; text-align: center; }
+        .h-chapter__eyebrow { justify-content: center; }
+        .h-stage__media { position: relative; order: 2; width: min(100%, 1400px); height: 360px; margin-inline: auto; }
+        .h-chapter__image { object-position: center 45%; }
+        .h-chapter__body { display: flex; flex-direction: column; max-width: 1200px; margin-inline: auto; }
+        .h-chapter__text { max-width: 1040px; margin-inline: auto; columns: 2; column-gap: 64px; }
+        .h-chapter__text :deep(p) { break-inside: avoid; }
+        .h-chapter__figure { position: relative; top: auto; width: 100%; }
+    }
+
+    // The cube is an object study: a slow, pinned drawing beside the title,
+    // with the 256-color explorer opened at full width in the reading section.
+    .h-chapter.h-layout--object {
+        .h-stage { height: 130svh; }
+        .h-stage__sticky { position: sticky; top: 0; height: 100svh; }
+        .h-chapter__copy { grid-column: 1 / 6; }
+        .h-stage__media {
+            left: auto;
+            right: max(0px, calc((100vw - 1560px) / 2));
+            width: min(68vw, 1040px);
+        }
+        .h-stage__media::after { background: linear-gradient(90deg, #0a0f1480, transparent 45%); }
+        .h-chapter__body { display: flex; flex-direction: column; max-width: 1200px; margin-inline: auto; }
+        .h-chapter__text { max-width: 1040px; margin-inline: auto; columns: 2; column-gap: 64px; }
+        .h-chapter__text :deep(p) { break-inside: avoid; }
+        .h-chapter__figure { position: relative; top: auto; width: 100%; }
+    }
+
+    // Truecolor is the one typographic color field in the middle of the story.
+    .h-chapter.h-layout--chromatic {
+        .h-stage__sticky { min-height: min(85svh, 850px); }
+        .h-stage__media { opacity: .55; }
+        .h-stage__media::after { background: radial-gradient(ellipse, #0a0f1480, #0a0f14bb); }
+        .h-chapter__copy { grid-column: 2 / 12; justify-items: center; text-align: center; }
+        .h-chapter__eyebrow { justify-content: center; }
+        .h-chapter__title em { font-size: clamp(7rem, 10vw, 14rem); }
+        .h-chapter__lead { max-width: 60ch; }
+        .h-chapter__body { grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); }
+    }
+
+    // A quiet, nearly monochrome pause fits the chapter about opting out of color.
+    .h-chapter.h-layout--quiet {
+        .h-stage__sticky { min-height: 520px; }
+        .h-stage__media { opacity: .16; filter: grayscale(1); }
+        .h-chapter__copy { grid-column: 3 / 11; justify-items: center; text-align: center; }
+        .h-chapter__eyebrow { justify-content: center; }
+        .h-chapter__body { max-width: 1120px; margin-inline: auto; }
+    }
+
+    // Only the final era returns to a full-bleed image, creating an ending.
+    .h-chapter.h-layout--immersive {
+        .h-stage { height: 145svh; }
+        .h-stage__sticky { position: sticky; top: 0; height: 100svh; justify-content: flex-end; }
+        .h-chapter__header { padding-block: 160px 88px; }
+        .h-chapter__copy { grid-column: 1 / 8; }
+        .h-stage__media::after { background: linear-gradient(20deg, #0a0f14ed, transparent 80%); }
+        .h-chapter__body { display: flex; flex-direction: column; max-width: 1200px; margin-inline: auto; }
+        .h-chapter__text { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
+        .h-chapter__figure { position: relative; top: auto; width: 100%; }
+    }
+
+    .h-chapter.h-chapter--glass {
+        .h-stage__sticky { min-height: 650px; }
+        .h-chapter__image { height: 100%; object-fit: cover; }
+        .h-chapter__figure { margin-top: -80px; }
+    }
+
+    .h-chapter.h-chapter--themes {
+        .h-stage__sticky { min-height: 540px; }
+        .h-chapter__body { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); }
+        .h-chapter__text { grid-column: 2; grid-row: 1; }
+        .h-chapter__figure { grid-column: 1; grid-row: 1; }
+    }
+
+    .h-chapter.h-chapter--science .h-chapter__body { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (min-width: 992px) and (prefers-reduced-motion: reduce) {
+    .h-chapter:is(.h-layout--spread, .h-layout--object, .h-layout--immersive) {
+        .h-stage { height: auto; }
+        .h-stage__sticky { position: relative; height: auto; min-height: 700px; }
+    }
+}

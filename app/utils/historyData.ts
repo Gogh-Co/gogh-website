@@ -104,11 +104,12 @@ export const HISTORY_CHAPTERS: HistoryChapter[] = [
             { kind: 'project', title: 'termstandard/colors: Truecolor support in terminals', publisher: 'GitHub', url: 'https://github.com/termstandard/colors' },
             { kind: 'article', title: '24-bit Color in the Windows Console', publisher: 'Microsoft Command Line blog · 2016', url: 'https://devblogs.microsoft.com/commandline/24-bit-color-in-the-windows-console/' },
             { kind: 'docs', title: 'terminfo(5)', publisher: 'man7.org', url: 'https://man7.org/linux/man-pages/man5/terminfo.5.html' },
+            { kind: 'article', title: 'macOS Tahoe', publisher: 'Wikipedia', url: 'https://en.wikipedia.org/wiki/MacOS_Tahoe' },
         ],
     },
     {
         id: 'themes',
-        image: 'modern',
+        image: 'modern-matte',
         accent: '#2aa198',
         sources: [
             XTERM_CTLSEQS,

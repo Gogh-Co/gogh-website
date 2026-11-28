@@ -54,7 +54,7 @@
                 <dl class="cube__facts">
                     <div><dt>hex</dt><dd>{{ current.hex }}</dd></div>
                     <div><dt>rgb</dt><dd>{{ rgb }}</dd></div>
-                    <div><dt>{{ copy.formula }}</dt><dd>{{ formula }}</dd></div>
+                    <div><dt>{{ copy.formula }}</dt><dd class="cube__formula">{{ formula }}</dd></div>
                     <div><dt>SGR</dt><dd>ESC[38;5;{{ current.index }}m</dd></div>
                 </dl>
             </div>
@@ -85,7 +85,7 @@ const rgb = computed(() => hexToRgb(current.value.hex).join(', '));
 const formula = computed(() => {
     const entry = current.value;
     if (entry.block === 'cube') {
-        return `16 + 36×${entry.r} + 6×${entry.g} + ${entry.b}  →  (${CUBE_LEVELS[entry.r]}, ${CUBE_LEVELS[entry.g]}, ${CUBE_LEVELS[entry.b]})`;
+        return `16 + 36×${entry.r} + 6×${entry.g} + ${entry.b}\n→ (${CUBE_LEVELS[entry.r]}, ${CUBE_LEVELS[entry.g]}, ${CUBE_LEVELS[entry.b]})`;
     }
     if (entry.block === 'gray') {
         return `8 + 10×${entry.step} = ${8 + 10 * entry.step}`;
@@ -219,5 +219,12 @@ const formula = computed(() => {
         font-size: 1.3rem;
         word-break: break-word;
     }
+}
+
+// Always two lines tall, so hovering between blocks never changes the figure's height.
+.cube__formula {
+    min-height: 3em;
+    line-height: 1.5;
+    white-space: pre-line;
 }
 </style>

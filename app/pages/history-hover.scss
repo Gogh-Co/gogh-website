@@ -1,0 +1,195 @@
+// Each drawing becomes a responsive scene: perspective, pigment and light.
+// Individual transforms compose with GSAP's scroll transform on the image.
+@media (min-width: 992px) and (prefers-reduced-motion: no-preference) {
+    .h-stage__sticky, .h-hero, .h-card, .h-chapter__figure {
+        --hover-x: 0;
+        --hover-y: 0;
+        --hover-u: 50%;
+        --hover-v: 50%;
+        --hover-active: 0;
+    }
+
+    .h-stage__media {
+        --light: var(--accent);
+        --light-width: 36%;
+        --light-height: 40%;
+        --light-strength: .28;
+        isolation: isolate;
+        transform: perspective(1200px) rotateX(calc(var(--hover-y) * -4deg)) rotateY(calc(var(--hover-x) * 7deg));
+        transform-origin: 50% 55%;
+
+        &::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            background: radial-gradient(ellipse var(--light-width) var(--light-height) at var(--hover-u) var(--hover-v), var(--light), transparent 100%);
+            opacity: calc(var(--hover-active) * var(--light-strength));
+            mix-blend-mode: screen;
+            pointer-events: none;
+        }
+        // Keep the existing dark fade above the light at the text edge.
+        &::after { z-index: 2; pointer-events: none; }
+    }
+
+    .h-chapter__image:not(.cube-depth) {
+        // GSAP normalizes these three properties to inline `none` when it
+        // initializes its matrix. Hover owns the individual properties while
+        // GSAP continues to own only the scroll/entrance `transform` matrix.
+        translate: calc(var(--hover-x) * var(--travel-x, 36px)) calc(var(--hover-y) * var(--travel-y, 22px)) !important;
+        rotate: calc(var(--hover-x) * var(--tilt, .8deg)) !important;
+        scale: calc(1 + var(--hover-active) * var(--approach, .04)) !important;
+        filter: brightness(calc(1 + var(--hover-active) * var(--exposure, .12)));
+    }
+
+    // Paper: raking gold light and a physical turn of the drawing.
+    .h-chapter--paper {
+        --travel-x: 32px; --travel-y: -20px; --tilt: -1.1deg;
+        .h-stage__media { --light: #e8bc7b; --light-width: 48%; --light-height: 22%; --light-strength: .28; }
+    }
+
+    // CRT: phosphor bloom with a faint scan band at the pointer's height.
+    .h-chapter--glass {
+        --travel-x: -26px; --travel-y: -18px; --tilt: 0deg; --exposure: .24;
+        .h-stage__media {
+            --light-strength: .3;
+            &::before {
+                background:
+                    radial-gradient(ellipse 32% 35% at var(--hover-u) var(--hover-v), #33ff66, transparent),
+                    linear-gradient(transparent, #33ff66, transparent) 50% var(--hover-v) / 65% 3px no-repeat;
+            }
+        }
+    }
+
+    // A horizontal signal traces the escape sequence; the code stays readable.
+    .h-chapter--escape {
+        --travel-x: 44px; --travel-y: 16px; --tilt: -.6deg;
+        .h-stage__media { --light-width: 42%; --light-height: 8%; --light-strength: .3; }
+    }
+
+    .h-chapter--eight {
+        --travel-x: 28px; --travel-y: -18px; --tilt: -.8deg;
+        .h-stage__media { --light: #f4efe6; --light-width: 18%; --light-height: 70%; --light-strength: .24; }
+    }
+
+    .h-chapter--sixteen {
+        --travel-x: -36px; --travel-y: 24px; --tilt: 1deg; --approach: .055;
+        .h-stage__media { --light: #c9e8bf; --light-width: 25%; --light-height: 45%; --light-strength: .24; }
+    }
+
+    // The cube already projects the original texture through its depth planes.
+    // Do not move its poster independently from that canvas.
+    .h-chapter--cube {
+        --travel-x: 0px; --travel-y: 0px; --tilt: 0deg; --approach: 0; --exposure: 0;
+        .h-stage__media { --light-strength: .12; transform: none; }
+    }
+
+    .h-chapter--truecolor, .h-chapter--today {
+        .h-stage__media::before {
+            background:
+                radial-gradient(ellipse 34% 44% at var(--hover-u) var(--hover-v), #21c5cf, transparent),
+                radial-gradient(ellipse 30% 44% at calc(100% - var(--hover-u)) calc(100% - var(--hover-v)), #bd4f9c, transparent);
+        }
+    }
+
+    .h-chapter--truecolor {
+        --travel-x: -42px; --travel-y: -26px; --tilt: 0deg;
+        .h-stage__media { --light-strength: .42; }
+        .h-chapter__title em { text-shadow: 0 0 calc(var(--hover-active) * 44px) #9b59b650; }
+    }
+
+    // Matte desk and a softly lit screen; no glossy sweep over the new artwork.
+    .h-chapter--themes {
+        --travel-x: -32px; --travel-y: -18px; --tilt: -.8deg;
+        .h-stage__media { --light-width: 32%; --light-height: 28%; --light-strength: .24; }
+    }
+
+    .h-chapter--science {
+        --travel-x: 28px; --travel-y: 18px; --tilt: .6deg; --approach: .055;
+        .h-stage__media::before {
+            background:
+                radial-gradient(ellipse 15% 45% at calc(var(--hover-u) - 6%) var(--hover-v), #e74c3c, transparent),
+                radial-gradient(ellipse 15% 45% at var(--hover-u) var(--hover-v), #2ecc71, transparent),
+                radial-gradient(ellipse 15% 45% at calc(var(--hover-u) + 6%) var(--hover-v), #3498db, transparent);
+        }
+    }
+
+    .h-chapter.h-chapter--etiquette {
+        --travel-x: 18px; --travel-y: -8px; --tilt: -.3deg; --approach: .025;
+        .h-stage__media { --light: #d4d7da; --light-strength: .08; opacity: calc(.16 + var(--hover-active) * .42); }
+    }
+
+    .h-chapter--today {
+        --travel-x: -42px; --travel-y: -28px; --tilt: -.7deg;
+        .h-stage__media { --light-strength: .3; }
+    }
+
+    .h-hero__image {
+        scale: calc(1 + var(--hover-active) * .035) !important;
+        translate: calc(var(--hover-x) * -36px) calc(var(--hover-y) * -24px) !important;
+    }
+
+    // Exhibits stay flat while their edge and label pick up a moving pool of light.
+    .h-chapter__figure {
+        &::after {
+            content: '';
+            position: absolute;
+            inset: 0 0 auto;
+            height: 2px;
+            box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 35%, transparent);
+            background: radial-gradient(ellipse 240px 2px at var(--hover-u) 50%, var(--accent), transparent);
+            opacity: var(--hover-active);
+            pointer-events: none;
+        }
+        :deep(.hfig__dot) { width: calc(16px + var(--hover-active) * 32px); }
+        :deep(.hfig__label) { color: color-mix(in srgb, var(--accent) calc(var(--hover-active) * 75%), var(--muted)); }
+    }
+
+    .h-chapter .h-chapter__title em {
+        background: radial-gradient(ellipse at var(--hover-u) 45%, color-mix(in srgb, #fff calc(var(--hover-active) * 85%), var(--accent)), var(--accent) 65%);
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    :deep(.h-hover-ink) {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+        mix-blend-mode: screen;
+        pointer-events: none;
+        mask-image: radial-gradient(ellipse, #000 36%, transparent 74%);
+    }
+
+    // Detail reveals replace the underlying pixels in their soft aperture;
+    // additive blending here would double the drawing's fine pencil lines.
+    .h-chapter--paper, .h-chapter--themes, .h-chapter--science {
+        :deep(.h-hover-ink) { mix-blend-mode: normal; }
+    }
+
+    .h-chapter__figure :deep(.hfig) {
+        box-shadow: 0 24px 70px color-mix(in srgb, #000 calc(var(--hover-active) * 35%), transparent);
+    }
+
+    .h-card {
+        position: relative;
+        &::after {
+            content: '';
+            position: absolute;
+            inset: auto 0 -1px;
+            height: 1px;
+            background: radial-gradient(ellipse 100px 1px at var(--hover-u) 50%, var(--accent), transparent);
+            opacity: var(--hover-active);
+            pointer-events: none;
+        }
+        .h-card__media img { rotate: calc(var(--hover-x) * 4deg); translate: calc(var(--hover-x) * 10px) calc(var(--hover-y) * 8px); }
+    }
+}
+
+// Keyboard feedback needs no motion or pointer coordinates.
+.h-chapter__figure:focus-within :deep(.hfig) { border-top-color: var(--accent); }
+
+@media (prefers-reduced-motion: reduce) {
+    .h-card:hover img { transform: none; }
+}

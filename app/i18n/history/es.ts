@@ -21,6 +21,12 @@ export default {
     },
 
     ui: {
+        motion: {
+            label: 'Modo tranquilo',
+            enable: 'Reducir movimiento y efectos visuales',
+            disable: 'Restaurar los efectos visuales',
+            system: 'Tu sistema tiene activado el movimiento reducido',
+        },
         chapter: 'Capítulo',
         sources: 'Especificaciones y lecturas',
         nav: 'Capítulos',
@@ -106,7 +112,7 @@ export default {
             titleAccent: 'de 256 colores',
             lead: 'xterm encajó un cubo RGB en un índice de 8 bits, y la mayoría de las terminales siguieron sus pasos.',
             body: [
-                'Dieciséis colores no bastaban para los editores y el resaltado de sintaxis. En 1999, **Todd Larason** incorporó a [xterm](https://invisible-island.net/xterm/) el soporte para 256 colores con las secuencias `ESC[38;5;Nm` para el texto y `ESC[48;5;Nm` para el fondo: una versión con punto y coma de una forma incluida en el formato de documentos T.416 de la ITU.',
+                'Dieciséis colores no bastaban para los editores y el resaltado de sintaxis. En 1999, **Todd Larason** incorporó a [xterm](https://invisible-island.net/xterm/) el soporte para 256 colores con las secuencias `ESC[38;5;Nm` para el texto y `ESC[48;5;Nm` para el fondo: una versión con punto y coma de una forma incluida en el formato de documentos T.416 de la ITU. Como terminal de referencia del X Window System, xterm marcó el ritmo en Linux y otros sistemas Unix: rxvt, Konsole y GNOME Terminal adoptaron las mismas secuencias.',
                 'Las 256 entradas se dividen en tres bloques. **0–15** son los 16 colores del sistema, los que controla tu tema. **16–231** forman un cubo RGB de 6×6×6, donde la entrada `16 + 36r + 6g + b` usa los niveles 0, 95, 135, 175, 215 y 255. **232–255** son 24 grises que van de `#080808` a `#eeeeee`.',
                 'A diferencia de los primeros 16, el cubo y la escala de grises casi siempre son fijos. Pasa el cursor por la cuadrícula para ver cómo se construye cada índice. (rxvt-unicode incluyó una variante de 88 colores de la misma idea, con un cubo de 4×4×4.)',
             ],
@@ -119,7 +125,7 @@ export default {
             lead: 'Tres bytes por color, enviados directamente a la pantalla. El salto de una norma documental a las terminales de uso cotidiano llevó dos décadas.',
             body: [
                 'La sintaxis de color directo procede de [ITU-T T.416](https://www.itu.int/rec/T-REC-T.416-199303-I/en) (1993, también ISO 8613-6), un formato de documentos, no una norma de terminales: `38:2:<color space>:r:g:b`, con dos puntos como separador. Las terminales adoptaron mayoritariamente una forma más sencilla, con punto y coma, `ESC[38;2;255;100;0m`; la compatibilidad con la forma original aún varía entre emuladores.',
-                '**Konsole** fue uno de los primeros emuladores en mostrarlo, a mediados de los años 2000. xterm aceptó la secuencia en 2012, aproximando cada valor a su paleta, y añadió color directo real a finales de 2017. La gran oleada llegó en **2016**: iTerm2 3.0, tmux 2.2, `termguicolors` de Vim (parte de Vim 8.0) y la consola de Windows 10, primero en versiones Insider.',
+                '**Konsole** fue uno de los primeros emuladores en mostrarlo, a mediados de los años 2000. xterm aceptó la secuencia en 2012, aproximando cada valor a su paleta, y añadió color directo real a finales de 2017. La gran oleada llegó en **2016**: iTerm2 3.0, tmux 2.2, `termguicolors` de Vim (parte de Vim 8.0) y la consola de Windows 10, primero en versiones Insider. En macOS, el **Terminal.app** de Apple se quedó en 256 colores casi una década más, una de las razones por las que muchos usuarios de Mac se pasaron a iTerm2; recién en **macOS 26 Tahoe** (2025) incorporó el color de 24 bits.',
                 'No hay una forma universal de preguntar a una terminal si admite color de 24 bits. Los programas combinan pistas: la variable de entorno `COLORTERM=truecolor` (o `24bit`), las capacidades de terminfo o una consulta que la terminal puede responder. El proyecto [termstandard/colors](https://github.com/termstandard/colors) mantiene una lista de qué admite cada emulador.',
             ],
         },
@@ -307,6 +313,7 @@ export default {
             { year: '2017', text: 'NO_COLOR. Alacritty pone la GPU a trabajar.' },
             { year: '2019', text: 'Se anuncia Windows Terminal.' },
             { year: '2024', text: 'Se publica Ghostty 1.0.' },
+            { year: '2025', text: 'Terminal.app recibe truecolor en macOS 26 Tahoe.' },
         ],
     },
 

@@ -24,6 +24,12 @@ export default {
     },
 
     ui: {
+        motion: {
+            label: 'Calm mode',
+            enable: 'Reduce motion and visual effects',
+            disable: 'Restore visual effects',
+            system: 'Reduced motion is enabled in your system',
+        },
         chapter: 'Chapter',
         sources: 'Specs and further reading',
         nav: 'Chapters',
@@ -109,7 +115,7 @@ export default {
             titleAccent: 'of 256 colors',
             lead: 'xterm squeezed an RGB cube into an 8-bit index, and most terminals followed.',
             body: [
-                'Sixteen colors was not enough for editors and syntax highlighting. In 1999, **Todd Larason** contributed 256-color support to [xterm](https://invisible-island.net/xterm/), using the sequences `ESC[38;5;Nm` for foreground and `ESC[48;5;Nm` for background, a semicolon version of a form found in the ITU’s T.416 document format.',
+                'Sixteen colors was not enough for editors and syntax highlighting. In 1999, **Todd Larason** contributed 256-color support to [xterm](https://invisible-island.net/xterm/), using the sequences `ESC[38;5;Nm` for foreground and `ESC[48;5;Nm` for background, a semicolon version of a form found in the ITU’s T.416 document format. As the reference terminal of the X Window System, xterm set the pace on Linux and other Unix systems: rxvt, Konsole and GNOME Terminal adopted the same sequences.',
                 'The 256 entries are three blocks. **0–15** are the 16 system colors, the ones your theme controls. **16–231** are a 6×6×6 RGB cube, where entry `16 + 36r + 6g + b` uses the levels 0, 95, 135, 175, 215 and 255. **232–255** are 24 grays from `#080808` to `#eeeeee`.',
                 'Unlike the first 16, the cube and the gray ramp are almost always fixed. Hover the grid to see how each index is built. (rxvt-unicode shipped an 88-color variant of the same idea, with a 4×4×4 cube.)',
             ],
@@ -122,7 +128,7 @@ export default {
             lead: 'Three bytes per color, sent straight to the screen. It took two decades to get from a document standard to everyone’s terminal.',
             body: [
                 'The direct-color syntax comes from [ITU-T T.416](https://www.itu.int/rec/T-REC-T.416-199303-I/en) (1993, also ISO 8613-6), a document format, not a terminal standard: `38:2:<color space>:r:g:b`, separated by colons. Terminals mostly adopted a simpler, semicolon form, `ESC[38;2;255;100;0m`; support for the original colon form still varies from one emulator to another.',
-                '**Konsole** was among the first emulators to render it, in the mid-2000s. xterm accepted the sequence in 2012, approximating each value to its palette, and added real direct color at the end of 2017. The big wave came in **2016**: iTerm2 3.0, tmux 2.2, Vim’s `termguicolors` (part of Vim 8.0) and the Windows 10 console, first in Insider builds.',
+                '**Konsole** was among the first emulators to render it, in the mid-2000s. xterm accepted the sequence in 2012, approximating each value to its palette, and added real direct color at the end of 2017. The big wave came in **2016**: iTerm2 3.0, tmux 2.2, Vim’s `termguicolors` (part of Vim 8.0) and the Windows 10 console, first in Insider builds. On macOS, Apple’s **Terminal.app** stayed at 256 colors for almost another decade, one reason many Mac users switched to iTerm2; it finally gained 24-bit color in **macOS 26 Tahoe** (2025).',
                 'There is no universal way to ask a terminal whether it supports 24-bit color. Programs combine hints: the environment variable `COLORTERM=truecolor` (or `24bit`), terminfo capabilities, or a query the terminal may answer. The [termstandard/colors](https://github.com/termstandard/colors) project keeps the list of who supports what.',
             ],
         },
@@ -310,6 +316,7 @@ export default {
             { year: '2017', text: 'NO_COLOR. Alacritty puts the GPU to work.' },
             { year: '2019', text: 'Windows Terminal is announced.' },
             { year: '2024', text: 'Ghostty 1.0 is released.' },
+            { year: '2025', text: 'Terminal.app gains truecolor in macOS 26 Tahoe.' },
         ],
     },
 

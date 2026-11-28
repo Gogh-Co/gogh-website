@@ -4,9 +4,10 @@
             <span class="hfig__dot" aria-hidden="true"></span>
             {{ label }}
         </figcaption>
-        <div class="hfig__stage">
+        <!-- The live experiment is complementary; captions remain in Reader View. -->
+        <aside class="hfig__stage" :aria-label="label">
             <slot />
-        </div>
+        </aside>
         <p v-if="caption" class="hfig__caption">{{ caption }}</p>
     </figure>
 </template>

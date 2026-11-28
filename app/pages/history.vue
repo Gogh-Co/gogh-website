@@ -1,191 +1,220 @@
 <template>
     <Header overlay />
 
-    <main ref="root" class="history" :style="{ '--ambient': ambient }">
+    <main ref="root" class="history" :class="{ 'is-calm': !effectsEnabled }" :style="{ '--ambient': ambient }">
         <!-- Fixed backdrop: a glow tinted by the chapter in view, plus film grain. -->
         <div class="h-ambient" aria-hidden="true">
             <span class="h-ambient__glow h-ambient__glow--far"></span>
             <span class="h-ambient__glow h-ambient__glow--near"></span>
         </div>
 
-        <!-- Hero -->
-        <section class="h-hero">
-            <div class="h-hero__media" aria-hidden="true">
-                <img
-                    class="h-hero__image"
-                    src="/history/hero.webp"
-                    srcset="/history/hero-960.webp 960w, /history/hero.webp 1672w"
-                    sizes="100vw"
-                    alt=""
-                    fetchpriority="high"
-                >
-            </div>
+        <aside class="h-motion-control" :aria-label="c.ui.motion.label">
+            <button
+                type="button"
+                class="h-motion-toggle"
+                :class="{ 'is-on': calm || systemReduced }"
+                :aria-pressed="calm || systemReduced"
+                :disabled="systemReduced || !motionReady"
+                :title="systemReduced ? c.ui.motion.system : calm ? c.ui.motion.disable : c.ui.motion.enable"
+                @click="setCalm(!calm)"
+            >
+                <span class="h-motion-toggle__indicator" aria-hidden="true"><i></i><i></i><i></i></span>
+                {{ c.ui.motion.label }}
+                <span class="h-motion-toggle__switch" aria-hidden="true"></span>
+            </button>
+        </aside>
 
-            <div class="h-hero__inner">
-                <p class="section-eyebrow h-hero__eyebrow"><span>ESC</span> {{ c.hero.eyebrow }}</p>
-                <h1 class="h-hero__title">
-                    <span class="h-mask"><span class="h-hero__line">{{ c.hero.title }}</span></span>
-                    <span class="h-mask"><em class="h-hero__line">{{ c.hero.titleAccent }}</em></span>
-                </h1>
-                <p class="h-hero__lead">{{ c.hero.lead }}</p>
+        <article class="h-article article-content" aria-labelledby="history-title" :lang="localeInfo.htmlLang" :dir="localeInfo.dir">
+            <!-- One continuous article: Reader View uses this same visible copy. -->
+            <section class="h-hero">
+                <div class="h-hero__media" aria-hidden="true">
+                    <img
+                        class="h-hero__image"
+                        src="/history/hero.webp"
+                        srcset="/history/hero-960.webp 960w, /history/hero.webp 1672w"
+                        sizes="100vw"
+                        alt=""
+                        fetchpriority="high"
+                    >
+                </div>
 
+                <div class="h-hero__inner">
+                    <header class="h-hero__heading">
+                        <div class="h-hero__masthead">
+                            <p class="section-eyebrow h-hero__eyebrow"><span>ESC</span> {{ c.hero.eyebrow }}</p>
+                            <span class="h-hero__notation" aria-hidden="true">ASCII / ANSI / RGB</span>
+                        </div>
+                        <h1 id="history-title" class="h-hero__title">
+                            <span class="h-mask"><span class="h-hero__line">{{ c.hero.title }}{{ ' ' }}</span></span>
+                            <span class="h-mask"><em class="h-hero__line">{{ c.hero.titleAccent }}</em></span>
+                        </h1>
+                    </header>
+                    <div class="h-hero__note">
+                        <p class="h-hero__lead">{{ c.hero.lead }}</p>
+                        <nav role="navigation" :aria-label="c.ui.nav">
+                            <a class="h-hero__cue" href="#paper" @click.prevent="goTo('#paper')">
+                                <span class="h-hero__cue-line" aria-hidden="true"></span>
+                                <span>{{ c.hero.scroll }}</span>
+                            </a>
+                        </nav>
+                    </div>
+                </div>
+
+                <div class="h-hero__spectrum" aria-hidden="true">
+                    <i v-for="(color, index) in SPECTRUM" :key="index" :style="{ background: color, '--i': index }"></i>
+                </div>
+            </section>
+
+            <aside class="h-wrap h-facts">
                 <ul class="h-hero__stats">
                     <li v-for="stat in c.hero.stats" :key="stat.value">
                         <b>{{ stat.value }}</b>
                         <span>{{ stat.label }}</span>
                     </li>
                 </ul>
+            </aside>
 
-                <a class="h-hero__cue" href="#chapters" @click.prevent="goTo('#chapters')">
-                    <span>{{ c.hero.scroll }}</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M11 4h2v12l5.5-5.5l1.42 1.42L12 19.84l-7.92-7.92L5.5 10.5L11 16z" /></svg>
-                </a>
-            </div>
-
-            <div class="h-hero__spectrum" aria-hidden="true">
-                <i v-for="(color, index) in SPECTRUM" :key="index" :style="{ background: color, '--i': index }"></i>
-            </div>
-        </section>
-
-        <!-- Chapter index -->
-        <section id="chapters" class="h-index" aria-labelledby="h-index-title">
-            <div class="h-wrap">
-                <header class="h-index__header">
-                    <p class="section-eyebrow"><span>{{ HISTORY_CHAPTERS.length }}</span> {{ c.index.eyebrow }}</p>
-                    <h2 id="h-index-title" class="section-title">{{ c.index.title }}<br><em>{{ c.index.titleAccent }}</em></h2>
-                </header>
-
-                <ol class="h-index__grid">
-                    <li v-for="(chapter, index) in HISTORY_CHAPTERS" :key="chapter.id" class="h-index__item" :style="{ '--accent': chapter.accent }">
-                        <a class="h-card" :href="`#${chapter.id}`" @click.prevent="goTo(`#${chapter.id}`)" @pointermove="tilt" @pointerleave="untilt">
-                            <span class="h-card__media">
-                                <img :src="`/history/${chapter.image}-480.webp`" alt="" loading="lazy" width="480" height="270">
-                            </span>
-                            <span class="h-card__meta">
-                                <span class="h-card__num">{{ pad(index + 1) }}</span>
-                                <span class="h-card__years">{{ c.chapters[chapter.id].years }}</span>
-                            </span>
-                            <span class="h-card__title">{{ c.chapters[chapter.id].title }} <em>{{ c.chapters[chapter.id].titleAccent }}</em></span>
-                            <span class="h-card__kicker">{{ c.chapters[chapter.id].kicker }}</span>
-                        </a>
-                    </li>
-                </ol>
-            </div>
-        </section>
-
-        <!-- Escape-code marquee: decorative, the same sequences the chapters explain. -->
-        <div class="h-marquee" aria-hidden="true">
-            <div class="h-marquee__track">
-                <span v-for="n in 2" :key="n">
-                    <b v-for="code in MARQUEE" :key="code[0]" :style="{ color: code[1] }">{{ code[0] }}</b>
-                </span>
-            </div>
-        </div>
-
-        <!-- Sticky chapter rail -->
-        <nav class="h-rail" :aria-label="c.ui.nav">
-            <div class="h-rail__inner">
-                <a
-                    v-for="(chapter, index) in HISTORY_CHAPTERS"
-                    :key="chapter.id"
-                    :ref="(el) => (railLinks[index] = el)"
-                    class="h-rail__link"
-                    :class="{ 'is-active': activeChapter === index }"
-                    :href="`#${chapter.id}`"
-                    :style="{ '--accent': chapter.accent }"
-                    :aria-current="activeChapter === index ? 'true' : undefined"
-                    @click.prevent="goTo(`#${chapter.id}`)"
-                >
-                    <span>{{ pad(index + 1) }}</span>
-                    {{ c.chapters[chapter.id].title }} {{ c.chapters[chapter.id].titleAccent }}
-                </a>
-            </div>
-            <span class="h-rail__progress" :style="{ transform: `scaleX(${progress})` }" role="progressbar" :aria-label="c.ui.progress" :aria-valuenow="Math.round(progress * 100)" aria-valuemin="0" aria-valuemax="100"></span>
-        </nav>
-
-        <!-- Chapters -->
-        <section
-            v-for="(chapter, index) in HISTORY_CHAPTERS"
-            :id="chapter.id"
-            :key="chapter.id"
-            class="h-chapter"
-            :class="{ 'h-chapter--alt': index % 2 === 1 }"
-            :style="{ '--accent': chapter.accent }"
-            :aria-labelledby="`${chapter.id}-title`"
-        >
-            <!-- Pinned stage: the drawing fills the screen and melts into the page. -->
-            <div class="h-stage">
-                <div class="h-stage__sticky">
-                    <div class="h-stage__media">
-                        <img
-                            class="h-chapter__image"
-                            :src="`/history/${chapter.image}.webp`"
-                            :srcset="`/history/${chapter.image}-960.webp 960w, /history/${chapter.image}.webp 1672w`"
-                            sizes="100vw"
-                            :alt="c.chapters[chapter.id].title + ' ' + c.chapters[chapter.id].titleAccent"
-                            loading="lazy"
-                            width="1672"
-                            height="941"
-                        >
-                    </div>
-                    <span class="h-chapter__bignum" aria-hidden="true">{{ pad(index + 1) }}</span>
-
-                    <header class="h-wrap h-chapter__header">
-                        <p class="section-eyebrow h-chapter__eyebrow">
-                            <span>{{ pad(index + 1) }}</span>
-                            {{ c.chapters[chapter.id].kicker }}
-                            <b class="h-chapter__years">{{ c.chapters[chapter.id].years }}</b>
-                        </p>
-                        <h2 :id="`${chapter.id}-title`" class="section-title h-chapter__title">
-                            <span class="h-mask"><span class="h-rise">{{ c.chapters[chapter.id].title }}</span></span>
-                            <span class="h-mask"><em class="h-rise">{{ c.chapters[chapter.id].titleAccent }}</em></span>
-                        </h2>
-                        <p class="h-chapter__lead">{{ c.chapters[chapter.id].lead }}</p>
+            <!-- Chapter index -->
+            <nav id="chapters" class="h-index" role="navigation" aria-labelledby="h-index-title">
+                <div class="h-wrap">
+                    <header class="h-index__header">
+                        <p class="section-eyebrow"><span>{{ HISTORY_CHAPTERS.length }}</span> {{ c.index.eyebrow }}</p>
+                        <h2 id="h-index-title" class="section-title">{{ c.index.title }} <em>{{ c.index.titleAccent }}</em></h2>
                     </header>
-                </div>
-            </div>
 
-            <div class="h-wrap">
-                <div class="h-chapter__body">
-                    <div class="h-chapter__text">
-                        <RichText v-for="(paragraph, p) in c.chapters[chapter.id].body" :key="p" :text="paragraph" />
-                    </div>
-
-                    <div class="h-chapter__figure">
-                        <FigAscii v-if="chapter.id === 'paper'" :copy="c.figures.paper" />
-                        <FigPhosphor v-else-if="chapter.id === 'glass'" :copy="c.figures.glass" />
-                        <FigSgr v-else-if="chapter.id === 'escape'" :copy="c.figures.escape" :ui="c.ui" />
-                        <FigAnsiTable v-else-if="chapter.id === 'eight'" :copy="c.figures.eight" />
-                        <FigBright v-else-if="chapter.id === 'sixteen'" :copy="c.figures.sixteen" :names="c.figures.eight.names" />
-                        <FigCube v-else-if="chapter.id === 'cube'" :copy="c.figures.cube" />
-                        <FigTruecolor v-else-if="chapter.id === 'truecolor'" :copy="c.figures.truecolor" />
-                        <FigThemes v-else-if="chapter.id === 'themes'" v-model="themeIndex" :copy="c.figures.themes" />
-                        <FigContrast v-else-if="chapter.id === 'science'" :copy="c.figures.science" :theme-index="themeIndex" />
-                        <FigEtiquette v-else-if="chapter.id === 'etiquette'" :copy="c.figures.etiquette" />
-                        <FigToday v-else-if="chapter.id === 'today'" :copy="c.figures.today" />
-                    </div>
-                </div>
-
-                <aside class="h-sources" :aria-label="c.ui.sources">
-                    <p class="h-sources__title">{{ c.ui.sources }}</p>
-                    <ul class="h-sources__list">
-                        <li v-for="source in chapter.sources" :key="source.url">
-                            <a class="h-source" :href="source.url" target="_blank" rel="noopener noreferrer">
-                                <span class="h-source__kind">{{ c.ui.kinds[source.kind] }}</span>
-                                <span class="h-source__title">{{ source.title }}</span>
-                                <span class="h-source__publisher">{{ source.publisher }}</span>
-                                <svg class="h-source__arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.4 18L5 16.6L14.6 7H6V5h12v12h-2V8.4z" /></svg>
+                    <ol class="h-index__grid">
+                        <li v-for="(chapter, index) in HISTORY_CHAPTERS" :key="chapter.id" class="h-index__item" :style="{ '--accent': chapter.accent }">
+                            <a class="h-card" :href="`#${chapter.id}`" @click.prevent="goTo(`#${chapter.id}`)">
+                                <span class="h-card__media">
+                                    <img :src="`/history/${chapter.image}-480.webp`" alt="" loading="lazy" width="480" height="270">
+                                </span>
+                                <span class="h-card__meta">
+                                    <span class="h-card__num">{{ pad(index + 1) }}</span>
+                                    <span class="h-card__years">{{ c.chapters[chapter.id].years }}</span>
+                                </span>
+                                <span class="h-card__title">{{ c.chapters[chapter.id].title }} <em>{{ c.chapters[chapter.id].titleAccent }}</em></span>
+                                <span class="h-card__kicker">{{ c.chapters[chapter.id].kicker }}</span>
                             </a>
                         </li>
-                    </ul>
-                </aside>
-            </div>
-        </section>
+                    </ol>
+                </div>
+            </nav>
 
-        <HistoryTimeline :copy="c.timeline" />
+            <!-- Escape-code marquee: decorative, the same sequences the chapters explain. -->
+            <div class="h-marquee" aria-hidden="true">
+                <div class="h-marquee__track">
+                    <span v-for="n in 2" :key="n">
+                        <b v-for="code in MARQUEE" :key="code[0]" :style="{ color: code[1] }">{{ code[0] }}</b>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Sticky chapter rail -->
+            <nav class="h-rail" role="navigation" :aria-label="c.ui.nav">
+                <div class="h-rail__inner">
+                    <a
+                        v-for="(chapter, index) in HISTORY_CHAPTERS"
+                        :key="chapter.id"
+                        :ref="(el) => (railLinks[index] = el)"
+                        class="h-rail__link"
+                        :class="{ 'is-active': activeChapter === index }"
+                        :href="`#${chapter.id}`"
+                        :style="{ '--accent': chapter.accent }"
+                        :aria-current="activeChapter === index ? 'true' : undefined"
+                        @click.prevent="goTo(`#${chapter.id}`)"
+                    >
+                        <span>{{ pad(index + 1) }}</span>
+                        {{ c.chapters[chapter.id].title }} {{ c.chapters[chapter.id].titleAccent }}
+                    </a>
+                </div>
+                <span class="h-rail__progress" :style="{ transform: `scaleX(${progress})` }" role="progressbar" :aria-label="c.ui.progress" :aria-valuenow="Math.round(progress * 100)" aria-valuemin="0" aria-valuemax="100"></span>
+            </nav>
+
+            <!-- Chapters -->
+            <section
+                v-for="(chapter, index) in HISTORY_CHAPTERS"
+                :id="chapter.id"
+                :key="chapter.id"
+                class="h-chapter"
+                :class="[`h-chapter--${chapter.id}`, `h-layout--${CHAPTER_LAYOUTS[chapter.id]}`]"
+                :style="{ '--accent': chapter.accent }"
+                :aria-labelledby="`${chapter.id}-title`"
+            >
+                <!-- Each era has its own composition, within the same editorial grid. -->
+                <div class="h-stage">
+                    <div class="h-stage__sticky">
+                        <header class="h-wrap h-chapter__header article-heading">
+                            <div class="h-chapter__copy">
+                                <p class="section-eyebrow h-chapter__eyebrow">
+                                    <span>{{ pad(index + 1) }}</span>
+                                    {{ c.chapters[chapter.id].kicker }}
+                                    <b class="h-chapter__years">{{ c.chapters[chapter.id].years }}</b>
+                                </p>
+                                <h2 :id="`${chapter.id}-title`" class="section-title h-chapter__title">
+                                    <span class="h-mask"><span class="h-rise">{{ c.chapters[chapter.id].title }}{{ ' ' }}</span></span>
+                                    <span class="h-mask"><em class="h-rise">{{ c.chapters[chapter.id].titleAccent }}</em></span>
+                                </h2>
+                                <p class="h-chapter__lead">{{ c.chapters[chapter.id].lead }}</p>
+                            </div>
+                        </header>
+                        <figure class="h-stage__media">
+                            <img
+                                class="h-chapter__image"
+                                :src="`/history/${chapter.image}.webp`"
+                                :srcset="`/history/${chapter.image}-960.webp 960w, /history/${chapter.image}.webp 1672w`"
+                                :sizes="CHAPTER_LAYOUTS[chapter.id] === 'immersive' || CHAPTER_LAYOUTS[chapter.id] === 'chromatic' ? '100vw' : '(min-width: 1600px) 1120px, (min-width: 992px) 75vw, 100vw'"
+                                :alt="c.chapters[chapter.id].title + ' ' + c.chapters[chapter.id].titleAccent"
+                                loading="lazy"
+                                width="1672"
+                                height="941"
+                            >
+                            <CubeDepth v-if="chapter.id === 'cube'" class="h-chapter__image" source="/history/cube256.webp" :enabled="effectsEnabled" />
+                        </figure>
+                    </div>
+                </div>
+
+                <div class="h-wrap article-content">
+                    <div class="h-chapter__body">
+                        <div class="h-chapter__text">
+                            <RichText v-for="(paragraph, p) in c.chapters[chapter.id].body" :key="p" :text="paragraph" />
+                        </div>
+
+                        <div class="h-chapter__figure">
+                            <FigAscii v-if="chapter.id === 'paper'" :copy="c.figures.paper" />
+                            <FigPhosphor v-else-if="chapter.id === 'glass'" :copy="c.figures.glass" />
+                            <FigSgr v-else-if="chapter.id === 'escape'" :copy="c.figures.escape" :ui="c.ui" />
+                            <FigAnsiTable v-else-if="chapter.id === 'eight'" :copy="c.figures.eight" />
+                            <FigBright v-else-if="chapter.id === 'sixteen'" :copy="c.figures.sixteen" :names="c.figures.eight.names" />
+                            <FigCube v-else-if="chapter.id === 'cube'" :copy="c.figures.cube" />
+                            <FigTruecolor v-else-if="chapter.id === 'truecolor'" :copy="c.figures.truecolor" />
+                            <FigThemes v-else-if="chapter.id === 'themes'" v-model="themeIndex" :copy="c.figures.themes" />
+                            <FigContrast v-else-if="chapter.id === 'science'" :copy="c.figures.science" :theme-index="themeIndex" />
+                            <FigEtiquette v-else-if="chapter.id === 'etiquette'" :copy="c.figures.etiquette" />
+                            <FigToday v-else-if="chapter.id === 'today'" :copy="c.figures.today" />
+                        </div>
+                    </div>
+
+                    <section class="h-sources article-references" :aria-label="c.ui.sources">
+                        <h3 class="h-sources__title">{{ c.ui.sources }}</h3>
+                        <ol class="h-sources__list">
+                            <li v-for="source in chapter.sources" :key="source.url">
+                                <a class="h-source" :href="source.url" target="_blank" rel="noopener noreferrer">
+                                    <span class="h-source__kind">{{ c.ui.kinds[source.kind] }}{{ ' ' }}</span>
+                                    <span class="h-source__title">{{ source.title }}{{ ' ' }}</span>
+                                    <span class="h-source__publisher">{{ source.publisher }}</span>
+                                    <svg class="h-source__arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.4 18L5 16.6L14.6 7H6V5h12v12h-2V8.4z" /></svg>
+                                </a>
+                            </li>
+                        </ol>
+                    </section>
+                </div>
+            </section>
+
+            <HistoryTimeline :copy="c.timeline" :motion-enabled="effectsEnabled" />
+        </article>
 
         <!-- Outro -->
-        <section class="h-outro">
+        <aside class="h-outro">
             <div class="h-outro__swatches" aria-hidden="true">
                 <i v-for="(color, index) in outroColors" :key="index" :style="{ background: color, '--i': index }"></i>
             </div>
@@ -198,7 +227,7 @@
                     <NuxtLink to="/generator" class="h-btn">{{ c.outro.generator }}</NuxtLink>
                 </div>
             </div>
-        </section>
+        </aside>
     </main>
 </template>
 
@@ -211,6 +240,7 @@ import FigSgr from '@/components/History/FigSgr.vue';
 import FigAnsiTable from '@/components/History/FigAnsiTable.vue';
 import FigBright from '@/components/History/FigBright.vue';
 import FigCube from '@/components/History/FigCube.vue';
+import CubeDepth from '@/components/History/CubeDepth.vue';
 import FigTruecolor from '@/components/History/FigTruecolor.vue';
 import FigThemes from '@/components/History/FigThemes.vue';
 import FigContrast from '@/components/History/FigContrast.vue';
@@ -218,9 +248,12 @@ import FigEtiquette from '@/components/History/FigEtiquette.vue';
 import FigToday from '@/components/History/FigToday.vue';
 import HistoryTimeline from '@/components/History/HistoryTimeline.vue';
 import { HISTORY_CHAPTERS, HISTORY_THEMES } from '~/utils/historyData';
+import { createHistoryHover } from '~/utils/historyHover';
+import { createHistoryField } from '~/utils/historyField';
 
-const { t } = useI18n();
+const { t, localeInfo } = useI18n();
 const c = useHistoryContent();
+const { calm, systemReduced, ready: motionReady, enabled: effectsEnabled, setCalm } = useHistoryMotion();
 
 const title = () => t('meta.historyTitle');
 const description = () => t('meta.historyDescription');
@@ -232,6 +265,7 @@ useSeoMeta({
     ogDescription: description,
     ogUrl: canonicalUrl('/history/'),
     ogImage: `${SITE_URL}/history/hero.webp`,
+    ogType: 'article',
     twitterTitle: title,
     twitterDescription: description,
     twitterImage: `${SITE_URL}/history/hero.webp`,
@@ -239,6 +273,21 @@ useSeoMeta({
 useHead({
     link: [{ rel: 'canonical', href: canonicalUrl('/history/') }],
 });
+useHead(() => ({
+    script: [{
+        key: 'history-article',
+        type: 'application/ld+json',
+        innerHTML: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Article',
+            headline: `${c.value.hero.title} ${c.value.hero.titleAccent}`,
+            description: c.value.hero.lead,
+            inLanguage: localeInfo.value.htmlLang,
+            url: canonicalUrl('/history/'),
+            image: `${SITE_URL}/history/hero.webp`,
+        }),
+    }],
+}));
 
 // The Gogh theme's sixteen colors, used for the hero and outro bands.
 const SPECTRUM = HISTORY_THEMES[0].colors;
@@ -251,30 +300,25 @@ const MARQUEE = [
     'ESC[1;91m', 'ESC[92m', 'ESC[93m', 'ESC[94m', 'ESC[95m', 'ESC[96m',
 ].map((code, i) => [code, SPECTRUM[i + 1]]).concat([['ESC[38;5;208m', '#ff8700'], ['ESC[38;2;255;121;198m', '#ff79c6']]);
 
+const CHAPTER_LAYOUTS = {
+    paper: 'spread', glass: 'split-left', escape: 'studio', eight: 'panorama',
+    sixteen: 'split-right', cube: 'object', truecolor: 'chromatic', themes: 'split-left',
+    science: 'split-right', etiquette: 'quiet', today: 'immersive',
+};
+const PINNED_LAYOUTS = new Set(['spread', 'object', 'immersive']);
+
 function pad(value) {
     return String(value).padStart(2, '0');
 }
 
 function goTo(hash) {
     // Chapters land with their stage filling the screen; the index sits below the rail.
-    scrollToTarget(hash, hash === '#chapters' ? -120 : 0);
-    history.replaceState(history.state, '', hash);
-}
-
-// Index cards lean toward the cursor (mouse only, and not with reduced motion).
-function tilt(event) {
-    if (event.pointerType !== 'mouse' || prefersReducedMotion()) {
-        return;
+    if (effectsEnabled.value) scrollToTarget(hash, hash === '#chapters' ? -120 : 0);
+    else {
+        const target = document.querySelector(hash);
+        if (target) window.scrollTo({ top: target.getBoundingClientRect().top + scrollY + (hash === '#chapters' ? -120 : 0), behavior: 'instant' });
     }
-    const card = event.currentTarget;
-    const box = card.getBoundingClientRect();
-    card.style.setProperty('--mx', ((event.clientX - box.left) / box.width).toFixed(3));
-    card.style.setProperty('--my', ((event.clientY - box.top) / box.height).toFixed(3));
-}
-
-function untilt(event) {
-    event.currentTarget.style.removeProperty('--mx');
-    event.currentTarget.style.removeProperty('--my');
+    history.replaceState(history.state, '', hash);
 }
 
 /* ---------- Scroll state: active chapter + reading progress ---------- */
@@ -285,7 +329,12 @@ const progress = ref(0);
 const smoothScroll = useSmoothScroll();
 const ambient = computed(() => HISTORY_CHAPTERS[activeChapter.value]?.accent ?? '#2aa198');
 let media = null;
-let onPointer = null;
+let disposeHover = null;
+let disposeField = null;
+let ownsSmoothScroll = false;
+let motionFrame = 0;
+let motionInitialized = false;
+let readingAnchor = null;
 let frame = 0;
 
 function updateScrollState() {
@@ -305,7 +354,7 @@ function updateScrollState() {
         const link = railLinks[active];
         const rail = link?.parentElement;
         if (link && rail && rail.scrollWidth > rail.clientWidth) {
-            rail.scrollTo({ left: link.offsetLeft - (rail.clientWidth - link.offsetWidth) / 2, behavior: 'smooth' });
+            rail.scrollTo({ left: link.offsetLeft - (rail.clientWidth - link.offsetWidth) / 2, behavior: effectsEnabled.value ? 'smooth' : 'auto' });
         }
     }
 
@@ -324,17 +373,22 @@ function onScroll() {
     }
 }
 
-onMounted(() => {
-    smoothScroll.start();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll, { passive: true });
-    updateScrollState();
+function stopEffects() {
+    disposeHover?.(); disposeHover = null;
+    disposeField?.(); disposeField = null;
+    media?.revert(); media = null;
+    if (ownsSmoothScroll) { smoothScroll.stop(); ownsSmoothScroll = false; }
+}
 
+function startEffects() {
+    disposeHover = createHistoryHover(root.value);
+    disposeField = createHistoryField(root.value);
+    smoothScroll.start(); ownsSmoothScroll = true;
     const { gsap, ScrollTrigger } = useGsap();
     media = gsap.matchMedia(root.value);
-    media.add({ wide: '(min-width: 768px)', motion: '(prefers-reduced-motion: no-preference)' }, ({ conditions }) => {
+    media.add({ wide: '(min-width: 768px)', desktop: '(min-width: 992px)', motion: '(prefers-reduced-motion: no-preference)' }, ({ conditions }) => {
         if (!conditions.motion) return;
-        const { wide } = conditions;
+        const { wide, desktop } = conditions;
         const blurIn = { opacity: 0, y: 24 };
 
         // The existing chapter color moves behind the artwork, across the whole
@@ -349,11 +403,11 @@ onMounted(() => {
         });
 
         /* Hero: the drawing comes into focus, the title rises out of masks. */
-        gsap.fromTo('.h-hero__image', { scale: 1.3, opacity: 0, filter: 'blur(24px)' }, {
-            scale: 1.08, opacity: 1, filter: 'blur(0px)', duration: 2.6, ease: 'expo.out',
+        gsap.fromTo('.h-hero__image', { scale: 1.06, opacity: 0, filter: 'blur(12px)' }, {
+            scale: 1, opacity: 1, filter: 'blur(0px)', duration: 1.8, ease: 'expo.out',
         });
         gsap.from('.h-hero__line', { yPercent: 115, duration: 1.6, stagger: 0.12, ease: 'expo.out', delay: 0.2 });
-        gsap.from('.h-hero__eyebrow, .h-hero__lead, .h-hero__stats li, .h-hero__cue', {
+        gsap.from('.h-hero__masthead, .h-hero__lead, .h-hero__cue', {
             ...blurIn, duration: 1.4, stagger: 0.07, ease: 'expo.out', delay: 0.45,
         });
         // Scrolling away: the copy lifts and fades, the image sinks.
@@ -362,18 +416,17 @@ onMounted(() => {
             scrollTrigger: { trigger: '.h-hero', start: 'top top', end: 'bottom top', scrub: true },
         });
         gsap.to('.h-hero__media', {
-            yPercent: 22, scale: 1.08, ease: 'none',
+            yPercent: 12, ease: 'none',
             scrollTrigger: { trigger: '.h-hero', start: 'top top', end: 'bottom top', scrub: true },
         });
-        if (wide) {
-            const moveX = gsap.quickTo('.h-hero__image', 'x', { duration: 1.4, ease: 'power3.out' });
-            const moveY = gsap.quickTo('.h-hero__image', 'y', { duration: 1.4, ease: 'power3.out' });
-            onPointer = (event) => {
-                moveX((event.clientX / window.innerWidth - 0.5) * -36);
-                moveY((event.clientY / window.innerHeight - 0.5) * -24);
-            };
-            window.addEventListener('pointermove', onPointer, { passive: true });
-        }
+        gsap.from('.h-hero__stats li', {
+            ...blurIn, duration: 1, stagger: 0.1, ease: 'expo.out',
+            scrollTrigger: { trigger: '.h-facts', start: 'top 90%' },
+        });
+        gsap.fromTo('.h-marquee__track', { xPercent: 0 }, {
+            xPercent: -10, ease: 'none',
+            scrollTrigger: { trigger: '.h-marquee', start: 'top bottom', end: 'bottom top', scrub: 0.8 },
+        });
 
         /* Keep the index on the same plane as the site's other cards. */
         gsap.set('.h-index__item', { opacity: 0, y: 36 });
@@ -391,32 +444,36 @@ onMounted(() => {
             const image = section.querySelector('.h-chapter__image');
             const header = section.querySelector('.h-chapter__header');
             const body = section.querySelector('.h-chapter__body');
-            const direction = section.classList.contains('h-chapter--alt') ? -1 : 1;
+            const layout = CHAPTER_LAYOUTS[section.id];
+            const pinned = desktop && PINNED_LAYOUTS.has(layout);
+            const direction = ['spread', 'split-right'].includes(layout) ? -1 : 1;
 
             // The illustration is the moving layer; its soft mask stays in place.
-            gsap.fromTo(image, {
-                scale: 1.16, xPercent: wide ? -3 * direction : 0, yPercent: -4,
-            }, {
-                scale: 1.08, xPercent: wide ? 3 * direction : 0, yPercent: 4,
-                ease: 'none',
-                scrollTrigger: { trigger: stage, start: 'top bottom', end: 'bottom top', scrub: 0.8 },
-            });
-            gsap.fromTo(section.querySelector('.h-chapter__bignum'), { yPercent: 18 }, {
-                yPercent: -18, ease: 'none',
-                scrollTrigger: { trigger: stage, start: 'top bottom', end: 'bottom top', scrub: true },
-            });
+            // The cube's WebGL relief owns its projection; keep its poster and
+            // canvas aligned rather than applying another image transform.
+            if (section.id !== 'cube') {
+                gsap.fromTo(image, {
+                    scale: section.id === 'paper' ? 1.02 : 1.08,
+                    xPercent: wide ? -2 * direction : 0, yPercent: -3,
+                }, {
+                    scale: section.id === 'paper' ? 1.06 : 1.02,
+                    xPercent: wide ? 2 * direction : 0, yPercent: 3,
+                    ease: 'none',
+                    scrollTrigger: { trigger: stage, start: 'top bottom', end: 'bottom top', scrub: 0.8 },
+                });
+            }
 
             // Title lines rise out of their masks once the stage is mostly in.
             gsap.timeline({
-                scrollTrigger: { trigger: stage, start: wide ? 'top 25%' : 'top 70%', toggleActions: 'play none none reverse' },
+                scrollTrigger: { trigger: stage, start: pinned ? 'top 25%' : 'top 70%', toggleActions: 'play none none reverse' },
             })
                 .from(header.querySelector('.h-chapter__eyebrow'), { ...blurIn, duration: 1, ease: 'expo.out' })
                 .from(header.querySelectorAll('.h-rise'), { yPercent: 115, duration: 1.4, stagger: 0.1, ease: 'expo.out' }, '<0.1')
                 .from(header.querySelector('.h-chapter__lead'), { ...blurIn, duration: 1.2, ease: 'expo.out' }, '<0.3');
 
             // Leaving the pin: the scene dims and the copy drifts up as the reading starts.
-            if (wide) {
-                gsap.to(header, {
+            if (pinned) {
+                gsap.to(header.querySelector('.h-chapter__copy'), {
                     y: -48, opacity: 0, ease: 'none',
                     scrollTrigger: { trigger: stage, start: 'bottom 95%', end: 'bottom 62%', scrub: true },
                 });
@@ -453,21 +510,49 @@ onMounted(() => {
             scrollTrigger: { trigger: '.h-outro', start: 'top 65%' },
         });
 
-        return () => {
-            if (onPointer) {
-                window.removeEventListener('pointermove', onPointer);
-                onPointer = null;
-            }
-        };
     });
+}
+
+// Keep the paragraph in view when removing the taller, pinned scenes.
+watch(effectsEnabled, () => {
+    if (!motionInitialized || !root.value) return;
+    const candidates = [...root.value.querySelectorAll('.h-chapter__text p, .h-chapter__copy, .h-hero__inner, .h-index__header')]
+        .map(element => ({ element, top: element.getBoundingClientRect().top, bottom: element.getBoundingClientRect().bottom }))
+        .filter(item => item.bottom > 120 && item.top < innerHeight - 80)
+        .sort((a, b) => Math.abs(a.top - 130) - Math.abs(b.top - 130));
+    readingAnchor = candidates[0] ?? null;
+}, { flush: 'pre' });
+
+watch(effectsEnabled, (enabled) => {
+    stopEffects();
+    if (enabled) startEffects();
+    motionInitialized = true;
+    cancelAnimationFrame(motionFrame);
+    motionFrame = requestAnimationFrame(() => {
+        motionFrame = 0;
+        if (readingAnchor?.element.isConnected) {
+            const delta = readingAnchor.element.getBoundingClientRect().top - readingAnchor.top;
+            if (Math.abs(delta) > 1) window.scrollBy({ top: delta, behavior: 'instant' });
+        }
+        readingAnchor = null;
+        useGsap().ScrollTrigger.refresh();
+        updateScrollState();
+    });
+}, { flush: 'post' });
+
+onMounted(() => {
+    if (!effectsEnabled.value) motionInitialized = true;
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    updateScrollState();
 });
 
 onBeforeUnmount(() => {
+    stopEffects();
+    cancelAnimationFrame(motionFrame);
     window.removeEventListener('scroll', onScroll);
     window.removeEventListener('resize', onScroll);
     cancelAnimationFrame(frame);
-    media?.revert();
-    smoothScroll.stop();
 });
 </script>
 

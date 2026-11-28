@@ -1,0 +1,98 @@
+.h-motion-control {
+    position: fixed;
+    left: max(16px, env(safe-area-inset-left));
+    bottom: max(18px, env(safe-area-inset-bottom));
+    z-index: 70;
+}
+
+.h-motion-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 40px;
+    padding: 8px 12px;
+    border: 1px solid #f4efe62b;
+    border-radius: 4px;
+    background: #10181ef5;
+    color: var(--cream);
+    font-size: 1.15rem;
+    line-height: 1.4;
+    cursor: pointer;
+
+    &:hover { border-color: #f4efe66b; }
+    &:focus-visible { outline: 2px solid var(--gogh-yellow); outline-offset: 4px; }
+    &.is-on { color: #8fd6ca; border-color: #8fd6ca60; }
+    &:disabled { cursor: default; }
+}
+
+.h-motion-toggle__indicator {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 14px;
+    i { width: 2px; height: 8px; background: currentColor; }
+    i:nth-child(2) { height: 14px; }
+    i:nth-child(3) { height: 5px; }
+    .is-on & i { height: 3px; }
+}
+
+.h-motion-toggle__switch {
+    position: relative;
+    width: 27px;
+    height: 14px;
+    margin-inline-start: 2px;
+    border: 1px solid currentColor;
+    border-radius: 10px;
+    opacity: .7;
+    &::after {
+        content: '';
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: currentColor;
+        translate: 0;
+    }
+    .is-on &::after { translate: 12px; }
+}
+
+// Calm mode removes the animation engines as well as their CSS treatments.
+// Keep all prose, illustrations and hands-on controls available and readable.
+.history.is-calm {
+    transition: none;
+    :deep(*), :deep(*::before), :deep(*::after) {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+    }
+    .h-stage__media { transform: none; }
+    .h-chapter__image, .h-hero__image {
+        translate: none !important;
+        rotate: none !important;
+        scale: none !important;
+        filter: none;
+    }
+    .h-card:hover img { transform: none; }
+    :deep(.cube-depth) { display: none; }
+    :deep(.tl__pin) { min-height: 0; padding-block: 72px; }
+    :deep(.tl__viewport) { overflow: visible; }
+    :deep(.tl__track) {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 36px 24px;
+        width: 100%;
+        max-width: 1400px;
+        margin-inline: auto;
+        padding-inline: 24px;
+    }
+    :deep(.tl__event) { width: auto; padding-inline-end: 0; }
+}
+
+@media (min-width: 992px) {
+    .history.is-calm .h-chapter:is(.h-layout--spread, .h-layout--object, .h-layout--immersive) {
+        .h-stage { height: auto; }
+        .h-stage__sticky { position: relative; top: auto; height: auto; min-height: min(75svh, 700px); }
+    }
+}

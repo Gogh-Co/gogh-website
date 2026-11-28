@@ -21,6 +21,12 @@ export default {
     },
 
     ui: {
+        motion: {
+            label: '静谧模式',
+            enable: '减少动态和视觉效果',
+            disable: '恢复视觉效果',
+            system: '系统已启用减少动态效果',
+        },
         chapter: '章节',
         sources: '规范与延伸阅读',
         nav: '章节',
@@ -106,7 +112,7 @@ export default {
             titleAccent: '立方体',
             lead: 'xterm 把一个 RGB 立方体压进 8 位索引，大多数终端随后跟进。',
             body: [
-                '十六种颜色，对编辑器和语法高亮来说已经不够。1999 年，**Todd Larason** 为 [xterm](https://invisible-island.net/xterm/) 贡献了 256 色支持，前景使用 `ESC[38;5;Nm`，背景使用 `ESC[48;5;Nm`，这是 ITU 的 T.416 文档格式中某种形式的分号版本。',
+                '十六种颜色，对编辑器和语法高亮来说已经不够。1999 年，**Todd Larason** 为 [xterm](https://invisible-island.net/xterm/) 贡献了 256 色支持，前景使用 `ESC[38;5;Nm`，背景使用 `ESC[48;5;Nm`，这是 ITU 的 T.416 文档格式中某种形式的分号版本。作为 X Window System 的参考终端，xterm 在 Linux 和其他 Unix 系统上引领了方向：rxvt、Konsole 和 GNOME Terminal 都采用了同样的序列。',
                 '这 256 项分为三块。**0–15** 是 16 个系统颜色，由你的主题掌控。**16–231** 是一个 6×6×6 的 RGB 立方体，其中 `16 + 36r + 6g + b` 项使用 0、95、135、175、215 和 255 这几个色阶。**232–255** 是从 `#080808` 到 `#eeeeee` 的 24 级灰。',
                 '与前 16 色不同，立方体和灰阶几乎总是固定的。把鼠标悬停在网格上，看看每个索引是如何构成的。（rxvt-unicode 曾推出同一思路的 88 色变体，采用 4×4×4 的立方体。）',
             ],
@@ -119,7 +125,7 @@ export default {
             lead: '每种颜色三个字节，直接送上屏幕。从一份文档标准走到每个人的终端，花了二十年。',
             body: [
                 '直接色语法源自 [ITU-T T.416](https://www.itu.int/rec/T-REC-T.416-199303-I/en)（1993，亦即 ISO 8613-6），这是一种文档格式，而非终端标准：`38:2:<color space>:r:g:b`，以冒号分隔。终端大多采用了更简单的分号形式 `ESC[38;2;255;100;0m`；对原始冒号形式的支持，各个模拟器之间仍不一致。',
-                '**Konsole** 是最早渲染它的模拟器之一，时间在 2000 年代中期。xterm 在 2012 年接受了这一序列，并把每个值近似到调色板上，到 2017 年底才加入真正的直接色。大浪潮出现在 **2016** 年：iTerm2 3.0、tmux 2.2、Vim 的 `termguicolors`（Vim 8.0 的一部分），以及 Windows 10 控制台（先出现在 Insider 版本中）。',
+                '**Konsole** 是最早渲染它的模拟器之一，时间在 2000 年代中期。xterm 在 2012 年接受了这一序列，并把每个值近似到调色板上，到 2017 年底才加入真正的直接色。大浪潮出现在 **2016** 年：iTerm2 3.0、tmux 2.2、Vim 的 `termguicolors`（Vim 8.0 的一部分），以及 Windows 10 控制台（先出现在 Insider 版本中）。在 macOS 上，Apple 的 **Terminal.app** 又在 256 色停留了将近十年，这也是许多 Mac 用户转向 iTerm2 的原因之一；直到 **macOS 26 Tahoe**（2025 年）才支持 24 位色。',
                 '没有通用的办法可以询问终端是否支持 24 位色。程序会综合各种线索：环境变量 `COLORTERM=truecolor`（或 `24bit`）、terminfo 能力，或是终端可能作答的一次查询。[termstandard/colors](https://github.com/termstandard/colors) 项目维护着谁支持什么的清单。',
             ],
         },
@@ -307,6 +313,7 @@ export default {
             { year: '2017', text: 'NO_COLOR 出现。Alacritty 让 GPU 投入工作。' },
             { year: '2019', text: 'Windows Terminal 发布。' },
             { year: '2024', text: 'Ghostty 1.0 发布。' },
+            { year: '2025', text: 'Terminal.app 在 macOS 26 Tahoe 中支持 truecolor。' },
         ],
     },
 

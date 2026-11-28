@@ -28,6 +28,7 @@
     "vue-router": "^5.5.3"
   },
   "devDependencies": {
+    "@mozilla/readability": "^0.6.0",
     "@nuxt/test-utils": "^4.4.0",
     "@vue/test-utils": "^2.6.0",
     "happy-dom": "^21.0.4",

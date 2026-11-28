@@ -2,6 +2,10 @@
     <HistoryFigure :label="copy.label" :caption="copy.caption">
         <div class="crt-demo">
             <div class="crt" :style="{ '--phosphor': PHOSPHORS[phosphor].color, '--phosphor-dim': PHOSPHORS[phosphor].dim }">
+                <div class="crt__bezel">
+                    <span>VT100 / 1978</span>
+                    <span class="crt__status"><i aria-hidden="true"></i><output aria-live="polite">{{ copy[phosphor] }}</output></span>
+                </div>
                 <div class="crt__glass">
                     <pre class="crt__text" aria-hidden="true"><span class="dim">VT100 READY</span>
 <span>$ ls -l</span>
@@ -23,7 +27,9 @@
                         class="hchip"
                         :class="{ 'is-on': phosphor === key }"
                         :aria-checked="phosphor === key"
+                        :tabindex="phosphor === key ? 0 : -1"
                         @click="phosphor = key"
+                        @keydown="movePhosphor($event, key)"
                     >
                         <i :style="{ background: item.color }"></i>{{ copy[key] }}
                     </button>
@@ -63,6 +69,16 @@ const ATTRIBUTES = ['bold', 'underline', 'blink', 'reverse'];
 const phosphor = ref('p1');
 const attributes = reactive({ bold: true, underline: false, blink: false, reverse: true });
 const attributeClasses = computed(() => ATTRIBUTES.filter((name) => attributes[name]).map((name) => `is-${name}`));
+
+function movePhosphor(event, key) {
+    const keys = Object.keys(PHOSPHORS);
+    const offset = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[event.key];
+    if (offset === undefined && !['Home', 'End'].includes(event.key)) return;
+    event.preventDefault();
+    const index = event.key === 'Home' ? 0 : event.key === 'End' ? keys.length - 1 : (keys.indexOf(key) + offset + keys.length) % keys.length;
+    phosphor.value = keys[index];
+    event.currentTarget.parentElement.querySelectorAll('[role="radio"]')[index].focus();
+}
 </script>
 
 <style lang="scss" scoped>
@@ -71,21 +87,41 @@ const attributeClasses = computed(() => ATTRIBUTES.filter((name) => attributes[n
 
 .crt-demo {
     display: grid;
-    gap: 20px;
+    gap: 28px;
 }
 
 .crt {
     padding: 18px;
-    border-radius: 26px;
-    background: linear-gradient(160deg, #2b2a27, #141412);
-    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.08), 0 30px 60px -30px rgba(0, 0, 0, 0.9);
+    border: 1px solid #ffffff16;
+    border-radius: 14px;
+    background: linear-gradient(145deg, #22292a, #101617);
+    box-shadow: inset 0 1px 0 #ffffff0a, 0 32px 64px -40px #000;
+}
+
+.crt__bezel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 4px 16px;
+    color: var(--muted);
+    font: 1.1rem $font_mono;
+    letter-spacing: .06em;
+}
+
+.crt__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--phosphor);
+    i { width: 4px; height: 4px; border-radius: 50%; background: currentColor; }
 }
 
 .crt__glass {
     position: relative;
     overflow: hidden;
     padding: 22px 24px;
-    border-radius: 18px / 26px;
+    border-radius: 8px;
     background: radial-gradient(ellipse at center, color-mix(in srgb, var(--phosphor) 10%, #050806), #020302 80%);
     box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.9), inset 0 0 6px color-mix(in srgb, var(--phosphor) 40%, transparent);
     transition: background 0.6s ease;
@@ -174,12 +210,14 @@ const attributeClasses = computed(() => ATTRIBUTES.filter((name) => attributes[n
     flex-wrap: wrap;
     align-items: center;
     gap: 6px;
+
+    .hchip { font-size: 1.3rem; }
 }
 
 .crt-controls__label {
     min-width: 92px;
     color: var(--muted);
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
 }
@@ -191,5 +229,10 @@ const attributeClasses = computed(() => ATTRIBUTES.filter((name) => attributes[n
 @keyframes refresh {
     from { transform: translateY(-100%); }
     to { transform: translateY(400%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .crt__glass::after, .cursor, .sample.is-blink { animation: none; }
+    .crt__glass, .crt__text { transition: none; }
 }
 </style>
